@@ -3,6 +3,8 @@ import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
 import TorneoCard from "../components/TorneoCard";
 
+import { apiFetch } from "../api/api";
+
 export default function Home() {
 
     const [search, setSearch] = useState("");
@@ -10,16 +12,19 @@ export default function Home() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch("http://localhost:8080/api/torneos/activos")
-            .then(res => res.json())
-            .then(data => {
+        const cargar = async () => {
+            setLoading(true);
+            try {
+                const data = await apiFetch("/api/torneos/activos");
                 setTorneos(data);
-                setLoading(false);
-            })
-            .catch(err => {
+            } catch (err) {
                 console.error("Error cargando torneos:", err);
+            } finally {
                 setLoading(false);
-            });
+            }
+        };
+
+        cargar();
     }, []);
 
     const filtrados = torneos.filter(t =>
@@ -42,7 +47,9 @@ export default function Home() {
 
             {/* Loading */}
             {loading && (
-                <p className="text-center mt-10 text-gray-400">Cargando torneos...</p>
+                <p className="text-center mt-10 text-gray-400">
+                    Cargando torneos...
+                </p>
             )}
 
             {/* Lista de torneos */}

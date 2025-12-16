@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
-
+import EquiposList from "../components/equipos/EquiposList";
 import TorneosList from "../components/dashboard/TorneosList";
 export default function Dashboard() {
     const { user } = useContext(AuthContext);
@@ -113,6 +113,14 @@ function Content({ selected }) {
         );
     }
 
+    if (selected === "equipos") {
+        return (
+            <div className="bg-[#1c213b] p-6 rounded-xl shadow text-gray-300">
+                <EquiposList />
+            </div>
+        );
+    }
+
     return (
         <div className="bg-[#1c213b] p-6 rounded-xl shadow text-gray-300">
             <p>
@@ -121,4 +129,5 @@ function Content({ selected }) {
         </div>
     );
 }
+
 

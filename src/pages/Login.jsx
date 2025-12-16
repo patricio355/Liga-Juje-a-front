@@ -2,6 +2,8 @@ import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import Navbar from "../components/Navbar.jsx";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Login() {
 
     const { login } = useContext(AuthContext);
@@ -14,7 +16,7 @@ export default function Login() {
         e.preventDefault();
 
         try {
-            const response = await fetch("http://localhost:8080/login", {
+            const response = await fetch(`${API_URL}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password })
@@ -39,14 +41,12 @@ export default function Login() {
             <Navbar />
 
             <div className="min-h-screen flex items-center justify-center bg-[#1B2033] px-4">
-
                 <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-md border">
 
                     <h1 className="text-3xl font-bold text-center mb-6">
                         Iniciar Sesión ⚽
                     </h1>
 
-                    {/* MENSAJE DE ERROR ROJO */}
                     {error && (
                         <p className="text-red-600 text-center mb-3 font-semibold">
                             {error}

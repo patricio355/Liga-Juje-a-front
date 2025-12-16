@@ -7,6 +7,8 @@ import ModalCrearZona from "./ModalCrearZona";
 import ModalEditarZona from "./ModalEditarZona";
 import ConfirmModal from "./ConfirmModal";
 
+import { apiFetch } from "../../api/api";
+
 export default function TorneosList() {
 
     const [torneos, setTorneos] = useState([]);
@@ -34,10 +36,9 @@ export default function TorneosList() {
     // ---------------------------------------------------
     // RECARGAR LISTA
     // ---------------------------------------------------
-    const recargar = () => {
-        fetch("http://localhost:8080/api/torneos")
-            .then(res => res.json())
-            .then(data => setTorneos(data));
+    const recargar = async () => {
+        const data = await apiFetch("/api/torneos");
+        setTorneos(data);
     };
 
     // ---------------------------------------------------
@@ -47,8 +48,7 @@ export default function TorneosList() {
         const cargar = async () => {
             setLoading(true);
             try {
-                const res = await fetch("http://localhost:8080/api/torneos");
-                const data = await res.json();
+                const data = await apiFetch("/api/torneos");
                 setTorneos(data);
             } catch (err) {
                 console.error("Error cargando torneos:", err);
@@ -61,29 +61,29 @@ export default function TorneosList() {
     }, []);
 
     // ---------------------------------------------------
-    // ELIMINAR TORNEO (con modal)
+    // ELIMINAR TORNEO
     // ---------------------------------------------------
     const eliminarTorneo = (id) => {
         setMensajeConfirm("¿Seguro que desea eliminar este torneo?");
-        setAccionEliminar(() => () => {
-            fetch(`http://localhost:8080/api/torneos/${id}`, {
-                method: "DELETE",
-            }).then(() => recargar());
+        setAccionEliminar(() => async () => {
+            await apiFetch(`/api/torneos/${id}`, { method: "DELETE" });
+            recargar();
         });
 
         setModalConfirm(true);
     };
 
     // ---------------------------------------------------
-    // ELIMINAR ZONA (con modal)
+    // ELIMINAR ZONA
     // ---------------------------------------------------
     const eliminarZona = (idTorneo, idZona) => {
         setMensajeConfirm("¿Seguro que desea eliminar esta zona?");
-        setAccionEliminar(() => () => {
-            fetch(
-                `http://localhost:8080/api/torneos/${idTorneo}/zonas/${idZona}`,
+        setAccionEliminar(() => async () => {
+            await apiFetch(
+                `/api/torneos/${idTorneo}/zonas/${idZona}`,
                 { method: "DELETE" }
-            ).then(() => recargar());
+            );
+            recargar();
         });
 
         setModalConfirm(true);
@@ -98,7 +98,6 @@ export default function TorneosList() {
             t.nombre.toLowerCase().includes(busqueda.toLowerCase())
         );
 
-    // LOADING
     if (loading) {
         return <p className="text-gray-300 text-center">Cargando torneos...</p>;
     }
@@ -108,12 +107,9 @@ export default function TorneosList() {
 
             {/* HEADER */}
             <div className="flex justify-between items-center mb-6">
-
                 <h2 className="text-2xl font-bold text-white">Lista de Torneos</h2>
 
                 <div className="flex items-center gap-3">
-
-                    {/* FILTRO ACTIVOS */}
                     <button
                         className={`px-4 py-2 rounded ${
                             filtro === "activos" ? "bg-blue-600" : "bg-gray-600"
@@ -123,7 +119,6 @@ export default function TorneosList() {
                         Activos
                     </button>
 
-                    {/* FILTRO TODOS */}
                     <button
                         className={`px-4 py-2 rounded ${
                             filtro === "todos" ? "bg-blue-600" : "bg-gray-600"
@@ -133,7 +128,6 @@ export default function TorneosList() {
                         Todos
                     </button>
 
-                    {/* BUSCADOR */}
                     <input
                         type="text"
                         placeholder="Buscar..."
@@ -142,7 +136,6 @@ export default function TorneosList() {
                         className="px-3 py-2 rounded bg-gray-700 text-white outline-none"
                     />
 
-                    {/* CREAR TORNEO */}
                     <button
                         onClick={() => setModalCrear(true)}
                         className="flex items-center gap-2 bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -154,30 +147,24 @@ export default function TorneosList() {
 
             {/* LISTA */}
             <div className="space-y-4">
-
                 {torneosFiltrados.map((t) => (
                     <div
                         key={t.id}
                         className="bg-[#262b45] p-4 rounded-lg shadow flex justify-between items-center"
                     >
-                        {/* DATOS TORNEO */}
                         <div>
                             <h3 className="text-xl font-bold">{t.nombre}</h3>
                             <p className="text-gray-400">División: {t.division}</p>
                             <p className="text-gray-400">Estado: {t.estado}</p>
 
-                            {/* LISTA ZONAS */}
                             {t.zonas?.length > 0 && (
                                 <ul className="mt-3 text-sm text-gray-300 ml-5 space-y-1">
                                     {t.zonas.map((z) => (
                                         <li key={z.id} className="flex justify-between items-center">
                                             <span>• {z.nombre}</span>
-
                                             <div className="flex gap-3 text-lg">
-
-                                                {/* EDITAR ZONA */}
                                                 <button
-                                                    className="text-yellow-400 hover:text-yellow-300"
+                                                    className="text-yellow-400"
                                                     onClick={() => {
                                                         setZonaSeleccionada(z);
                                                         setModalZonaEditar(true);
@@ -186,23 +173,20 @@ export default function TorneosList() {
                                                     ✏
                                                 </button>
 
-                                                {/* ELIMINAR ZONA */}
                                                 <button
-                                                    className="text-red-500 hover:text-red-400"
+                                                    className="text-red-500"
                                                     onClick={() => eliminarZona(t.id, z.id)}
                                                 >
                                                     🗑
                                                 </button>
-
                                             </div>
                                         </li>
                                     ))}
                                 </ul>
                             )}
 
-                            {/* BOTÓN AGREGAR ZONA */}
                             <button
-                                className="mt-3 text-sm bg-blue-600 px-3 py-1 rounded hover:bg-blue-700"
+                                className="mt-3 text-sm bg-blue-600 px-3 py-1 rounded"
                                 onClick={() => {
                                     setTorneoSeleccionado(t);
                                     setModalZonaCrear(true);
@@ -212,12 +196,9 @@ export default function TorneosList() {
                             </button>
                         </div>
 
-                        {/* ACCIONES TORNEO */}
                         <div className="flex gap-4 text-xl">
-
-                            {/* EDITAR */}
                             <button
-                                className="text-yellow-400 hover:text-yellow-300"
+                                className="text-yellow-400"
                                 onClick={() => {
                                     setTorneoSeleccionado(t);
                                     setModalEditar(true);
@@ -226,51 +207,22 @@ export default function TorneosList() {
                                 <FaEdit />
                             </button>
 
-                            {/* ELIMINAR */}
                             <button
-                                className="text-red-500 hover:text-red-400"
+                                className="text-red-500"
                                 onClick={() => eliminarTorneo(t.id)}
                             >
                                 <FaTrash />
                             </button>
                         </div>
-
                     </div>
                 ))}
             </div>
 
             {/* MODALES */}
-            {modalCrear && (
-                <ModalCrearTorneo
-                    onClose={() => setModalCrear(false)}
-                    onCreated={recargar}
-                />
-            )}
-
-            {modalEditar && torneoSeleccionado && (
-                <ModalEditarTorneo
-                    torneo={torneoSeleccionado}
-                    onClose={() => setModalEditar(false)}
-                    onUpdated={recargar}
-                />
-            )}
-
-            {modalZonaCrear && torneoSeleccionado && (
-                <ModalCrearZona
-                    torneo={torneoSeleccionado}
-                    onClose={() => setModalZonaCrear(false)}
-                    onCreated={recargar}
-                />
-            )}
-
-            {modalZonaEditar && zonaSeleccionada && (
-                <ModalEditarZona
-                    zona={zonaSeleccionada}
-                    onClose={() => setModalZonaEditar(false)}
-                    onUpdated={recargar}
-                />
-            )}
-
+            {modalCrear && <ModalCrearTorneo onClose={() => setModalCrear(false)} onCreated={recargar} />}
+            {modalEditar && torneoSeleccionado && <ModalEditarTorneo torneo={torneoSeleccionado} onClose={() => setModalEditar(false)} onUpdated={recargar} />}
+            {modalZonaCrear && torneoSeleccionado && <ModalCrearZona torneo={torneoSeleccionado} onClose={() => setModalZonaCrear(false)} onCreated={recargar} />}
+            {modalZonaEditar && zonaSeleccionada && <ModalEditarZona zona={zonaSeleccionada} onClose={() => setModalZonaEditar(false)} onUpdated={recargar} />}
             {modalConfirm && (
                 <ConfirmModal
                     mensaje={mensajeConfirm}
