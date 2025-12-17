@@ -1,54 +1,69 @@
 import { useState } from "react";
+import { apiFetch } from "../../api/api";
 
 export default function ModalCrearTorneo({ onClose, onCreated }) {
 
     const [nombre, setNombre] = useState("");
     const [division, setDivision] = useState("A");
-    const [encargado, setEncargado] = useState("");
+    const [encargadoEmail, setEncargadoEmail] = useState("");
     const [estado, setEstado] = useState("activo");
+
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const crearTorneo = async () => {
         if (!nombre.trim()) {
-            alert("El nombre es obligatorio");
+            setError("El nombre es obligatorio");
             return;
         }
 
         setLoading(true);
-
-        const torneo = {
-            nombre,
-            division,
-            encargado,
-            estado
-        };
+        setError(null);
 
         try {
-            const res = await fetch("http://localhost:8080/api/torneos", {
+            await apiFetch("/api/torneos", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(torneo),
+                body: JSON.stringify({
+                    nombre,
+                    division,
+                    encargadoEmail,
+                    estado
+                }),
             });
 
-            if (res.ok) {
-                onCreated(); // refrescar lista
-                onClose();   // cerrar modal
-            }
+            onCreated(); // refrescar lista
+            onClose();   // cerrar modal
 
-        } catch (error) {
-            console.error("Error al crear torneo:", error);
+        } catch (e) {
+            // 👇 intentamos mostrar mensaje real del backend
+            try {
+                const parsed = JSON.parse(e.message);
+                setError(parsed.message || "Error al crear torneo");
+            } catch {
+                setError(e.message || "Error al crear torneo");
+            }
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-             onClick={onClose}>
+        <div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            onClick={onClose}
+        >
             <div
                 className="bg-[#1c213b] p-6 rounded-xl w-96 shadow-xl text-white"
                 onClick={(e) => e.stopPropagation()}
             >
+
+                {/* ERROR */}
+                {error && (
+                    <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-2 rounded mb-4">
+                        {error}
+                    </div>
+                )}
+
                 <h2 className="text-xl font-bold mb-4">Crear Torneo</h2>
 
                 {/* Nombre */}
@@ -72,12 +87,13 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                 </select>
 
                 {/* Encargado */}
-                <label className="block mb-2">Encargado</label>
+                <label className="block mb-2">Encargado (email)</label>
                 <input
                     type="text"
-                    value={encargado}
-                    onChange={(e) => setEncargado(e.target.value)}
+                    value={encargadoEmail}
+                    onChange={(e) => setEncargadoEmail(e.target.value)}
                     className="w-full p-2 rounded bg-gray-700 outline-none mb-4"
+                    placeholder="email@ejemplo.com"
                 />
 
                 {/* Estado */}
@@ -96,12 +112,13 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                     <button
                         className="px-4 py-2 bg-gray-600 rounded hover:bg-gray-500 transition"
                         onClick={onClose}
+                        disabled={loading}
                     >
                         Cancelar
                     </button>
 
                     <button
-                        className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500 transition disabled:bg-gray-400"
+                        className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500 transition disabled:opacity-50"
                         onClick={crearTorneo}
                         disabled={loading}
                     >

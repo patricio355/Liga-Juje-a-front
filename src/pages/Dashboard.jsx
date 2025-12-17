@@ -1,8 +1,11 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
-import EquiposList from "../components/equipos/EquiposList";
+
 import TorneosList from "../components/dashboard/TorneosList";
+import EquiposList from "../components/equipos/EquiposList";
+import UsuariosList from "../components/usuarios/UsuariosList";
+
 export default function Dashboard() {
     const { user } = useContext(AuthContext);
 
@@ -16,16 +19,24 @@ export default function Dashboard() {
             <div className="flex min-h-screen bg-[#0f1325] text-white">
 
                 {/* SIDEBAR PC */}
-                <aside className="w-64 bg-[#1a1f36] p-6 border-r border-gray-700 hidden md:block">
+                <aside className="w-64 bg-[#1a1f36] p-6 border-r border-gray-700 hidden md:flex flex-col justify-between">
 
-                    <h2 className="text-xl font-bold mb-6">Administración</h2>
+                    <div>
+                        <h2 className="text-xl font-bold mb-6">
+                            Administración
+                        </h2>
 
-                    <SidebarMenu selected={selected} setSelected={setSelected} />
+                        <SidebarMenu
+                            selected={selected}
+                            setSelected={setSelected}
+                            user={user}
+                        />
+                    </div>
 
                     <UserSection user={user} />
                 </aside>
 
-                {/* SIDEBAR MOBILE (slide-in) */}
+                {/* SIDEBAR MOBILE */}
                 {mobileSidebar && (
                     <div
                         className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -35,7 +46,9 @@ export default function Dashboard() {
                             className="absolute left-0 top-0 h-full w-64 bg-[#1a1f36] p-6 shadow-xl"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <h2 className="text-xl font-bold mb-6">Administración</h2>
+                            <h2 className="text-xl font-bold mb-6">
+                                Administración
+                            </h2>
 
                             <SidebarMenu
                                 selected={selected}
@@ -43,6 +56,7 @@ export default function Dashboard() {
                                     setSelected(val);
                                     setMobileSidebar(false);
                                 }}
+                                user={user}
                             />
 
                             <UserSection user={user} />
@@ -57,57 +71,61 @@ export default function Dashboard() {
                         {selected}
                     </h1>
 
-                    {/* CONTENIDO DINÁMICO */}
-                    <Content selected={selected} />
+                    <Content selected={selected} user={user} />
                 </main>
             </div>
         </>
     );
 }
 
+/* ======================================================
+   COMPONENTES AUXILIARES
+   ====================================================== */
 
-// ---------------- COMPONENTES PEQUEÑOS -----------------
+function SidebarMenu({ selected, setSelected, user }) {
 
-function SidebarMenu({ selected, setSelected }) {
     const items = [
         { id: "torneos", icon: "⚽", label: "Torneos" },
         { id: "equipos", icon: "🏆", label: "Equipos" },
-        { id: "arbitros", icon: "🧑‍⚖️", label: "Árbitros" },
-        { id: "canchas", icon: "🏟️", label: "Canchas" },
-        { id: "usuarios", icon: "👤", label: "Usuarios" },
+        { id: "usuarios", icon: "👤", label: "Usuarios", adminOnly: true },
     ];
 
     return (
         <ul className="space-y-3">
-            {items.map((item) => (
-                <li
-                    key={item.id}
-                    className={`cursor-pointer p-3 rounded-lg transition
-                        ${selected === item.id ? "bg-blue-600" : "hover:bg-[#2a314d]"}`}
-                    onClick={() => setSelected(item.id)}
-                >
-                    {item.icon} {item.label}
-                </li>
-            ))}
+            {items
+                .filter(item => !item.adminOnly || user?.role === "ROLE_ADMIN")
+                .map(item => (
+                    <li
+                        key={item.id}
+                        className={`cursor-pointer p-3 rounded-lg transition
+                            ${
+                            selected === item.id
+                                ? "bg-blue-600"
+                                : "hover:bg-[#2a314d]"
+                        }`}
+                        onClick={() => setSelected(item.id)}
+                    >
+                        {item.icon} {item.label}
+                    </li>
+                ))}
         </ul>
     );
 }
 
 function UserSection({ user }) {
     return (
-        <div className="mt-10 text-gray-300 text-sm">
-            <p>{user?.sub}</p>
-            <p className="text-xs">{user?.role}</p>
+        <div className="text-gray-300 text-sm">
+            <p className="font-semibold">{user?.sub}</p>
+            <p className="text-xs opacity-70">{user?.role}</p>
         </div>
     );
 }
 
-
-function Content({ selected }) {
+function Content({ selected, user }) {
 
     if (selected === "torneos") {
         return (
-            <div className="bg-[#1c213b] p-6 rounded-xl shadow text-gray-300">
+            <div className="bg-[#1c213b] p-6 rounded-xl shadow">
                 <TorneosList />
             </div>
         );
@@ -115,19 +133,23 @@ function Content({ selected }) {
 
     if (selected === "equipos") {
         return (
-            <div className="bg-[#1c213b] p-6 rounded-xl shadow text-gray-300">
+            <div className="bg-[#1c213b] p-6 rounded-xl shadow">
                 <EquiposList />
             </div>
         );
     }
 
+    if (selected === "usuarios" && user?.role === "ROLE_ADMIN") {
+        return (
+            <div className="bg-[#1c213b] p-6 rounded-xl shadow">
+                <UsuariosList />
+            </div>
+        );
+    }
+
     return (
-        <div className="bg-[#1c213b] p-6 rounded-xl shadow text-gray-300">
-            <p>
-                Aquí irán los <strong>{selected}</strong>...
-            </p>
+        <div className="bg-[#1c213b] p-6 rounded-xl shadow text-gray-400">
+            <p>Sección no disponible</p>
         </div>
     );
 }
-
-

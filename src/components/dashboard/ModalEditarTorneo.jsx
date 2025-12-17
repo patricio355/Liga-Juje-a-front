@@ -1,52 +1,57 @@
 import { useState, useEffect } from "react";
+import { apiFetch } from "../../api/api";
 
 export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
 
     const [nombre, setNombre] = useState("");
-    const [division, setDivision] = useState("");
-    const [encargado, setEncargado] = useState("");
-    const [estado, setEstado] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [division, setDivision] = useState("A");
+    const [encargadoEmail, setEncargadoEmail] = useState("");
+    const [estado, setEstado] = useState("activo");
 
-    // Cargar los datos del torneo al abrir el modal
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    // Cargar datos al abrir el modal
     useEffect(() => {
         if (torneo) {
-            setNombre(torneo.nombre);
-            setDivision(torneo.division);
-            setEncargado(torneo.encargado);
-            setEstado(torneo.estado);
+            setNombre(torneo.nombre || "");
+            setDivision(torneo.division || "A");
+            setEncargadoEmail(torneo.encargadoEmail || "");
+            setEstado(torneo.estado || "activo");
         }
     }, [torneo]);
 
     const actualizarTorneo = async () => {
         if (!nombre.trim()) {
-            alert("El nombre es obligatorio");
+            setError("El nombre es obligatorio");
             return;
         }
 
         setLoading(true);
-
-        const body = {
-            nombre,
-            division,
-            encargado,
-            estado
-        };
+        setError(null);
 
         try {
-            const res = await fetch(`http://localhost:8080/api/torneos/${torneo.id}`, {
+            await apiFetch(`/api/torneos/${torneo.id}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
+                body: JSON.stringify({
+                    nombre,
+                    division,
+                    encargadoEmail,
+                    estado
+                }),
             });
 
-            if (res.ok) {
-                onUpdated(); // recargar lista
-                onClose();   // cerrar modal
-            }
+            onUpdated(); // refrescar lista
+            onClose();   // cerrar modal
 
-        } catch (error) {
-            console.error("Error al actualizar torneo:", error);
+        } catch (e) {
+            // Mostrar error real del backend
+            try {
+                const parsed = JSON.parse(e.message);
+                setError(parsed.message || "Error al actualizar torneo");
+            } catch {
+                setError(e.message || "Error al actualizar torneo");
+            }
         } finally {
             setLoading(false);
         }
@@ -61,6 +66,14 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                 className="bg-[#1c213b] p-6 rounded-xl w-96 shadow-xl text-white"
                 onClick={(e) => e.stopPropagation()}
             >
+
+                {/* ERROR */}
+                {error && (
+                    <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-2 rounded mb-4">
+                        {error}
+                    </div>
+                )}
+
                 <h2 className="text-xl font-bold mb-4">Editar Torneo</h2>
 
                 {/* Nombre */}
@@ -84,12 +97,13 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                 </select>
 
                 {/* Encargado */}
-                <label className="block mb-2">Encargado</label>
+                <label className="block mb-2">Encargado (email)</label>
                 <input
                     type="text"
-                    value={encargado}
-                    onChange={(e) => setEncargado(e.target.value)}
+                    value={encargadoEmail}
+                    onChange={(e) => setEncargadoEmail(e.target.value)}
                     className="w-full p-2 rounded bg-gray-700 outline-none mb-4"
+                    placeholder="email@ejemplo.com"
                 />
 
                 {/* Estado */}
@@ -108,12 +122,13 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                     <button
                         className="px-4 py-2 bg-gray-600 rounded hover:bg-gray-500 transition"
                         onClick={onClose}
+                        disabled={loading}
                     >
                         Cancelar
                     </button>
 
                     <button
-                        className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500 transition disabled:bg-gray-400"
+                        className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500 transition disabled:opacity-50"
                         onClick={actualizarTorneo}
                         disabled={loading}
                     >

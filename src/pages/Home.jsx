@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
-import TorneoCard from "../components/TorneoCard";
-
+import TorneoCard from "../components/torneo/TorneoCard.jsx";
 import { apiFetch } from "../api/api";
 
 export default function Home() {
@@ -52,14 +51,13 @@ export default function Home() {
                 </p>
             )}
 
-            {/* Lista de torneos */}
-            <div className="mt-6">
-                {filtrados.map((t) => (
-                    <TorneoCard key={t.id} nombre={t.nombre} />
+            {/* Lista */}
+            <div className="mt-6 space-y-4">
+                {filtrados.map(t => (
+                    <TorneoCard key={t.id} torneo={t} />
                 ))}
             </div>
 
-            {/* Si no se encontraron */}
             {!loading && filtrados.length === 0 && (
                 <p className="text-center mt-10 text-gray-400">
                     No se encontraron torneos.
