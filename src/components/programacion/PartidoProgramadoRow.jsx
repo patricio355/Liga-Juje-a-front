@@ -1,4 +1,6 @@
 // src/components/programacion/PartidoProgramadoRow.jsx
+import CerrarPartidoForm from "./CerrarPartidoForm.jsx";
+
 export default function PartidoProgramadoRow({ partido }) {
     const local =
         partido.local ||
@@ -30,6 +32,7 @@ export default function PartidoProgramadoRow({ partido }) {
 
             <div className="text-xs text-gray-600">
                 #{partido.partidoId}
+                <CerrarPartidoForm partidoId={partido.partidoId} />
             </div>
         </div>
     );

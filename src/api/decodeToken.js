@@ -1,12 +1,10 @@
-export function decodeToken(token) {
-    if (!token) return null;
+import { jwtDecode } from "jwt-decode";
 
-    const payload = token.split(".")[1];
-    if (!payload) return null;
-
+export const decodeToken = (token) => {
     try {
-        return JSON.parse(atob(payload));
+        return jwtDecode(token); // 👈 SOLO lee el payload
     } catch (e) {
+        console.error("Token inválido", e);
         return null;
     }
-}
+};
