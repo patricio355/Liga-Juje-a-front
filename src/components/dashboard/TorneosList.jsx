@@ -155,6 +155,18 @@ export default function TorneosList() {
                         <div>
                             <h3 className="text-xl font-bold">{t.nombre}</h3>
                             <p className="text-gray-400">División: {t.division}</p>
+
+                            <p className="text-gray-400">Tipo: {t.tipo} </p>
+                            {t.tipo === "CERRADO" && (
+                                <p className="text-red-400 font-semibold">
+                                    No se aceptan inscripciones
+                                </p>
+                            )}
+                            {t.tipo === "ABIERTO" && (
+                                <p className="text-green-400 font-semibold">
+                                    Se aceptan inscripciones
+                                </p>
+                            )}
                             <p className="text-gray-400">Estado: {t.estado}</p>
 
                             {t.zonas?.length > 0 && (

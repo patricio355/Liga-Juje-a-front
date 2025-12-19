@@ -7,7 +7,7 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
     const [division, setDivision] = useState("A");
     const [encargadoEmail, setEncargadoEmail] = useState("");
     const [estado, setEstado] = useState("activo");
-
+    const [tipo, setTipo] = useState("CERRADO");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -27,7 +27,8 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                     nombre,
                     division,
                     encargadoEmail,
-                    estado
+                    estado,
+                    tipo
                 }),
             });
 
@@ -105,6 +106,17 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                 >
                     <option value="activo">Activo</option>
                     <option value="inactivo">Inactivo</option>
+                </select>
+
+                {/* Tipo */}
+                <label className="block mb-2">Tipo</label>
+                <select
+                    value={tipo}
+                    onChange={(e) => setTipo(e.target.value)}
+                    className="w-full p-2 rounded bg-gray-700 outline-none mb-6"
+                >
+                    <option value="ABIERTO">Abierto</option>
+                    <option value="CERRADO">Cerrado</option>
                 </select>
 
                 {/* Botones */}

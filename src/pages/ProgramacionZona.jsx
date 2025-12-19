@@ -7,7 +7,9 @@ import {
     programarPartido,
 } from "../api/programacion.api";
 import FilaProgramacion from "../components/programacion/FilaProgramacion";
-import PartidoProgramadoRow from "../components/programacion/PartidoProgramadoRow";
+import PartidoCardAdmin from "../components/torneo/PartidoCardAdmin.jsx";
+import CerrarPartidoModal from "../components/modal/CerrarPartidoModal.jsx";
+import EditarResultadoModal from "../components/modal/EditarResultadoModal.jsx";
 
 export default function ProgramacionZona({ zonaId }) {
     const [fecha, setFecha] = useState(1);
@@ -16,9 +18,30 @@ export default function ProgramacionZona({ zonaId }) {
     const [openEquipoId, setOpenEquipoId] = useState(null);
     const [selecciones, setSelecciones] = useState({});
 
+    const [partidoSeleccionado, setPartidoSeleccionado] = useState(null);
+    const [modalCerrar, setModalCerrar] = useState(false);
+    const [modalEditar, setModalEditar] = useState(false);
+
+    const abrirModalCerrar = (partido) => {
+        setPartidoSeleccionado(partido);
+        setModalCerrar(true);
+    };
+
+    const abrirModalEditar = (partido) => {
+        setPartidoSeleccionado(partido);
+        setModalEditar(true);
+    };
+
+    const cerrarModales = () => {
+        setPartidoSeleccionado(null);
+        setModalCerrar(false);
+        setModalEditar(false);
+    };
+
     const cargarTodo = async () => {
         const opciones = await getOpcionesProgramacion(zonaId, fecha);
         const prog = await getProgramacionFecha(zonaId, fecha);
+
         setTarjetas(opciones || []);
         setProgramados(prog || []);
         setSelecciones({});
@@ -34,11 +57,21 @@ export default function ProgramacionZona({ zonaId }) {
         [programados]
     );
 
+    const equiposOcupadosSet = useMemo(() => {
+        const set = new Set();
+        programados.forEach((p) => {
+            if (p.local) set.add(p.local);
+            if (p.visitante) set.add(p.visitante);
+        });
+        return set;
+    }, [programados]);
+
     return (
         <div className="min-h-screen bg-[#0b1023]">
             <Navbar />
 
             <div className="p-6">
+                {/* SELECTOR FECHA */}
                 <div className="flex gap-2 mb-4 overflow-x-auto">
                     {Array.from({ length: 9 }, (_, i) => i + 1).map((f) => (
                         <button
@@ -56,6 +89,7 @@ export default function ProgramacionZona({ zonaId }) {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* PANEL IZQUIERDO */}
                     <div className="lg:col-span-2 bg-[#121735] border border-[#1f2547] rounded-xl p-4">
                         <h2 className="text-white font-bold text-lg mb-3">
                             Armar partidos
@@ -69,18 +103,20 @@ export default function ProgramacionZona({ zonaId }) {
                                         !programadosSet.has(op.partidoId)
                                 );
 
+                                const equipoYaProgramado =
+                                    equiposOcupadosSet.has(t.equipoNombre);
+
                                 return (
                                     <FilaProgramacion
                                         key={t.equipoId}
                                         tarjeta={t}
                                         opciones={opcionesDisponibles}
+                                        equipoYaProgramado={equipoYaProgramado}
                                         open={openEquipoId === t.equipoId}
                                         onOpen={() =>
                                             setOpenEquipoId(t.equipoId)
                                         }
-                                        onClose={() =>
-                                            setOpenEquipoId(null)
-                                        }
+                                        onClose={() => setOpenEquipoId(null)}
                                         seleccion={selecciones[t.equipoId]}
                                         onSelect={(op) =>
                                             setSelecciones((prev) => ({
@@ -108,6 +144,7 @@ export default function ProgramacionZona({ zonaId }) {
                         </div>
                     </div>
 
+                    {/* PANEL DERECHO */}
                     <div className="bg-[#121735] border border-[#1f2547] rounded-xl p-4">
                         <h2 className="text-white font-bold text-lg mb-3">
                             PROGRAMACIÓN
@@ -120,9 +157,11 @@ export default function ProgramacionZona({ zonaId }) {
                         ) : (
                             <div className="space-y-2">
                                 {programados.map((p) => (
-                                    <PartidoProgramadoRow
+                                    <PartidoCardAdmin
                                         key={p.partidoId}
                                         partido={p}
+                                        onCerrar={abrirModalCerrar}
+                                        onEditar={abrirModalEditar}
                                     />
                                 ))}
                             </div>
@@ -130,6 +169,21 @@ export default function ProgramacionZona({ zonaId }) {
                     </div>
                 </div>
             </div>
+
+            {/* MODALES */}
+            <CerrarPartidoModal
+                open={modalCerrar}
+                partido={partidoSeleccionado}
+                onClose={cerrarModales}
+                onSuccess={cargarTodo}
+            />
+
+            <EditarResultadoModal
+                open={modalEditar}
+                partido={partidoSeleccionado}
+                onClose={cerrarModales}
+                onSuccess={cargarTodo}
+            />
         </div>
     );
 }

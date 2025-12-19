@@ -3,8 +3,9 @@ import { useParams } from "react-router-dom";
 
 import TablaPosiciones from "../components/torneo/TablaPosiciones";
 import FixtureTorneo from "../components/torneo/FixtureTorneo";
+import ProgramacionComoFixture from "../components/torneo/ProgramacionComoFixture";
 import TabsTorneo from "../components/torneo/TabsTorneo";
-import Navbar from "../components/Navbar"; // ajustá si cambia la ruta
+import Navbar from "../components/Navbar";
 
 export default function TorneoPublico() {
     const { id } = useParams();
@@ -15,7 +16,6 @@ export default function TorneoPublico() {
     const [posiciones, setPosiciones] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // 🔹 TAB ACTIVO
     const [activeTab, setActiveTab] = useState("Tabla de posiciones");
 
     // 1️⃣ Traer torneo + zonas
@@ -23,15 +23,16 @@ export default function TorneoPublico() {
         const cargar = async () => {
             try {
                 const res = await fetch(
-                    `http://localhost:8080/api/torneos/activos`
+                    "http://localhost:8080/api/torneos/activos"
                 );
                 const data = await res.json();
 
                 const t = data.find(t => t.id === Number(id));
-                setTorneo(t);
+                if (!t) return;
 
-                setZonas(t.zonas);
-                setZonaActiva(t.zonas[0]);
+                setTorneo(t);
+                setZonas(t.zonas || []);
+                setZonaActiva(t.zonas?.[0] ?? null);
             } catch (e) {
                 console.error(e);
             }
@@ -40,7 +41,7 @@ export default function TorneoPublico() {
         cargar();
     }, [id]);
 
-    // 2️⃣ Traer posiciones de la zona
+    // 2️⃣ Traer posiciones
     useEffect(() => {
         if (!zonaActiva) return;
 
@@ -63,7 +64,7 @@ export default function TorneoPublico() {
         <div className="min-h-screen bg-[#1F2333] text-white">
             <Navbar />
 
-            {/* TITULO */}
+            {/* TÍTULO */}
             <h1 className="text-center text-3xl font-bold mt-10">
                 {torneo.nombre.toUpperCase()} DIVISIONAL "{torneo.division}"
             </h1>
@@ -92,7 +93,7 @@ export default function TorneoPublico() {
                 ))}
             </div>
 
-            {/* CONTENIDO SEGÚN TAB */}
+            {/* CONTENIDO */}
             <div className="mt-8 px-6">
                 {activeTab === "Tabla de posiciones" && (
                     loading ? (
@@ -105,7 +106,11 @@ export default function TorneoPublico() {
                 )}
 
                 {activeTab === "Fixture" && zonaActiva && (
-                    <FixtureTorneo zonaId={zonaActiva.id} />
+                    torneo.tipo === "CERRADO" ? (
+                        <FixtureTorneo zonaId={zonaActiva.id} />
+                    ) : (
+                        <ProgramacionComoFixture zonaId={zonaActiva.id} />
+                    )
                 )}
 
                 {activeTab === "Equipos" && (

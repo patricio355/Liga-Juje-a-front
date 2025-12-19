@@ -4,12 +4,13 @@ import { useEffect, useRef } from "react";
 export default function FilaProgramacion({
                                              tarjeta,
                                              opciones,
+                                             equipoYaProgramado,
                                              open,
                                              onOpen,
                                              onClose,
+                                             seleccion,
                                              onSelect,
                                              onConfirm,
-                                             seleccion,
                                          }) {
     const ref = useRef(null);
 
@@ -39,9 +40,20 @@ export default function FilaProgramacion({
         px-4 py-3
       "
         >
-            <div className="w-48 text-black font-semibold truncate">
-                {tarjeta.equipoNombre}
-            </div>
+            <span
+                className={`font-semibold ${
+                    equipoYaProgramado
+                        ? "text-red-500"
+                        : "text-black"
+                }`}
+            >
+    {tarjeta.equipoNombre}
+</span>
+            {equipoYaProgramado && (
+                <span className="text-xs text-red-400">
+        Ya juega en esta fecha
+    </span>
+            )}
 
             <span className="text-gray-600">VS</span>
 

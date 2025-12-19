@@ -39,7 +39,7 @@ export default function ModalInscribirEquipo({ equipo, onClose, onInscripto }) {
 
         try {
             await apiFetch(
-                `/api/equipos-zona/inscribir/${equipo.id}/zona/${zonaId}`,
+                `/api/torneos/inscribir/${equipo.id}/zona/${zonaId}`,
                 { method: "POST" }
             );
 
