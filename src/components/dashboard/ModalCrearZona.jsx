@@ -11,12 +11,19 @@ export default function ModalCrearZona({ torneo, onClose, onCreated }) {
 
         setLoading(true);
 
+        // 1. Recuperar el token (asegúrate de que el nombre coincida con cómo lo guardas en el login)
+        const token = localStorage.getItem("token");
+
         try {
             const res = await fetch(
                 `http://localhost:8080/api/torneos/${torneo.id}/zonas`,
                 {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json",
+                        // 2. Agregar el header de Authorization
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify({ nombre, descripcion }),
                 }
             );
@@ -24,6 +31,10 @@ export default function ModalCrearZona({ torneo, onClose, onCreated }) {
             if (res.ok) {
                 onCreated();
                 onClose();
+            } else if (res.status === 403) {
+                alert("No tienes permisos para realizar esta acción o la sesión expiró.");
+            } else {
+                console.error("Error en la respuesta:", res.status);
             }
 
         } catch (err) {

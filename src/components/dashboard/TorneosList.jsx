@@ -1,21 +1,20 @@
 import { useEffect, useState } from "react";
-import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus, FaEye } from "react-icons/fa";
+import { useNavigate } from "react-router-dom"; // Importamos navegación
 
 import ModalCrearTorneo from "./ModalCrearTorneo";
 import ModalEditarTorneo from "./ModalEditarTorneo";
-import ModalCrearZona from "./ModalCrearZona";
-import ModalEditarZona from "./ModalEditarZona";
 import ConfirmModal from "./ConfirmModal";
 
 import { apiFetch } from "../../api/api";
 
 export default function TorneosList() {
-
     const [torneos, setTorneos] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate(); // Hook para redirigir
 
     // FILTRO Y BUSQUEDA
-    const [filtro, setFiltro] = useState("todos");
+    const [filtro, setFiltro] = useState("activos");
     const [busqueda, setBusqueda] = useState("");
 
     // MODALES TORNEO
@@ -23,32 +22,25 @@ export default function TorneosList() {
     const [modalEditar, setModalEditar] = useState(false);
     const [torneoSeleccionado, setTorneoSeleccionado] = useState(null);
 
-    // MODALES ZONA
-    const [modalZonaCrear, setModalZonaCrear] = useState(false);
-    const [modalZonaEditar, setModalZonaEditar] = useState(false);
-    const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
-
     // MODAL CONFIRMACION
     const [modalConfirm, setModalConfirm] = useState(false);
     const [mensajeConfirm, setMensajeConfirm] = useState("");
     const [accionEliminar, setAccionEliminar] = useState(null);
 
-    // ---------------------------------------------------
-    // RECARGAR LISTA
-    // ---------------------------------------------------
     const recargar = async () => {
-        const data = await apiFetch("/api/torneos");
-        setTorneos(data);
+        try {
+            const data = await apiFetch("/api/torneos/dashboard");
+            setTorneos(data);
+        } catch (err) {
+            console.error("Error al recargar:", err);
+        }
     };
 
-    // ---------------------------------------------------
-    // CARGAR INICIAL
-    // ---------------------------------------------------
     useEffect(() => {
         const cargar = async () => {
             setLoading(true);
             try {
-                const data = await apiFetch("/api/torneos");
+                const data = await apiFetch("/api/torneos/dashboard");
                 setTorneos(data);
             } catch (err) {
                 console.error("Error cargando torneos:", err);
@@ -56,185 +48,133 @@ export default function TorneosList() {
                 setLoading(false);
             }
         };
-
         cargar();
     }, []);
 
-    // ---------------------------------------------------
-    // ELIMINAR TORNEO
-    // ---------------------------------------------------
-    const eliminarTorneo = (id) => {
+    const eliminarTorneo = (e, id) => {
+        e.stopPropagation(); // Evita que al hacer clic en borrar se abra el detalle
         setMensajeConfirm("¿Seguro que desea eliminar este torneo?");
         setAccionEliminar(() => async () => {
             await apiFetch(`/api/torneos/${id}`, { method: "DELETE" });
             recargar();
         });
-
         setModalConfirm(true);
     };
 
-    // ---------------------------------------------------
-    // ELIMINAR ZONA
-    // ---------------------------------------------------
-    const eliminarZona = (idTorneo, idZona) => {
-        setMensajeConfirm("¿Seguro que desea eliminar esta zona?");
-        setAccionEliminar(() => async () => {
-            await apiFetch(
-                `/api/torneos/${idTorneo}/zonas/${idZona}`,
-                { method: "DELETE" }
-            );
-            recargar();
-        });
-
-        setModalConfirm(true);
+    const abrirEdicion = (e, t) => {
+        e.stopPropagation(); // Evita redirigir al abrir el modal
+        setTorneoSeleccionado(t);
+        setModalEditar(true);
     };
 
-    // ---------------------------------------------------
-    // APLICAR FILTROS
-    // ---------------------------------------------------
     const torneosFiltrados = torneos
         .filter((t) => (filtro === "activos" ? t.estado === "activo" : true))
-        .filter((t) =>
-            t.nombre.toLowerCase().includes(busqueda.toLowerCase())
-        );
+        .filter((t) => t.nombre.toLowerCase().includes(busqueda.toLowerCase()));
 
-    if (loading) {
-        return <p className="text-gray-300 text-center">Cargando torneos...</p>;
-    }
+    if (loading) return <p className="text-gray-300 text-center p-10">Cargando torneos...</p>;
 
     return (
-        <div>
-
+        <div className="p-4">
             {/* HEADER */}
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Lista de Torneos</h2>
-
-                <div className="flex items-center gap-3">
-                    <button
-                        className={`px-4 py-2 rounded ${
-                            filtro === "activos" ? "bg-blue-600" : "bg-gray-600"
-                        }`}
-                        onClick={() => setFiltro("activos")}
-                    >
-                        Activos
-                    </button>
-
-                    <button
-                        className={`px-4 py-2 rounded ${
-                            filtro === "todos" ? "bg-blue-600" : "bg-gray-600"
-                        }`}
-                        onClick={() => setFiltro("todos")}
-                    >
-                        Todos
-                    </button>
+            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                <h2 className="text-2xl font-bold text-white">Administración de Torneos</h2>
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="bg-gray-800 p-1 rounded-lg">
+                        <button
+                            className={`px-4 py-1.5 rounded-md transition ${filtro === "activos" ? "bg-blue-600 text-white" : "text-gray-400"}`}
+                            onClick={() => setFiltro("activos")}
+                        >
+                            Activos
+                        </button>
+                        <button
+                            className={`px-4 py-1.5 rounded-md transition ${filtro === "todos" ? "bg-blue-600 text-white" : "text-gray-400"}`}
+                            onClick={() => setFiltro("todos")}
+                        >
+                            Todos
+                        </button>
+                    </div>
 
                     <input
                         type="text"
-                        placeholder="Buscar..."
+                        placeholder="Buscar torneo..."
                         value={busqueda}
                         onChange={(e) => setBusqueda(e.target.value)}
-                        className="px-3 py-2 rounded bg-gray-700 text-white outline-none"
+                        className="px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-blue-500 outline-none"
                     />
 
                     <button
                         onClick={() => setModalCrear(true)}
-                        className="flex items-center gap-2 bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700"
+                        className="flex items-center gap-2 bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 font-bold transition"
                     >
-                        <FaPlus /> Crear Torneo
+                        <FaPlus /> Nuevo Torneo
                     </button>
                 </div>
             </div>
 
-            {/* LISTA */}
-            <div className="space-y-4">
+            {/* LISTA DE TORNEOS */}
+            <div className="grid grid-cols-1 gap-4">
                 {torneosFiltrados.map((t) => (
                     <div
                         key={t.id}
-                        className="bg-[#262b45] p-4 rounded-lg shadow flex justify-between items-center"
+                        onClick={() => navigate(`/dashboard/torneos/${t.id}`)}
+                        className="bg-[#1e243a] p-5 rounded-xl border border-gray-700 shadow-lg flex justify-between items-center cursor-pointer hover:border-blue-500 transition-all group"
                     >
-                        <div>
-                            <h3 className="text-xl font-bold">{t.nombre}</h3>
-                            <p className="text-gray-400">División: {t.division}</p>
+                        <div className="flex-1">
+                            <div className="flex items-center gap-3">
+                                <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition">{t.nombre}</h3>
+                                <span className={`text-[10px] px-2 py-0.5 rounded uppercase font-bold ${t.tipo === 'ABIERTO' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                    {t.tipo}
+                                </span>
+                            </div>
 
-                            <p className="text-gray-400">Tipo: {t.tipo} </p>
-                            {t.tipo === "CERRADO" && (
-                                <p className="text-red-400 font-semibold">
-                                    No se aceptan inscripciones
-                                </p>
+                            <div className="mt-2 flex gap-4 text-sm text-gray-400">
+                                <span>División: <b className="text-gray-200">{t.division}</b></span>
+                                <span>Zonas: <b className="text-gray-200">{t.zonas?.length || 0}</b></span>
+                            </div>
+
+                            {t.tipo === "CERRADO" ? (
+                                <p className="text-red-400 text-xs mt-2 italic">Inscripciones cerradas - Fixture generado</p>
+                            ) : (
+                                <p className="text-green-400 text-xs mt-2 italic">En fase de inscripción</p>
                             )}
-                            {t.tipo === "ABIERTO" && (
-                                <p className="text-green-400 font-semibold">
-                                    Se aceptan inscripciones
-                                </p>
-                            )}
-                            <p className="text-gray-400">Estado: {t.estado}</p>
-
-                            {t.zonas?.length > 0 && (
-                                <ul className="mt-3 text-sm text-gray-300 ml-5 space-y-1">
-                                    {t.zonas.map((z) => (
-                                        <li key={z.id} className="flex justify-between items-center">
-                                            <span>• {z.nombre}</span>
-                                            <div className="flex gap-3 text-lg">
-                                                <button
-                                                    className="text-yellow-400"
-                                                    onClick={() => {
-                                                        setZonaSeleccionada(z);
-                                                        setModalZonaEditar(true);
-                                                    }}
-                                                >
-                                                    ✏
-                                                </button>
-
-                                                <button
-                                                    className="text-red-500"
-                                                    onClick={() => eliminarZona(t.id, z.id)}
-                                                >
-                                                    🗑
-                                                </button>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-
-                            <button
-                                className="mt-3 text-sm bg-blue-600 px-3 py-1 rounded"
-                                onClick={() => {
-                                    setTorneoSeleccionado(t);
-                                    setModalZonaCrear(true);
-                                }}
-                            >
-                                + Agregar Zona
-                            </button>
                         </div>
 
-                        <div className="flex gap-4 text-xl">
+                        <div className="flex gap-3">
                             <button
-                                className="text-yellow-400"
-                                onClick={() => {
-                                    setTorneoSeleccionado(t);
-                                    setModalEditar(true);
-                                }}
+                                title="Ver Administración"
+                                className="p-3 bg-gray-700/50 hover:bg-blue-600 rounded-lg text-white transition"
+                                onClick={() => navigate(`/dashboard/torneos/${t.id}`)}
+                            >
+                                <FaEye />
+                            </button>
+                            <button
+                                title="Editar"
+                                className="p-3 bg-gray-700/50 hover:bg-yellow-600 rounded-lg text-white transition"
+                                onClick={(e) => abrirEdicion(e, t)}
                             >
                                 <FaEdit />
                             </button>
-
                             <button
-                                className="text-red-500"
-                                onClick={() => eliminarTorneo(t.id)}
+                                title="Eliminar"
+                                className="p-3 bg-gray-700/50 hover:bg-red-600 rounded-lg text-white transition"
+                                onClick={(e) => eliminarTorneo(e, t.id)}
                             >
                                 <FaTrash />
                             </button>
                         </div>
                     </div>
                 ))}
+
+                {torneosFiltrados.length === 0 && (
+                    <div className="text-center py-20 bg-gray-800/20 rounded-xl border border-dashed border-gray-700">
+                        <p className="text-gray-500">No se encontraron torneos con esos filtros.</p>
+                    </div>
+                )}
             </div>
 
             {/* MODALES */}
             {modalCrear && <ModalCrearTorneo onClose={() => setModalCrear(false)} onCreated={recargar} />}
             {modalEditar && torneoSeleccionado && <ModalEditarTorneo torneo={torneoSeleccionado} onClose={() => setModalEditar(false)} onUpdated={recargar} />}
-            {modalZonaCrear && torneoSeleccionado && <ModalCrearZona torneo={torneoSeleccionado} onClose={() => setModalZonaCrear(false)} onCreated={recargar} />}
-            {modalZonaEditar && zonaSeleccionada && <ModalEditarZona zona={zonaSeleccionada} onClose={() => setModalZonaEditar(false)} onUpdated={recargar} />}
             {modalConfirm && (
                 <ConfirmModal
                     mensaje={mensajeConfirm}

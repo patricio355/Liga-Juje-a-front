@@ -5,6 +5,7 @@ import Dashboard from "../pages/Dashboard";
 import TorneoPublico from "../pages/TorneoPublico";
 import ProtectedRoute from "./ProtectedRoute";
 import ProgramacionFechaWrapper from "../pages/ProgramacionFechaWrapper";
+import TorneoDetalleAdmin from "../pages/TorneoDetalleAdmin.jsx";
 
 export default function AppRouter() {
     return (
@@ -16,6 +17,8 @@ export default function AppRouter() {
 
                 {/* TORNEO PÚBLICO */}
                 <Route path="/torneo/:id" element={<TorneoPublico />} />
+
+                <Route path="/dashboard/torneos/:id" element={<TorneoDetalleAdmin />} />
 
                 {/* LOGIN */}
                 <Route path="/login" element={<Login />} />

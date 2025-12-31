@@ -1,13 +1,16 @@
 export async function apiFetch(url, options = {}) {
 
+    const token = localStorage.getItem("token");
+
     const res = await fetch(
         import.meta.env.VITE_API_URL + url,
         {
+            ...options,
             headers: {
                 "Content-Type": "application/json",
+                ...(token && { Authorization: `Bearer ${token}` }),
                 ...options.headers,
             },
-            ...options,
         }
     );
 
@@ -17,7 +20,7 @@ export async function apiFetch(url, options = {}) {
         throw new Error(text || "Error en la API");
     }
 
-    // 👇 CLAVE: si es 204, no hay JSON
+    // 204 No Content
     if (res.status === 204) {
         return null;
     }
@@ -28,6 +31,5 @@ export async function apiFetch(url, options = {}) {
         return res.json();
     }
 
-    // Si no hay JSON, devolvemos null
     return null;
 }
