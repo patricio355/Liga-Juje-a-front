@@ -6,22 +6,23 @@ export default function ModalCrearZona({ torneo, onClose, onCreated }) {
     const [descripcion, setDescripcion] = useState("");
     const [loading, setLoading] = useState(false);
 
+    // Definimos la URL base desde las variables de entorno
+    const API_URL = import.meta.env.VITE_API_URL;
+
     const crearZona = async () => {
         if (!nombre.trim()) return alert("La zona debe tener un nombre");
 
         setLoading(true);
 
-        // 1. Recuperar el token (asegúrate de que el nombre coincida con cómo lo guardas en el login)
         const token = localStorage.getItem("token");
 
         try {
             const res = await fetch(
-                `http://localhost:8080/api/torneos/${torneo.id}/zonas`,
+                `${API_URL}/api/torneos/${torneo.id}/zonas`,
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        // 2. Agregar el header de Authorization
                         "Authorization": `Bearer ${token}`
                     },
                     body: JSON.stringify({ nombre, descripcion }),
@@ -62,8 +63,6 @@ export default function ModalCrearZona({ torneo, onClose, onCreated }) {
                     onChange={(e) => setNombre(e.target.value)}
                     className="w-full p-2 rounded bg-gray-700 outline-none mb-4"
                 />
-
-
 
                 <div className="flex justify-end gap-3">
                     <button

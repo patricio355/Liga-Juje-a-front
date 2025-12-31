@@ -1,4 +1,6 @@
-const BASE_URL = "http://localhost:8080/api/partidos";
+// Usamos la variable de entorno definida en tu archivo .env
+const API_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = `${API_URL}/api/partidos`;
 
 const authHeaders = () => ({
     "Content-Type": "application/json",
@@ -18,7 +20,7 @@ export async function getPartidos() {
 // CERRAR PARTIDO (admin)
 export async function cerrarPartido(partidoId, data) {
     const res = await fetch(
-        `http://localhost:8080/api/partidos/${partidoId}/cerrar`,
+        `${API_URL}/api/partidos/${partidoId}/cerrar`,
         {
             method: "POST",
             headers: {

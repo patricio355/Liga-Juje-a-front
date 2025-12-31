@@ -7,10 +7,14 @@ export default function FixtureTorneo({ zonaId }) {
     const [loading, setLoading] = useState(true);
     const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
 
+    // Definimos la URL base desde las variables de entorno
+    const API_URL = import.meta.env.VITE_API_URL;
+
     useEffect(() => {
         const cargarFixture = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/api/partidos/zona/${zonaId}/fixture`);
+                // Sustituimos localhost por la variable dinámica
+                const res = await fetch(`${API_URL}/api/partidos/zona/${zonaId}/fixture`);
                 const data = await res.json();
                 setFixture(Array.isArray(data) ? data : []);
                 if (data.length > 0) setFechaSeleccionada(data[0].numeroFecha);
@@ -21,7 +25,7 @@ export default function FixtureTorneo({ zonaId }) {
             }
         };
         cargarFixture();
-    }, [zonaId]);
+    }, [zonaId, API_URL]); // Añadimos API_URL como dependencia
 
     if (loading) return <p className="text-center py-10 text-emerald-600 font-bold animate-pulse">Cargando...</p>;
     if (fixture.length === 0) return <p className="text-center py-10 text-gray-400 italic">No hay partidos cargados</p>;

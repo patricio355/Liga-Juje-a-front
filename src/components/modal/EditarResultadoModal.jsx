@@ -10,14 +10,21 @@ export default function EditarResultadoModal({
     const [golesLocal, setGolesLocal] = useState(partido?.golesLocal ?? 0);
     const [golesVisitante, setGolesVisitante] = useState(partido?.golesVisitante ?? 0);
 
+    // Definimos la URL base desde las variables de entorno
+    const API_URL = import.meta.env.VITE_API_URL;
+
     if (!partido) return null;
 
     const guardarCambios = async () => {
         await fetch(
-            `http://localhost:8080/api/partidos/${partido.partidoId}/editar-resultado`,
+            `${API_URL}/api/partidos/${partido.partidoId}/editar-resultado`,
             {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    // Agregamos el token si es una ruta protegida (opcional, según tu backend)
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                },
                 body: JSON.stringify({
                     golesLocal,
                     golesVisitante

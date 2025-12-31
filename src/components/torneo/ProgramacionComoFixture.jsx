@@ -8,11 +8,13 @@ export default function ProgramacionComoFixture({ zonaId }) {
     const [fechasValidas, setFechasValidas] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const API_URL = import.meta.env.VITE_API_URL;
+
     useEffect(() => {
         const cargarFechasReales = async () => {
             setLoading(true);
             try {
-                const res = await fetch(`http://localhost:8080/api/programacion/zona/${zonaId}/fechas-disponibles`);
+                const res = await fetch(`${API_URL}/api/programacion/zona/${zonaId}/fechas-disponibles`);
                 if (!res.ok) throw new Error("Error de red");
                 const data = await res.json();
 
@@ -31,13 +33,13 @@ export default function ProgramacionComoFixture({ zonaId }) {
             }
         };
         if (zonaId) cargarFechasReales();
-    }, [zonaId]);
+    }, [zonaId, API_URL]);
 
     useEffect(() => {
         if (fechaActual === null) return;
         const cargarPartidos = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/api/programacion/zona/${zonaId}/fecha/${fechaActual}`);
+                const res = await fetch(`${API_URL}/api/programacion/zona/${zonaId}/fecha/${fechaActual}`);
                 const data = await res.json();
                 setPartidos(Array.isArray(data) ? data : []);
             } catch (error) {
@@ -45,7 +47,7 @@ export default function ProgramacionComoFixture({ zonaId }) {
             }
         };
         cargarPartidos();
-    }, [zonaId, fechaActual]);
+    }, [zonaId, fechaActual, API_URL]);
 
     const navegar = (direccion) => {
         const indiceActual = fechasValidas.indexOf(fechaActual);
@@ -60,7 +62,6 @@ export default function ProgramacionComoFixture({ zonaId }) {
 
     return (
         <div className="mt-8 bg-white rounded-2xl border-2 border-gray-300 shadow-md overflow-hidden max-w-2xl mx-auto">
-            {/* SELECTOR DE FECHAS */}
             <div className="bg-gray-100 border-b-2 border-gray-300 p-4 flex flex-col items-center gap-3">
                 <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] italic">FECHA</span>
 
@@ -73,11 +74,10 @@ export default function ProgramacionComoFixture({ zonaId }) {
                         <FaChevronLeft size={12} />
                     </button>
 
-                    {/* GRILLA FORZADA A 10 POR FILA */}
                     <div className="flex flex-wrap gap-[6px] justify-center max-w-[400px]">
                         {fechasValidas.map(f => (
                             <button
-                                key={f}
+                                key={`fecha-btn-${f}`} // ✅ Key única para los botones de fecha
                                 onClick={() => setFechaActual(f)}
                                 className={`w-[34px] h-8 rounded-lg text-[10px] font-black transition-all border-2 flex items-center justify-center
                                     ${fechaActual === f
@@ -101,16 +101,19 @@ export default function ProgramacionComoFixture({ zonaId }) {
 
             <div className="p-4 bg-white min-h-[200px]">
                 <div className="space-y-4">
-                    {partidos.map(p => (
-                        <PartidoCard key={p.partidId || p.id} partido={{
-                            estado: p.estado,
-                            equipoLocalNombre: p.local || p.equipoLocalNombre,
-                            equipoVisitanteNombre: p.visitante || p.equipoVisitanteNombre,
-                            golesLocal: p.golesLocal,
-                            golesVisitante: p.golesVisitante,
-                            fecha: p.fecha,
-                            canchaNombre: p.cancha || p.canchaNombre
-                        }} />
+                    {partidos.map((p, index) => (
+                        <PartidoCard
+                            key={p.partidId || p.id || `partido-${index}`} // ✅ Solución: si no hay ID, usamos el índice del mapa
+                            partido={{
+                                estado: p.estado,
+                                equipoLocalNombre: p.local || p.equipoLocalNombre,
+                                equipoVisitanteNombre: p.visitante || p.equipoVisitanteNombre,
+                                golesLocal: p.golesLocal,
+                                golesVisitante: p.golesVisitante,
+                                fecha: p.fecha,
+                                canchaNombre: p.cancha || p.canchaNombre
+                            }}
+                        />
                     ))}
                 </div>
             </div>

@@ -11,6 +11,9 @@ export default function CerrarPartidoModal({
     const [golesVisitante, setGolesVisitante] = useState(0);
     const [loading, setLoading] = useState(false);
 
+    // Definimos la URL base desde las variables de entorno
+    const API_URL = import.meta.env.VITE_API_URL;
+
     useEffect(() => {
         if (partido) {
             setGolesLocal(partido.golesLocal ?? 0);
@@ -24,7 +27,7 @@ export default function CerrarPartidoModal({
         try {
             setLoading(true);
             const res = await fetch(
-                `http://localhost:8080/api/partidos/${partido.partidoId}/cerrar`,
+                `${API_URL}/api/partidos/${partido.partidoId}/cerrar`,
                 {
                     method: "POST",
                     headers: {
