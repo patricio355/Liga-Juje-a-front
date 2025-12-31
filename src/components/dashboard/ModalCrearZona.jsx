@@ -63,13 +63,7 @@ export default function ModalCrearZona({ torneo, onClose, onCreated }) {
                     className="w-full p-2 rounded bg-gray-700 outline-none mb-4"
                 />
 
-                <label className="block mb-2">Descripción</label>
-                <input
-                    type="text"
-                    value={descripcion}
-                    onChange={(e) => setDescripcion(e.target.value)}
-                    className="w-full p-2 rounded bg-gray-700 outline-none mb-6"
-                />
+
 
                 <div className="flex justify-end gap-3">
                     <button

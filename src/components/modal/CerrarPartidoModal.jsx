@@ -1,6 +1,5 @@
-// src/components/modal/CerrarPartidoModal.jsx
 import { useEffect, useState } from "react";
-import Modal from "./Modal";
+import { FaTrophy, FaTimes, FaCheck } from "react-icons/fa";
 
 export default function CerrarPartidoModal({
                                                open,
@@ -12,7 +11,6 @@ export default function CerrarPartidoModal({
     const [golesVisitante, setGolesVisitante] = useState(0);
     const [loading, setLoading] = useState(false);
 
-    // Resetear cuando cambia el partido
     useEffect(() => {
         if (partido) {
             setGolesLocal(partido.golesLocal ?? 0);
@@ -25,7 +23,6 @@ export default function CerrarPartidoModal({
     const cerrar = async () => {
         try {
             setLoading(true);
-
             const res = await fetch(
                 `http://localhost:8080/api/partidos/${partido.partidoId}/cerrar`,
                 {
@@ -41,11 +38,8 @@ export default function CerrarPartidoModal({
                 }
             );
 
-            if (!res.ok) {
-                throw new Error("Error al cerrar el partido");
-            }
+            if (!res.ok) throw new Error("Error al cerrar el partido");
 
-            // 🔥 refrescar ANTES de cerrar
             await onSuccess();
             onClose();
         } catch (e) {
@@ -57,53 +51,79 @@ export default function CerrarPartidoModal({
     };
 
     return (
-        <Modal open={open} onClose={onClose}>
-            <h2 className="text-lg font-bold mb-4">
-                Cerrar partido
-            </h2>
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+            {/* Overlay con desenfoque */}
+            <div className="absolute inset-0 bg-[#0b1023]/80 backdrop-blur-sm" onClick={onClose}></div>
 
-            <p className="mb-4 font-semibold">
-                {partido.local} vs {partido.visitante}
-            </p>
+            {/* Contenedor Principal */}
+            <div className="relative bg-[#1c213b] border border-gray-700 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
 
-            <div className="flex items-center gap-3 mb-6">
-                <input
-                    type="number"
-                    min="0"
-                    className="border px-2 py-1 w-20"
-                    value={golesLocal}
-                    onChange={(e) =>
-                        setGolesLocal(Number(e.target.value))
-                    }
-                />
-                <span className="font-bold">-</span>
-                <input
-                    type="number"
-                    min="0"
-                    className="border px-2 py-1 w-20"
-                    value={golesVisitante}
-                    onChange={(e) =>
-                        setGolesVisitante(Number(e.target.value))
-                    }
-                />
+                {/* Cabecera */}
+                <div className="bg-green-600/10 p-6 flex flex-col items-center border-b border-gray-700">
+                    <div className="bg-green-600/20 p-3 rounded-full mb-3">
+                        <FaTrophy className="text-3xl text-green-500" />
+                    </div>
+                    <h2 className="text-xl font-bold text-white uppercase tracking-tighter">
+                        Finalizar Encuentro
+                    </h2>
+                </div>
+
+                {/* Cuerpo del Modal */}
+                <div className="p-8">
+                    <div className="flex justify-between items-center gap-4 mb-8">
+                        {/* LOCAL */}
+                        <div className="flex-1 text-center">
+                            <p className="text-white font-bold text-sm mb-3 truncate px-1">
+                                {partido.local}
+                            </p>
+                            <input
+                                type="number"
+                                min="0"
+                                className="w-20 h-20 bg-[#12172d] border-2 border-gray-700 rounded-2xl text-center text-3xl font-black text-white focus:border-green-500 outline-none transition-all"
+                                value={golesLocal}
+                                onChange={(e) => setGolesLocal(Number(e.target.value))}
+                            />
+                        </div>
+
+                        <div className="text-gray-600 font-black text-2xl pt-8">-</div>
+
+                        {/* VISITANTE */}
+                        <div className="flex-1 text-center">
+                            <p className="text-white font-bold text-sm mb-3 truncate px-1">
+                                {partido.visitante}
+                            </p>
+                            <input
+                                type="number"
+                                min="0"
+                                className="w-20 h-20 bg-[#12172d] border-2 border-gray-700 rounded-2xl text-center text-3xl font-black text-white focus:border-green-500 outline-none transition-all"
+                                value={golesVisitante}
+                                onChange={(e) => setGolesVisitante(Number(e.target.value))}
+                            />
+                        </div>
+                    </div>
+
+                    <p className="text-[11px] text-gray-400 bg-[#0b1023] p-3 rounded-lg border border-gray-800 text-center uppercase font-bold tracking-widest leading-relaxed">
+                        Al confirmar, se guardará el resultado oficial y el partido ya no podrá ser modificado.
+                    </p>
+                </div>
+
+                {/* Acciones */}
+                <div className="flex p-4 gap-3 bg-[#0b1023]/50 border-t border-gray-700">
+                    <button
+                        onClick={onClose}
+                        className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-gray-400 hover:bg-gray-800 hover:text-white transition-all uppercase text-xs tracking-widest"
+                    >
+                        <FaTimes /> Cancelar
+                    </button>
+                    <button
+                        onClick={cerrar}
+                        disabled={loading}
+                        className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-900/20 transition-all uppercase text-xs tracking-widest disabled:opacity-50"
+                    >
+                        {loading ? "..." : <><FaCheck /> Confirmar</>}
+                    </button>
+                </div>
             </div>
-
-            <div className="flex justify-end gap-2">
-                <button
-                    onClick={onClose}
-                    className="px-4 py-2 rounded bg-gray-300"
-                >
-                    Cancelar
-                </button>
-
-                <button
-                    onClick={cerrar}
-                    disabled={loading}
-                    className="px-4 py-2 rounded bg-green-600 text-white"
-                >
-                    {loading ? "Cerrando..." : "Confirmar"}
-                </button>
-            </div>
-        </Modal>
+        </div>
     );
 }

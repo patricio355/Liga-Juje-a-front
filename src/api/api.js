@@ -1,5 +1,4 @@
 export async function apiFetch(url, options = {}) {
-
     const token = localStorage.getItem("token");
 
     const res = await fetch(
@@ -14,7 +13,21 @@ export async function apiFetch(url, options = {}) {
         }
     );
 
-    // Manejo de errores
+    // --- INTERCEPTOR DE SESIÓN ---
+    if (res.status === 401 || res.status === 403) {
+        // Si el backend no reconoce el token (ej: por reinicio), limpiamos todo
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        // Redirigimos al login con un parámetro para mostrar el mensaje de "Sesión expirada"
+        if (!window.location.pathname.includes("/login")) {
+            window.location.href = "/login?session=expired";
+        }
+
+        throw new Error("Sesión expirada o inválida");
+    }
+
+    // Manejo de errores genéricos
     if (!res.ok) {
         const text = await res.text();
         throw new Error(text || "Error en la API");

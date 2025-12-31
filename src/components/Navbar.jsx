@@ -1,12 +1,15 @@
 import { useState, useContext, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import {
+    FaUserCircle, FaBars, FaTimes,
+    FaSignOutAlt, FaThLarge, FaHome
+} from "react-icons/fa"; // FaThLarge reemplaza al inexistente FaLayout
 
 export default function Navbar() {
     const [open, setOpen] = useState(false);
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
-
     const menuRef = useRef(null);
     const buttonRef = useRef(null);
 
@@ -15,104 +18,67 @@ export default function Navbar() {
         navigate("/");
     }
 
-    // Cerrar menú al hacer click afuera
     useEffect(() => {
         function handleClickOutside(e) {
-            if (
-                menuRef.current &&
-                !menuRef.current.contains(e.target) &&
-                buttonRef.current &&
-                !buttonRef.current.contains(e.target)
-            ) {
+            if (menuRef.current && !menuRef.current.contains(e.target) &&
+                buttonRef.current && !buttonRef.current.contains(e.target)) {
                 setOpen(false);
             }
         }
-
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     return (
-        <nav className="relative w-full bg-[#E8E5FF] px-6 py-4 flex justify-between items-center z-50">
-
-            {/* LOGO → lleva al home */}
-            <Link to="/" className="flex items-center gap-3 cursor-pointer">
-                <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white text-xl font-bold">
+        <nav className="relative w-full bg-[#0a1a11]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center z-[100] border-b border-emerald-500/20 shadow-xl">
+            {/* LOGO */}
+            <Link to="/" className="flex items-center gap-3 group">
+                <div className="w-11 h-11 bg-emerald-500 rounded-xl flex items-center justify-center text-black text-2xl shadow-[0_0_15px_rgba(16,185,129,0.4)]">
                     ⚽
                 </div>
-                <div className="text-black font-extrabold text-xl leading-5">
-                    LIGAS <br /> JUJEÑAS
+                <div className="text-white font-black text-xl leading-5 tracking-tighter uppercase italic">
+                    Ligas <br /> <span className="text-emerald-500">Jujeñas</span>
                 </div>
             </Link>
 
-            {/* USUARIO (solo si está logueado) */}
-            {user && (
-                <div className="hidden md:flex items-center gap-2 bg-gray-800 px-3 py-1 rounded-full shadow mr-3">
-                    <span className="text-white text-xl">👤</span>
-                    <span className="font-medium text-white">{user.sub}</span>
-                </div>
-            )}
-
-            {/* ICONO MENÚ */}
-            <div
-                ref={buttonRef}
-                className="space-y-1 cursor-pointer z-50"
-                onClick={() => setOpen(!open)}
-            >
-                <div className="w-8 h-[3px] bg-black"></div>
-                <div className="w-8 h-[3px] bg-black"></div>
-                <div className="w-8 h-[3px] bg-black"></div>
+            <div className="flex items-center gap-4">
+                {user && (
+                    <div className="hidden md:flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+                        <FaUserCircle className="text-emerald-500" />
+                        <span className="font-bold text-[10px] text-emerald-400 uppercase">{user.sub}</span>
+                    </div>
+                )}
+                <button
+                    ref={buttonRef}
+                    className="p-2 text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all"
+                    onClick={() => setOpen(!open)}
+                >
+                    {open ? <FaTimes size={24} /> : <FaBars size={24} />}
+                </button>
             </div>
 
             {/* MENÚ DESPLEGABLE */}
             {open && (
-                <div
-                    ref={menuRef}
-                    className="absolute right-4 top-full mt-2 bg-white shadow-lg rounded-lg p-4 w-44 z-50"
-                >
-                    {/* HOME */}
-                    <Link
-                        to="/"
-                        className="block text-black py-1 text-lg hover:text-blue-600"
-                        onClick={() => setOpen(false)}
-                    >
-                        Home
-                    </Link>
-
-                    {/* LOGIN */}
-                    {!user && (
-                        <Link
-                            to="/login"
-                            className="block text-black py-1 text-lg hover:text-blue-600"
-                            onClick={() => setOpen(false)}
-                        >
-                            Iniciar sesión
+                <div ref={menuRef} className="absolute right-6 top-[calc(100%+10px)] bg-[#12172d] border border-emerald-500/30 shadow-2xl rounded-2xl p-2 w-52 z-[110] animate-in fade-in zoom-in duration-200">
+                    <div className="flex flex-col gap-1">
+                        <Link to="/" className="flex items-center gap-3 text-gray-300 px-4 py-3 rounded-xl hover:bg-emerald-500 hover:text-black font-bold transition-all" onClick={() => setOpen(false)}>
+                            <FaHome /> Home
                         </Link>
-                    )}
-
-                    {/* DASHBOARD SI ESTÁ LOGUEADO */}
-                    {user && (
-                        <Link
-                            to="/dashboard"
-                            className="block text-black py-1 text-lg hover:text-blue-600"
-                            onClick={() => setOpen(false)}
-                        >
-                            Dashboard
-                        </Link>
-                    )}
-
-                    {/* CERRAR SESIÓN */}
-                    {user && (
-                        <button
-                            onClick={() => {
-                                handleLogout();
-                                setOpen(false);
-                            }}
-                            className="block text-left text-black py-1 text-lg hover:text-red-600 w-full"
-                        >
-                            Cerrar sesión
-                        </button>
-                    )}
+                        {user ? (
+                            <>
+                                <Link to="/dashboard" className="flex items-center gap-3 text-gray-300 px-4 py-3 rounded-xl hover:bg-emerald-500 hover:text-black font-bold transition-all" onClick={() => setOpen(false)}>
+                                    <FaThLarge /> Dashboard
+                                </Link>
+                                <button onClick={handleLogout} className="flex items-center gap-3 text-red-400 px-4 py-3 rounded-xl hover:bg-red-500/10 font-bold transition-all text-left w-full">
+                                    <FaSignOutAlt /> Salir
+                                </button>
+                            </>
+                        ) : (
+                            <Link to="/login" className="flex items-center gap-3 text-emerald-500 px-4 py-3 rounded-xl hover:bg-emerald-500/10 font-bold" onClick={() => setOpen(false)}>
+                                Iniciar sesión
+                            </Link>
+                        )}
+                    </div>
                 </div>
             )}
         </nav>
