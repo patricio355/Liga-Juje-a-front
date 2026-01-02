@@ -61,28 +61,31 @@ export default function ProgramacionComoFixture({ zonaId }) {
     if (fechasValidas.length === 0 && !loading) return null;
 
     return (
-        <div className="mt-8 bg-white rounded-2xl border-2 border-gray-300 shadow-md overflow-hidden max-w-2xl mx-auto">
-            <div className="bg-gray-100 border-b-2 border-gray-300 p-4 flex flex-col items-center gap-3">
-                <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] italic">FECHA</span>
+        <div className="mt-8 bg-[#12172d] rounded-2xl border border-gray-800 shadow-2xl overflow-hidden max-w-2xl mx-auto">
+            {/* CABECERA / SELECTOR DE FECHAS */}
+            <div className="bg-[#1c213b] border-b border-gray-800 p-4 flex flex-col items-center gap-3">
+                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] italic">
+                    FECHA
+                </span>
 
                 <div className="flex items-start justify-center gap-3 w-full">
                     <button
                         onClick={() => navegar("prev")}
                         disabled={fechasValidas.indexOf(fechaActual) === 0}
-                        className="shrink-0 w-8 h-8 mt-1 flex items-center justify-center rounded-full border-2 border-gray-300 text-gray-400 hover:border-emerald-500 hover:text-emerald-600 disabled:opacity-10 transition-all"
+                        className="shrink-0 w-8 h-8 mt-1 flex items-center justify-center rounded-full border border-gray-700 text-gray-500 hover:border-emerald-500 hover:text-emerald-500 bg-[#0b1023] disabled:opacity-10 transition-all"
                     >
-                        <FaChevronLeft size={12} />
+                        <FaChevronLeft size={10} />
                     </button>
 
                     <div className="flex flex-wrap gap-[6px] justify-center max-w-[400px]">
                         {fechasValidas.map(f => (
                             <button
-                                key={`fecha-btn-${f}`} // ✅ Key única para los botones de fecha
+                                key={`fecha-btn-${f}`}
                                 onClick={() => setFechaActual(f)}
-                                className={`w-[34px] h-8 rounded-lg text-[10px] font-black transition-all border-2 flex items-center justify-center
+                                className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all border flex items-center justify-center
                                     ${fechaActual === f
-                                    ? "bg-emerald-600 text-white border-emerald-700 shadow-sm scale-105"
-                                    : "bg-white text-gray-400 border-gray-200 hover:border-gray-400"}`}
+                                    ? "bg-emerald-600 text-white border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)] scale-110"
+                                    : "bg-[#0b1023] text-gray-500 border-gray-800 hover:border-gray-600 hover:text-gray-300"}`}
                             >
                                 {f}
                             </button>
@@ -92,18 +95,19 @@ export default function ProgramacionComoFixture({ zonaId }) {
                     <button
                         onClick={() => navegar("next")}
                         disabled={fechasValidas.indexOf(fechaActual) === fechasValidas.length - 1}
-                        className="shrink-0 w-8 h-8 mt-1 flex items-center justify-center rounded-full border-2 border-gray-300 text-gray-400 hover:border-emerald-500 hover:text-emerald-600 disabled:opacity-10 transition-all"
+                        className="shrink-0 w-8 h-8 mt-1 flex items-center justify-center rounded-full border border-gray-700 text-gray-500 hover:border-emerald-500 hover:text-emerald-500 bg-[#0b1023] disabled:opacity-10 transition-all"
                     >
-                        <FaChevronRight size={12} />
+                        <FaChevronRight size={10} />
                     </button>
                 </div>
             </div>
 
-            <div className="p-4 bg-white min-h-[200px]">
+            {/* LISTADO DE PARTIDOS */}
+            <div className="p-4 bg-[#12172d] min-h-[200px]">
                 <div className="space-y-4">
                     {partidos.map((p, index) => (
                         <PartidoCard
-                            key={p.partidId || p.id || `partido-${index}`} // ✅ Solución: si no hay ID, usamos el índice del mapa
+                            key={p.partidId || p.id || `partido-${index}`}
                             partido={{
                                 estado: p.estado,
                                 equipoLocalNombre: p.local || p.equipoLocalNombre,
@@ -116,6 +120,13 @@ export default function ProgramacionComoFixture({ zonaId }) {
                         />
                     ))}
                 </div>
+            </div>
+
+            {/* PIE DE SECCIÓN */}
+            <div className="bg-[#0b1023] py-2 px-4 border-t border-gray-800">
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-600 text-center">
+                    Programación sujeta a cambios
+                </p>
             </div>
         </div>
     );

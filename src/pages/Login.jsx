@@ -1,5 +1,5 @@
 import { useState, useContext } from "react";
-import { useLocation } from "react-router-dom"; // Importado para detectar sesión expirada
+import { useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import Navbar from "../components/Navbar.jsx";
 import { FaEnvelope, FaLock, FaFutbol, FaExclamationTriangle } from "react-icons/fa";
@@ -8,9 +8,8 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Login() {
     const { login } = useContext(AuthContext);
-    const location = useLocation(); //
+    const location = useLocation();
 
-    // Detectamos si venimos de un redireccionamiento por sesión caída
     const query = new URLSearchParams(location.search);
     const sessionExpired = query.get("session") === "expired";
 
@@ -39,7 +38,6 @@ export default function Login() {
 
             const data = await response.json();
             login(data.token);
-            // Usamos replace para que no se pueda volver atrás al login una vez dentro
             window.location.replace("/dashboard");
         } catch (err) {
             setError("No hay conexión con el servidor de la liga.");
@@ -51,22 +49,21 @@ export default function Login() {
         <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans selection:bg-emerald-500/30">
             <Navbar />
 
-            <div className="flex items-center justify-center p-4 pt-32">
+            {/* Se redujo pt-32 a pt-16 para subir la posición del formulario */}
+            <div className="flex items-center justify-center p-4 pt-16">
                 <div className="w-full max-w-md">
 
-                    {/* Alerta de Sesión Expirada */}
                     {sessionExpired && (
                         <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center gap-4 animate-pulse">
                             <FaExclamationTriangle className="text-amber-500 text-xl shrink-0" />
                             <p className="text-[10px] font-black uppercase tracking-widest text-amber-200 leading-tight">
-                                Tu sesión ha finalizado por seguridad o reinicio del sistema.
+                                Vuelve a iniciar Sesión
                             </p>
                         </div>
                     )}
 
                     <div className="bg-[#1e293b] p-10 rounded-[2.5rem] shadow-2xl border border-slate-700/50 relative overflow-hidden">
 
-                        {/* Header Estilo Admin */}
                         <div className="text-center mb-10">
                             <div className="inline-flex p-4 bg-[#0f172a] rounded-2xl mb-4 border border-slate-700/50 text-emerald-500 shadow-inner">
                                 <FaFutbol className="text-3xl" />
@@ -86,7 +83,6 @@ export default function Login() {
                         )}
 
                         <form onSubmit={handleLogin} className="space-y-6">
-                            {/* Email */}
                             <div className="space-y-2">
                                 <label htmlFor="email" className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Correo Electrónico</label>
                                 <div className="relative">
@@ -96,7 +92,7 @@ export default function Login() {
                                         type="email"
                                         name="email"
                                         autoComplete="email"
-                                        placeholder="admin@liga.com"
+                                        placeholder="correo@gmail.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         className="w-full h-14 bg-[#0f172a] border border-slate-700/50 p-3 pl-12 rounded-xl focus:outline-none focus:border-emerald-500 transition-all text-sm text-white shadow-inner"
@@ -105,7 +101,6 @@ export default function Login() {
                                 </div>
                             </div>
 
-                            {/* Contraseña */}
                             <div className="space-y-2">
                                 <label htmlFor="password" className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Clave de Acceso</label>
                                 <div className="relative">
@@ -129,13 +124,13 @@ export default function Login() {
                                 disabled={isSubmitting}
                                 className="w-full h-14 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all shadow-xl shadow-emerald-900/20 active:scale-95 disabled:opacity-50 mt-4 flex items-center justify-center gap-2"
                             >
-                                {isSubmitting ? "Autenticando..." : "Ingresar al Panel"}
+                                {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
                             </button>
                         </form>
 
                         <div className="mt-10 text-center border-t border-slate-700/30 pt-8">
                             <p className="text-slate-600 text-[10px] font-black uppercase italic tracking-[0.2em] opacity-40">
-                                Gestión Deportiva v2.5 • Oficial
+                                Gestión Deportiva v1 • Oficial
                             </p>
                         </div>
                     </div>

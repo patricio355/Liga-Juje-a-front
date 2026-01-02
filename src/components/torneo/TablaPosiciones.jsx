@@ -1,23 +1,23 @@
 export default function TablaPosiciones({ posiciones }) {
     return (
-        <div className="w-full overflow-hidden rounded-2xl border-2 border-gray-300 bg-white shadow-md">
+        <div className="w-full overflow-hidden rounded-xl border border-gray-800 bg-[#12172d] shadow-2xl">
+            {/* Contenedor con scroll horizontal para móviles */}
             <div className="overflow-x-auto">
-                <table className="w-full min-w-[500px] text-left border-collapse">
+                <table className="w-full min-w-[380px] text-left border-collapse table-fixed">
                     <thead>
-                    <tr className="bg-gray-100 border-b-2 border-gray-300">
-                        {/* Celda de cabecera de posición más angosta */}
-                        <th className="py-4 px-1 text-[11px] font-black uppercase tracking-widest text-gray-600 text-center w-10">Pos</th>
-                        <th className="py-4 px-3 text-[11px] font-black uppercase tracking-widest text-gray-700">Equipo</th>
-                        <th className="py-4 px-1 text-[11px] font-black uppercase tracking-widest text-emerald-700 text-center">Pts</th>
-                        <th className="py-4 px-1 text-[11px] font-black uppercase tracking-widest text-gray-600 text-center">PJ</th>
-                        <th className="py-4 px-1 text-[11px] font-black uppercase tracking-widest text-gray-600 text-center">PG</th>
-                        <th className="py-4 px-1 text-[11px] font-black uppercase tracking-widest text-gray-600 text-center">PE</th>
-                        <th className="py-4 px-1 text-[11px] font-black uppercase tracking-widest text-gray-600 text-center">PP</th>
-                        <th className="py-4 px-1 text-[11px] font-black uppercase tracking-widest text-gray-600 text-center">DG</th>
+                    <tr className="bg-[#1c213b] text-emerald-400 border-b border-gray-800">
+                        <th className="py-3 px-1 text-[10px] font-black uppercase tracking-tighter text-center w-[35px]">#</th>
+                        <th className="py-3 px-2 text-[10px] font-black uppercase tracking-tighter text-left">Equipos</th>
+                        <th className="py-3 px-1 text-[10px] font-black uppercase tracking-tighter text-center w-[40px] bg-[#232a4d]/30">PTS</th>
+                        <th className="py-3 px-1 text-[10px] font-black uppercase tracking-tighter text-center w-[30px]">J</th>
+                        <th className="py-3 px-1 text-[10px] font-black uppercase tracking-tighter text-center w-[30px]">G</th>
+                        <th className="py-3 px-1 text-[10px] font-black uppercase tracking-tighter text-center w-[30px]">E</th>
+                        <th className="py-3 px-1 text-[10px] font-black uppercase tracking-tighter text-center w-[30px]">P</th>
+                        <th className="py-3 px-1 text-[10px] font-black uppercase tracking-tighter text-center w-[40px]">+/-</th>
                     </tr>
                     </thead>
 
-                    <tbody className="divide-y-2 divide-gray-200">
+                    <tbody className="divide-y divide-gray-800/50">
                     {posiciones.map((p, index) => {
                         const esPrimero = index === 0;
                         const diferenciaGoles = (p.golesAFavor || 0) - (p.golesEnContra || 0);
@@ -25,42 +25,44 @@ export default function TablaPosiciones({ posiciones }) {
                         return (
                             <tr
                                 key={p.id || index}
-                                className="group hover:bg-emerald-50 transition-colors duration-150"
+                                className="hover:bg-emerald-500/5 transition-colors border-b border-gray-800/30"
                             >
-                                {/* POSICIÓN: Reducido el tamaño del cuadro y el padding de la celda */}
-                                <td className="py-4 px-1 text-center">
-                                    <span className={`
-                                        inline-flex items-center justify-center w-6 h-6 rounded font-black text-[11px]
-                                        ${esPrimero
-                                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-200"
-                                        : "bg-gray-200 text-gray-700 group-hover:bg-emerald-200 group-hover:text-emerald-800"}
-                                        transition-all
-                                    `}>
-                                        {index + 1}
-                                    </span>
+                                {/* POSICIÓN */}
+                                <td className="py-3 px-1 text-center">
+                                        <span className={`text-[11px] font-black ${esPrimero ? 'text-emerald-400' : 'text-gray-500'}`}>
+                                            {index + 1}
+                                        </span>
                                 </td>
 
-                                <td className="py-4 px-3">
-                                    <span className="text-sm font-extrabold text-gray-900 group-hover:text-emerald-800 transition-colors uppercase italic tracking-tight whitespace-nowrap">
-                                        {p.nombreEquipo}
-                                    </span>
+                                {/* EQUIPO */}
+                                <td className="py-3 px-2">
+                                    <div className="flex items-center gap-2">
+                                        {/* Círculo de color o logo del equipo */}
+                                        <div className={`w-2 h-2 rounded-full ${esPrimero ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-gray-600'}`}></div>
+                                        <span className="text-[11px] font-bold text-gray-200 uppercase tracking-tight truncate max-w-[110px] italic">
+                                                {p.nombreEquipo}
+                                            </span>
+                                    </div>
                                 </td>
 
-                                <td className="py-4 px-1 text-center">
-                                    <span className="text-base font-black text-emerald-700 italic">
-                                        {p.puntos}
-                                    </span>
+                                {/* PUNTOS (Resaltado central) */}
+                                <td className="py-3 px-1 text-center bg-[#1c213b]/40">
+                                        <span className="text-sm font-black text-emerald-400">
+                                            {p.puntos}
+                                        </span>
                                 </td>
 
-                                <td className="py-4 px-1 text-center text-xs font-bold text-gray-700">{p.partidosJugados}</td>
-                                <td className="py-4 px-1 text-center text-xs font-bold text-gray-700">{p.ganados}</td>
-                                <td className="py-4 px-1 text-center text-xs font-bold text-gray-700">{p.empatados}</td>
-                                <td className="py-4 px-1 text-center text-xs font-bold text-gray-700">{p.perdidos}</td>
+                                {/* ESTADÍSTICAS */}
+                                <td className="py-3 px-1 text-center text-[10px] font-bold text-gray-400">{p.partidosJugados}</td>
+                                <td className="py-3 px-1 text-center text-[10px] font-bold text-gray-400">{p.ganados}</td>
+                                <td className="py-3 px-1 text-center text-[10px] font-bold text-gray-400">{p.empatados}</td>
+                                <td className="py-3 px-1 text-center text-[10px] font-bold text-gray-400">{p.perdidos}</td>
 
-                                <td className="py-4 px-1 text-center">
-                                    <span className={`text-xs font-black italic ${diferenciaGoles > 0 ? 'text-emerald-600' : diferenciaGoles < 0 ? 'text-red-600' : 'text-gray-400'}`}>
-                                        {diferenciaGoles > 0 ? `+${diferenciaGoles}` : diferenciaGoles}
-                                    </span>
+                                {/* DIFERENCIA DE GOLES */}
+                                <td className="py-3 px-1 text-center">
+                                        <span className={`text-[10px] font-black ${diferenciaGoles > 0 ? 'text-emerald-500' : diferenciaGoles < 0 ? 'text-red-500' : 'text-gray-500'}`}>
+                                            {diferenciaGoles > 0 ? `+${diferenciaGoles}` : diferenciaGoles}
+                                        </span>
                                 </td>
                             </tr>
                         );
@@ -69,9 +71,10 @@ export default function TablaPosiciones({ posiciones }) {
                 </table>
             </div>
 
-            <div className="bg-gray-100 py-3 px-8 border-t-2 border-gray-300">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 text-right">
-                    Datos Oficiales • Ligas Jujeñas
+            {/* Footer estilo Liga Bulón */}
+            <div className="bg-[#0b1023] py-2 px-4 border-t border-gray-800">
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-600 text-center">
+                    Panel Oficial de Posiciones • Temporada 2025
                 </p>
             </div>
         </div>
