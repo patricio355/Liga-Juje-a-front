@@ -11,7 +11,7 @@ import { FaFutbol, FaTrophy, FaUsers, FaUserShield, FaTimes, FaBars } from "reac
 function SidebarMenu({ selected, setSelected, user }) {
     const items = [
         { id: "torneos", icon: <FaFutbol />, label: "Torneos" },
-        { id: "equipos", icon: <FaTrophy />, label: "Equipos" },
+        { id: "equipos", icon: <FaTrophy />, label: "Equipos", adminOnly: true  },
         { id: "usuarios", icon: <FaUsers />, label: "Usuarios", adminOnly: true },
     ];
 
@@ -58,7 +58,7 @@ function UserSection({ user }) {
 function Content({ selected, user }) {
     const sectionClass = "bg-[#1e293b] p-4 md:p-8 rounded-3xl border border-slate-700/50 shadow-2xl";
     if (selected === "torneos") return <div className={sectionClass}><TorneosList /></div>;
-    if (selected === "equipos") return <div className={sectionClass}><EquiposList /></div>;
+    if (selected === "equipos" && user?.role === "ROLE_ADMIN") return <div className={sectionClass}><EquiposList /></div>;
     if (selected === "usuarios" && user?.role === "ROLE_ADMIN") return <div className={sectionClass}><UsuariosList /></div>;
     return null;
 }

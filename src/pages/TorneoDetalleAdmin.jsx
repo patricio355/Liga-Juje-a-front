@@ -83,7 +83,7 @@ export default function TorneoDetalleAdmin() {
     if (loading) return (
         <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center gap-4">
             <FaFutbol className="text-4xl text-emerald-500 animate-spin" />
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic text-center">Sincronizando Gestión...</span>
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic text-center">Cargando...</span>
         </div>
     );
 

@@ -1,16 +1,12 @@
 export default function TablaPosiciones({ posiciones }) {
     return (
         <div className="w-full overflow-hidden rounded-xl border border-gray-800 bg-[#12172d] shadow-2xl">
-            {/* Contenedor con scroll horizontal activo */}
             <div className="overflow-x-auto">
-                {/* Usamos table-auto para que el nombre defina el ancho.
-                   La tabla crecerá horizontalmente según el nombre más largo.
-                */}
                 <table className="w-full text-left border-collapse table-auto">
                     <thead>
                     <tr className="bg-[#1c213b] text-emerald-400 border-b border-gray-800">
                         <th className="py-3 px-2 text-[10px] font-black text-center w-[30px] shrink-0">#</th>
-                        <th className="py-3 px-3 text-[10px] font-black text-left min-w-[120px]">EQUIPOS</th>
+                        <th className="py-3 px-3 text-[10px] font-black text-left min-w-[140px]">EQUIPOS</th>
                         <th className="py-3 px-2 text-[10px] font-black text-center w-[40px] bg-[#232a4d]/30 shrink-0">PTS</th>
                         <th className="py-3 px-1 text-[10px] font-black text-center w-[30px] shrink-0">J</th>
                         <th className="py-3 px-1 text-[10px] font-black text-center w-[30px] shrink-0">G</th>
@@ -32,14 +28,23 @@ export default function TablaPosiciones({ posiciones }) {
                                 </td>
 
                                 <td className="py-3 px-3">
-                                    <div className="flex items-center gap-2">
-                                        <div className={`shrink-0 w-1.5 h-1.5 rounded-full ${esPrimero ? 'bg-emerald-500' : 'bg-gray-600'}`}></div>
-                                        {/* 'whitespace-nowrap' obliga al nombre a estar en una sola línea.
-                                               Sin 'truncate', el nombre empujará la tabla hacia la derecha.
-                                            */}
+                                    <div className="flex items-center gap-3">
+                                        {/* ESCUDO: Renderizado desde la URL de Cloudinary */}
+                                        <div className="shrink-0 w-6 h-6 flex items-center justify-center">
+                                            {p.escudo || p.urlEscudo ? (
+                                                <img
+                                                    src={p.escudo || p.urlEscudo}
+                                                    alt={`Escudo de ${p.nombreEquipo}`}
+                                                    className="w-full h-full object-contain filter drop-shadow-md"
+                                                />
+                                            ) : (
+                                                <div className={`w-1.5 h-1.5 rounded-full ${esPrimero ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-gray-600'}`}></div>
+                                            )}
+                                        </div>
+
                                         <span className="text-[11px] font-bold text-gray-200 uppercase tracking-tighter italic whitespace-nowrap">
-                                                {p.nombreEquipo}
-                                            </span>
+                                            {p.nombreEquipo}
+                                        </span>
                                     </div>
                                 </td>
 
@@ -53,9 +58,9 @@ export default function TablaPosiciones({ posiciones }) {
                                 <td className="py-3 px-1 text-center text-[10px] font-bold text-gray-400">{p.perdidos}</td>
 
                                 <td className="py-3 px-2 text-center">
-                                        <span className={`text-[10px] font-black ${diferenciaGoles > 0 ? 'text-emerald-500' : diferenciaGoles < 0 ? 'text-red-500' : 'text-gray-600'}`}>
-                                            {diferenciaGoles > 0 ? `+${diferenciaGoles}` : diferenciaGoles}
-                                        </span>
+                                    <span className={`text-[10px] font-black ${diferenciaGoles > 0 ? 'text-emerald-500' : diferenciaGoles < 0 ? 'text-red-500' : 'text-gray-600'}`}>
+                                        {diferenciaGoles > 0 ? `+${diferenciaGoles}` : diferenciaGoles}
+                                    </span>
                                 </td>
                             </tr>
                         );

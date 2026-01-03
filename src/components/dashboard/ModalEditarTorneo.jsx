@@ -5,12 +5,16 @@ import { FaTrophy, FaUserAlt, FaCheckCircle, FaTimes, FaLock } from "react-icons
 
 export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
     const { user } = useContext(AuthContext);
-    const esAdmin = user?.role === "ROLE_ADMIN";
+
+    // Normalizamos el rol usando 'role' para que el ADMIN sea reconocido correctamente
+    const userRole = user?.role?.toUpperCase().trim();
+    const esAdmin = userRole === "ADMIN" || userRole === "ROLE_ADMIN";
 
     const [nombre, setNombre] = useState("");
     const [division, setDivision] = useState("A");
     const [encargadoEmail, setEncargadoEmail] = useState("");
     const [estado, setEstado] = useState("activo");
+    const [tipo, setTipo] = useState("ABIERTO"); // Mantenemos el tipo para evitar el NULL en BD
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -21,6 +25,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
             setDivision(torneo.division || "A");
             setEncargadoEmail(torneo.encargadoEmail || "");
             setEstado(torneo.estado?.toLowerCase() || "activo");
+            setTipo(torneo.tipo || "ABIERTO");
         }
     }, [torneo]);
 
@@ -37,8 +42,8 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
             const payload = {
                 nombre,
                 division,
-                estado,
-                // NO enviamos el "tipo" en el payload para evitar cambios accidentales
+                estado, // Se envía el estado actual (activo por defecto para encargados)
+                tipo,   // Se envía el tipo original para no romper la BD
             };
 
             if (esAdmin) payload.encargadoEmail = encargadoEmail;
@@ -90,7 +95,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
                             <div>
                                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">Modalidad Actual</p>
                                 <p className="text-xs font-bold text-emerald-400 uppercase italic tracking-widest">
-                                    {torneo?.tipo || "CERRADO"}
+                                    {tipo}
                                 </p>
                             </div>
                             <div className="flex items-center gap-2 text-slate-600 bg-slate-800/50 px-3 py-1 rounded-full">
@@ -109,8 +114,9 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
                             />
                         </div>
 
-                        {/* Fila Dual: División y Estado */}
-                        <div className="grid grid-cols-2 gap-5">
+                        {/* Fila Dual o Single según Rol */}
+                        <div className={`grid gap-5 ${esAdmin ? "grid-cols-2" : "grid-cols-1"}`}>
+                            {/* División */}
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">División</label>
                                 <select
@@ -122,17 +128,20 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
                                 </select>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estado</label>
-                                <select
-                                    value={estado}
-                                    onChange={(e) => setEstado(e.target.value)}
-                                    className="w-full h-12 bg-[#0f172a] border border-slate-700/50 px-4 rounded-xl text-sm text-slate-200 outline-none appearance-none focus:border-emerald-500 cursor-pointer"
-                                >
-                                    <option value="activo">Activo</option>
-                                    <option value="inactivo">Inactivo</option>
-                                </select>
-                            </div>
+                            {/* Estado: Solo visible para ADMIN */}
+                            {esAdmin && (
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estado</label>
+                                    <select
+                                        value={estado}
+                                        onChange={(e) => setEstado(e.target.value)}
+                                        className="w-full h-12 bg-[#0f172a] border border-slate-700/50 px-4 rounded-xl text-sm text-slate-200 outline-none appearance-none focus:border-emerald-500 cursor-pointer"
+                                    >
+                                        <option value="activo">Activo</option>
+                                        <option value="inactivo">Inactivo</option>
+                                    </select>
+                                </div>
+                            )}
                         </div>
 
                         {/* Responsable (Solo Admin) */}
@@ -151,7 +160,6 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
                         )}
                     </div>
 
-                    {/* Botones */}
                     <div className="flex gap-4 pt-4">
                         <button
                             className="flex-1 h-12 bg-[#0f172a] text-slate-500 rounded-2xl text-[11px] font-black uppercase hover:text-white transition-all border border-slate-700/50 shadow-lg"

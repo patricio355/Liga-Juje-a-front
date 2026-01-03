@@ -1,12 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { FaEdit, FaTrash, FaPlus, FaEye, FaFutbol } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import ModalCrearTorneo from "./ModalCrearTorneo";
 import ModalEditarTorneo from "./ModalEditarTorneo";
 import ConfirmModal from "./ConfirmModal";
 import { apiFetch } from "../../api/api";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function TorneosList() {
+    const { user } = useContext(AuthContext);
+
+    // Usamos 'role' como pediste y normalizamos para evitar fallos de lectura
+    const userRole = user?.role?.toUpperCase().trim();
+    const esAdmin = userRole === "ADMIN" || userRole === "ROLE_ADMIN";
+
     const [torneos, setTorneos] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
@@ -58,19 +65,22 @@ export default function TorneosList() {
     };
 
     const torneosFiltrados = torneos
-        .filter((t) => (filtro === "activos" ? t.estado === "activo" : true))
+        .filter((t) => {
+            // Si no es ADMIN, forzamos activos. Si es ADMIN, depende del botón.
+            if (!esAdmin) return t.estado === "activo";
+            return filtro === "activos" ? t.estado === "activo" : true;
+        })
         .filter((t) => t.nombre.toLowerCase().includes(busqueda.toLowerCase()));
 
     if (loading) return (
         <div className="flex flex-col items-center py-32 gap-4">
             <FaFutbol className="text-5xl text-emerald-600 animate-spin" />
-            <span className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">Sincronizando Torneos...</span>
+            <span className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">Cargando...</span>
         </div>
     );
 
     return (
         <div className="w-full max-w-6xl mx-auto">
-            {/* HEADER MÁS GRANDE */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12 gap-8">
                 <div>
                     <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter leading-none">Gestión de Torneos</h2>
@@ -78,18 +88,21 @@ export default function TorneosList() {
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-5 w-full lg:w-auto">
-                    {/* Filtros */}
-                    <div className="bg-[#0f172a] p-2 rounded-2xl border border-slate-700/50 flex gap-1 w-full md:w-auto">
-                        {["activos", "todos"].map((f) => (
-                            <button
-                                key={f}
-                                className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl text-[11px] font-black uppercase transition-all ${filtro === f ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/20" : "text-slate-500 hover:text-slate-300"}`}
-                                onClick={() => setFiltro(f)}
-                            >
-                                {f}
-                            </button>
-                        ))}
-                    </div>
+
+                    {/* El botón de filtro solo aparece para ADMIN */}
+                    {esAdmin && (
+                        <div className="bg-[#0f172a] p-2 rounded-2xl border border-slate-700/50 flex gap-1 w-full md:w-auto">
+                            {["activos", "todos"].map((f) => (
+                                <button
+                                    key={f}
+                                    className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl text-[11px] font-black uppercase transition-all ${filtro === f ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/20" : "text-slate-500 hover:text-slate-300"}`}
+                                    onClick={() => setFiltro(f)}
+                                >
+                                    {f}
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
                     <input
                         type="text"
@@ -108,7 +121,6 @@ export default function TorneosList() {
                 </div>
             </div>
 
-            {/* LISTA DE TORNEOS REFORZADA */}
             <div className="grid grid-cols-1 gap-6">
                 {torneosFiltrados.map((t) => (
                     <div
@@ -124,6 +136,7 @@ export default function TorneosList() {
                                 </span>
                             </div>
 
+                            {/* Detalles del Torneo Restaurados */}
                             <div className="mt-3 flex gap-6 text-xs font-bold text-slate-500 uppercase tracking-widest">
                                 <span>División: <span className="text-slate-200">{t.division}</span></span>
                                 <span>Zonas: <span className="text-slate-200">{t.zonas?.length || 0}</span></span>
@@ -134,7 +147,6 @@ export default function TorneosList() {
                             </p>
                         </div>
 
-                        {/* Botones de Acción Proporcionalmente más grandes */}
                         <div className="flex gap-3 mt-8 lg:mt-0 w-full lg:w-auto">
                             <button
                                 title="Gestionar"
@@ -160,15 +172,8 @@ export default function TorneosList() {
                         </div>
                     </div>
                 ))}
-
-                {torneosFiltrados.length === 0 && (
-                    <div className="text-center py-32 bg-[#0f172a]/30 rounded-[2.5rem] border-2 border-dashed border-slate-700/50">
-                        <p className="text-xs font-black text-slate-600 uppercase tracking-[0.4em]">Sin registros de competencias activos</p>
-                    </div>
-                )}
             </div>
 
-            {/* MODALES */}
             {modalCrear && <ModalCrearTorneo onClose={() => setModalCrear(false)} onCreated={recargar} />}
             {modalEditar && torneoSeleccionado && <ModalEditarTorneo torneo={torneoSeleccionado} onClose={() => setModalEditar(false)} onUpdated={recargar} />}
             {modalConfirm && (
