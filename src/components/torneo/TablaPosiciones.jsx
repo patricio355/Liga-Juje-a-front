@@ -1,3 +1,5 @@
+import { FaShieldAlt } from "react-icons/fa";
+
 export default function TablaPosiciones({ posiciones }) {
     return (
         <div className="w-full overflow-hidden rounded-xl border border-gray-800 bg-[#12172d] shadow-2xl">
@@ -18,7 +20,6 @@ export default function TablaPosiciones({ posiciones }) {
 
                     <tbody className="divide-y divide-gray-800/50">
                     {posiciones.map((p, index) => {
-                        const esPrimero = index === 0;
                         const diferenciaGoles = (p.golesAFavor || 0) - (p.golesEnContra || 0);
 
                         return (
@@ -29,8 +30,8 @@ export default function TablaPosiciones({ posiciones }) {
 
                                 <td className="py-3 px-3">
                                     <div className="flex items-center gap-3">
-                                        {/* ESCUDO: Renderizado desde la URL de Cloudinary */}
-                                        <div className="shrink-0 w-6 h-6 flex items-center justify-center">
+                                        {/* CONTENEDOR DE ESCUDO UNIFICADO */}
+                                        <div className="shrink-0 w-7 h-7 flex items-center justify-center">
                                             {p.escudo || p.urlEscudo ? (
                                                 <img
                                                     src={p.escudo || p.urlEscudo}
@@ -38,7 +39,8 @@ export default function TablaPosiciones({ posiciones }) {
                                                     className="w-full h-full object-contain filter drop-shadow-md"
                                                 />
                                             ) : (
-                                                <div className={`w-1.5 h-1.5 rounded-full ${esPrimero ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-gray-600'}`}></div>
+                                                /* ESCUDO GENÉRICO - Tamaño aumentado para igualar a las imágenes */
+                                                <FaShieldAlt className="text-gray-700 text-lg sm:text-xl opacity-40" />
                                             )}
                                         </div>
 
@@ -71,7 +73,7 @@ export default function TablaPosiciones({ posiciones }) {
 
             <div className="bg-[#0b1023] py-2 px-4 border-t border-gray-800 text-center">
                 <p className="text-[8px] font-black uppercase tracking-[0.2em] text-gray-600">
-                    POSICIONES OFICIALES • 2025
+                    POSICIONES OFICIALES • 2026
                 </p>
             </div>
         </div>

@@ -112,6 +112,9 @@ export default function ProgramacionComoFixture({ zonaId }) {
                                 estado: p.estado,
                                 equipoLocalNombre: p.local || p.equipoLocalNombre,
                                 equipoVisitanteNombre: p.visitante || p.equipoVisitanteNombre,
+                                // ✅ Agregamos los escudos aquí para que la Card los dibuje
+                                equipoLocalEscudo: p.equipoLocalEscudo || p.localEscudo,
+                                equipoVisitanteEscudo: p.equipoVisitanteEscudo || p.visitanteEscudo,
                                 golesLocal: p.golesLocal,
                                 golesVisitante: p.golesVisitante,
                                 fecha: p.fecha,

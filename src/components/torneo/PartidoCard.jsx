@@ -1,3 +1,5 @@
+import { FaShieldAlt, FaMapMarkerAlt, FaClock } from "react-icons/fa";
+
 export default function PartidoCard({ partido }) {
     const finalizado = partido.estado === "FINALIZADO";
 
@@ -5,44 +7,55 @@ export default function PartidoCard({ partido }) {
         <div
             className={`
                 mx-auto max-w-lg
-                rounded-xl px-4 py-3
+                rounded-[2rem] p-5
                 border-2 transition-all duration-300
                 ${finalizado
-                ? "bg-emerald-50 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
-                : "bg-white border-gray-300 hover:border-emerald-500"}
+                ? "bg-[#1c213b] border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.1)]"
+                : "bg-[#0f172a] border-slate-800 hover:border-emerald-500/30"}
             `}
         >
-            {/* ESTADO COMPACTO */}
-            <div className="flex justify-center mb-2">
+            {/* ESTADO SUPERIOR */}
+            <div className="flex justify-center mb-5">
                 <span className={`
-                    text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md border
+                    text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border
                     ${finalizado
-                    ? "bg-emerald-600 text-white border-emerald-700"
-                    : "bg-gray-100 text-gray-500 border-gray-200"}
+                    ? "bg-emerald-500 text-[#0f172a] border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                    : "bg-amber-500/10 text-amber-500 border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.1)]"}
                 `}>
                     {finalizado ? "✓ Finalizado" : "● Pendiente"}
                 </span>
             </div>
 
-            {/* MARCADOR AJUSTADO PARA MÓVIL */}
-            <div className="flex items-center justify-between gap-1">
+            {/* ENFRENTAMIENTO CON ESCUDOS LATERALES */}
+            <div className="flex items-center justify-between gap-3">
 
-                {/* LOCAL */}
-                <div className="flex-1 text-right">
-                    <span className="text-[11px] sm:text-sm font-black text-gray-900 uppercase italic tracking-tighter leading-tight block truncate">
+                {/* LOCAL: Escudo a la izquierda, Nombre a la derecha */}
+                <div className="flex-1 flex items-center gap-3 min-w-0">
+                    <div className="shrink-0 w-12 h-12 bg-[#0b1023] rounded-xl border border-slate-700 p-1.5 flex items-center justify-center shadow-inner">
+                        {partido.equipoLocalEscudo ? (
+                            <img
+                                src={partido.equipoLocalEscudo}
+                                alt="L"
+                                className="w-full h-full object-contain"
+                            />
+                        ) : (
+                            <FaShieldAlt className="text-slate-800 text-lg" />
+                        )}
+                    </div>
+                    <span className="text-[10px] sm:text-[11px] font-black text-white uppercase italic tracking-tighter leading-tight truncate">
                         {partido.equipoLocalNombre}
                     </span>
                 </div>
 
-                {/* RESULTADO COMPACTO */}
-                <div className="px-2">
+                {/* MARCADOR CENTRAL */}
+                <div className="shrink-0">
                     <div className={`
-                        flex items-center justify-center rounded-lg px-2 py-1 border-2 min-w-[50px]
+                        flex items-center justify-center rounded-xl px-3 py-2 border-2 min-w-[65px]
                         ${finalizado
-                        ? "bg-gray-900 text-emerald-400 border-gray-800"
-                        : "bg-gray-100 text-gray-400 border-gray-200"}
+                        ? "bg-[#0b1023] text-emerald-400 border-emerald-500/40"
+                        : "bg-[#0b1023] text-slate-500 border-slate-800"}
                     `}>
-                        <span className="text-sm font-black italic">
+                        <span className="text-lg font-black italic tracking-tighter">
                             {finalizado
                                 ? `${partido.golesLocal}-${partido.golesVisitante}`
                                 : "VS"
@@ -51,27 +64,35 @@ export default function PartidoCard({ partido }) {
                     </div>
                 </div>
 
-                {/* VISITANTE */}
-                <div className="flex-1 text-left">
-                    <span className="text-[11px] sm:text-sm font-black text-gray-900 uppercase italic tracking-tighter leading-tight block truncate">
+                {/* VISITANTE: Nombre a la izquierda, Escudo a la derecha */}
+                <div className="flex-1 flex items-center justify-end gap-3 min-w-0">
+                    <span className="text-[10px] sm:text-[11px] font-black text-white uppercase italic tracking-tighter leading-tight truncate text-right">
                         {partido.equipoVisitanteNombre}
                     </span>
+                    <div className="shrink-0 w-12 h-12 bg-[#0b1023] rounded-xl border border-slate-700 p-1.5 flex items-center justify-center shadow-inner">
+                        {partido.equipoVisitanteEscudo ? (
+                            <img
+                                src={partido.equipoVisitanteEscudo}
+                                alt="V"
+                                className="w-full h-full object-contain"
+                            />
+                        ) : (
+                            <FaShieldAlt className="text-slate-800 text-lg" />
+                        )}
+                    </div>
                 </div>
+
             </div>
 
-            {/* INFO SIMPLIFICADA */}
-            <div className="mt-3 pt-2 border-t border-gray-200/60 flex justify-between items-center px-1">
-                <div className="flex flex-col">
-                    <span className="text-[7px] font-black text-emerald-700 uppercase italic">Estadio</span>
-                    <span className="text-[9px] font-bold text-gray-600 truncate max-w-[100px] uppercase">
-                        {partido.canchaNombre ?? "A DEFINIR"}
-                    </span>
+            {/* PIE TÉCNICO */}
+            <div className="mt-5 pt-3 border-t border-slate-800/50 flex justify-between items-center text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                <div className="flex items-center gap-2">
+                    <FaMapMarkerAlt className="text-emerald-500/50" />
+                    <span className="truncate max-w-[120px]">{partido.canchaNombre ?? "A definir"}</span>
                 </div>
-                <div className="flex flex-col text-right">
-                    <span className="text-[7px] font-black text-emerald-700 uppercase italic">Fecha</span>
-                    <span className="text-[9px] font-bold text-gray-700">
-                        {partido.fecha ?? "A DEFINIR"}
-                    </span>
+                <div className="flex items-center gap-2">
+                    <span>{partido.fecha ?? "A definir"}</span>
+                    <FaClock className="text-emerald-500/50" />
                 </div>
             </div>
         </div>
