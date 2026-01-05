@@ -3,7 +3,19 @@ import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
 import TorneoCard from "../components/torneo/TorneoCard.jsx";
 import { apiFetch } from "../api/api";
-import { FaTrophy, FaFutbol } from "react-icons/fa";
+import { FaTrophy } from "react-icons/fa";
+
+// Componente Interno para el Skeleton (La "tarjeta fantasma")
+const TorneoSkeleton = () => (
+    <div className="w-full h-32 bg-[#1e293b]/50 rounded-[2rem] border border-slate-700/30 animate-pulse flex items-center p-6 gap-4">
+        <div className="w-16 h-16 bg-slate-700/50 rounded-2xl"></div>
+        <div className="flex-1 space-y-3">
+            <div className="h-4 bg-slate-700/50 rounded w-1/3"></div>
+            <div className="h-3 bg-slate-700/30 rounded w-1/4"></div>
+        </div>
+        <div className="w-10 h-10 bg-slate-700/50 rounded-xl"></div>
+    </div>
+);
 
 export default function Home() {
     const [search, setSearch] = useState("");
@@ -11,18 +23,16 @@ export default function Home() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        let montado = true;
         const cargar = async () => {
-            setLoading(true);
-            try {
-                const data = await apiFetch("/api/torneos/activos");
+            const data = await apiFetch("/api/torneos/activos");
+            if (montado) {
                 setTorneos(data || []);
-            } catch (err) {
-                console.error("Error cargando torneos:", err);
-            } finally {
-                setLoading(false);
+                setLoading(false); // Solo quitamos el loading cuando ya tenemos la data
             }
         };
         cargar();
+        return () => { montado = false; };
     }, []);
 
     const filtrados = useMemo(() => {
@@ -34,23 +44,18 @@ export default function Home() {
             <Navbar />
 
             <main className="px-4 py-8 max-w-4xl mx-auto w-full">
-
-                {/* ENCABEZADO TIPO LOGIN */}
                 <div className="flex flex-col items-center mt-12 mb-10">
                     <div className="bg-[#1e293b] p-4 rounded-2xl mb-4 border border-slate-700/50 shadow-xl">
                         <FaTrophy className="text-4xl text-emerald-500" />
                     </div>
-
                     <h1 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter text-white text-center leading-none">
                         Torneos <span className="text-emerald-500">Activos</span>
                     </h1>
-
                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mt-3">
-                        Ligas Jujeñas • Temporada 2025
+                        Ligas Jujeñas • Temporada 2026
                     </p>
                 </div>
 
-                {/* BUSCADOR */}
                 <div className="mb-10">
                     <SearchBar
                         value={search}
@@ -59,30 +64,32 @@ export default function Home() {
                     />
                 </div>
 
-                {/* CONTENIDO PRINCIPAL */}
-                {loading ? (
-                    <div className="flex flex-col items-center py-20 gap-3">
-                        <FaFutbol className="text-3xl text-emerald-600 animate-spin" />
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Sincronizando...</span>
-                    </div>
-                ) : (
-                    /* ELIMINAMOS fondos y bordes de aquí para que TorneoCard luzca solo */
-                    <div className="grid gap-5">
-                        {filtrados.length > 0 ? (
-                            filtrados.map(t => (
-                                <div key={t.id} className="transition-transform hover:scale-[1.01] active:scale-100">
-                                    <TorneoCard torneo={t} />
+                <div className="grid gap-5">
+                    {loading ? (
+                        // Mostramos 3 Skeletons mientras carga
+                        <>
+                            <TorneoSkeleton />
+                            <TorneoSkeleton />
+                            <TorneoSkeleton />
+                        </>
+                    ) : (
+                        <>
+                            {filtrados.length > 0 ? (
+                                filtrados.map(t => (
+                                    <div key={t.id} className="transition-transform hover:scale-[1.01] active:scale-100">
+                                        <TorneoCard torneo={t} />
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="py-16 text-center bg-[#1e293b]/50 rounded-2xl border border-dashed border-slate-700/50">
+                                    <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">
+                                        Sin resultados para "{search}"
+                                    </p>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="py-16 text-center bg-[#1e293b]/50 rounded-2xl border border-dashed border-slate-700/50">
-                                <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">
-                                    Sin resultados para "{search}"
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                )}
+                            )}
+                        </>
+                    )}
+                </div>
 
                 <footer className="mt-20 mb-10 text-center border-t border-slate-700/30 pt-6">
                     <p className="text-[9px] font-bold text-slate-600 uppercase tracking-[0.2em] italic">

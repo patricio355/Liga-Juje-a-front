@@ -11,7 +11,7 @@ export default function TorneoCard({ torneo }) {
         >
             <div className="flex justify-between items-center relative z-10">
                 <div className="flex-1">
-                    {/* Badge superior estilo "hueco" */}
+                    {/* Badge superior */}
                     <div className="inline-flex items-center gap-1.5 mb-3 px-2 py-1 rounded-md bg-[#0f172a] border border-slate-700/50">
                         <FaTrophy className="text-emerald-500 text-[10px]" />
                         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
@@ -27,20 +27,10 @@ export default function TorneoCard({ torneo }) {
                         División {torneo.division || "A"}
                     </p>
 
-                    {/* Zonas con fondo oscuro para resaltar */}
-                    <div className="mt-6 flex items-center gap-3">
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">Zonas:</span>
-                        <div className="flex gap-2 flex-wrap">
-                            {torneo.zonas?.map((z, idx) => (
-                                <span key={idx} className="text-[9px] px-3 py-1 rounded-lg bg-[#0f172a] border border-slate-700/50 text-slate-300 font-bold">
-                                    {z.nombre}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
+                    {/* Quitamos el bloque de Zonas para aligerar la carga y el diseño */}
                 </div>
 
-                {/* Botón lateral estilizado */}
+                {/* Botón lateral */}
                 <div className="ml-4 bg-[#0f172a] p-4 rounded-xl border border-slate-700/50 group-hover:bg-emerald-600 group-hover:border-emerald-500 transition-all duration-300 shadow-inner">
                     <FaChevronRight className="text-emerald-500 group-hover:text-white transition-colors size-5" />
                 </div>
