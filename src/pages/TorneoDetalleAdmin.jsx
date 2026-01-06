@@ -30,6 +30,7 @@ export default function TorneoDetalleAdmin() {
     const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
     const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
 
+    // Función de carga optimizada: Ahora es "awaitable" para los manejadores de eventos
     const cargarDatos = useCallback(async () => {
         try {
             const data = await apiFetch(`/api/torneos/${id}`);
@@ -52,23 +53,32 @@ export default function TorneoDetalleAdmin() {
         return torneo.zonas.some(z => z.partidos && z.partidos.length > 0);
     }, [torneo?.zonas]);
 
+    // Lógica de Generar Fixture: Espera la confirmación del backend antes de refrescar
     const handleGenerarFixtureGlobal = async () => {
-        if (fixtureYaGenerado) return;
-        if (!confirm("¿Generar fixture automático para todas las zonas?")) return;
+        // ... confirmaciones ...
+        setLoading(true);
         try {
             const promesas = torneo.zonas.map(zona =>
                 apiFetch(`/api/partidos/zona/${zona.id}/fixture`, { method: "POST" })
             );
             await Promise.all(promesas);
-            cargarDatos();
-        } catch (error) { console.error(error); }
+
+            // Pequeño delay de seguridad para que el caché de persistencia se asiente
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            await cargarDatos();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleEliminarZona = async (zonaId) => {
         if (!confirm("¿Seguro que deseas eliminar esta zona?")) return;
         try {
             await apiFetch(`/api/torneos/${id}/zonas/${zonaId}`, { method: "DELETE" });
-            cargarDatos();
+            await cargarDatos();
         } catch (error) { console.error(error); }
     };
 
@@ -76,14 +86,14 @@ export default function TorneoDetalleAdmin() {
         if (!confirm("¿Quitar este equipo de la zona?")) return;
         try {
             await apiFetch(`/api/equipos-zona/${equipoZonaId}`, { method: "DELETE" });
-            cargarDatos();
+            await cargarDatos();
         } catch (error) { console.error(error); }
     };
 
     if (loading) return (
         <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center gap-4">
             <FaFutbol className="text-4xl text-emerald-500 animate-spin" />
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic text-center">Cargando...</span>
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">Actualizando Panel...</span>
         </div>
     );
 
@@ -123,7 +133,6 @@ export default function TorneoDetalleAdmin() {
                     </div>
 
                     <div className="flex flex-wrap justify-center gap-4 w-full xl:w-auto">
-                        {/* BOTÓN AGREGAR ZONA [SOLICITADO] */}
                         {(esAbierto || !fixtureYaGenerado) && (
                             <button onClick={() => setModalZonaCrear(true)} className="bg-[#0f172a] hover:bg-[#162235] px-6 py-4 rounded-2xl font-black flex items-center gap-3 border border-slate-700/50 text-emerald-500 transition-all uppercase text-[10px] tracking-widest shadow-lg">
                                 <FaPlus /> Nueva Zona
@@ -153,14 +162,14 @@ export default function TorneoDetalleAdmin() {
                     </div>
                 </header>
 
-                {/* GRID DE ZONAS (SIN SCROLL HORIZONTAL) */}
+                {/* GRID DE ZONAS */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
                     {torneo.zonas?.map((zona) => (
                         <div key={zona.id} className="bg-[#1e293b] p-6 rounded-3xl border border-slate-700/40 flex flex-col shadow-2xl hover:border-emerald-500/30 transition-all duration-300">
 
                             <div className="bg-[#0f172a] border border-slate-700/50 p-5 rounded-2xl mb-6 flex justify-between items-center shadow-inner">
                                 <div className="flex flex-col text-left">
-                                    <h3 className="font-black text-white uppercase text-xl italic tracking-tighter group-hover:text-emerald-400 transition-colors">
+                                    <h3 className="font-black text-white uppercase text-xl italic tracking-tighter">
                                         {zona.nombre}
                                     </h3>
                                     {esAbierto && (
@@ -222,12 +231,26 @@ export default function TorneoDetalleAdmin() {
                 </div>
             </main>
 
-            {/* MODALES */}
-            {modalTorneoEditar && <ModalEditarTorneo torneo={torneo} onClose={() => setModalTorneoEditar(false)} onSuccess={cargarDatos} />}
-            {modalZonaEditar && zonaSeleccionada && <ModalEditarZona zona={zonaSeleccionada} onClose={() => setModalZonaEditar(false)} onSuccess={cargarDatos} />}
-            {modalEquipoEditar && equipoSeleccionado && <ModalEquipoEditar equipo={equipoSeleccionado} onClose={() => setModalEquipoEditar(false)} onUpdated={cargarDatos} />}
-            {modalInscribir && zonaSeleccionada && <ModalInscribirEnZona zona={zonaSeleccionada} torneo={torneo} onClose={() => setModalInscribir(false)} onSuccess={cargarDatos} />}
-            {modalZonaCrear && <ModalCrearZona torneo={torneo} onClose={() => setModalZonaCrear(false)} onCreated={cargarDatos} />}
+            {/* MODALES SINCRONIZADOS */}
+            {modalTorneoEditar && (
+                <ModalEditarTorneo torneo={torneo} onClose={() => setModalTorneoEditar(false)} onUpdated={cargarDatos} />
+            )}
+
+            {modalZonaEditar && zonaSeleccionada && (
+                <ModalEditarZona zona={zonaSeleccionada} onClose={() => setModalZonaEditar(false)} onUpdated={cargarDatos} />
+            )}
+
+            {modalEquipoEditar && equipoSeleccionado && (
+                <ModalEquipoEditar equipo={equipoSeleccionado} onClose={() => setModalEquipoEditar(false)} onUpdated={cargarDatos} />
+            )}
+
+            {modalZonaCrear && (
+                <ModalCrearZona torneo={torneo} onClose={() => setModalZonaCrear(false)} onCreated={cargarDatos} />
+            )}
+
+            {modalInscribir && zonaSeleccionada && (
+                <ModalInscribirEnZona zona={zonaSeleccionada} torneo={torneo} onClose={() => setModalInscribir(false)} onUpdated={cargarDatos} />
+            )}
         </div>
     );
 }

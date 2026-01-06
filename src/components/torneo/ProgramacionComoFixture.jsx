@@ -128,7 +128,7 @@ export default function ProgramacionComoFixture({ zonaId }) {
             {/* PIE DE SECCIÓN */}
             <div className="bg-[#0b1023] py-2 px-4 border-t border-gray-800">
                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-600 text-center">
-                    Programación sujeta a cambios
+                    Programación sujeta a cambios A
                 </p>
             </div>
         </div>

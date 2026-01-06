@@ -3,10 +3,10 @@ import { apiFetch } from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
 import { FaTrophy, FaUserAlt, FaCheckCircle, FaTimes, FaLock } from "react-icons/fa";
 
-export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
+export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
     const { user } = useContext(AuthContext);
 
-    // Normalizamos el rol usando 'role' para que el ADMIN sea reconocido correctamente
+    // Normalizamos el rol para asegurar compatibilidad con el Backend
     const userRole = user?.role?.toUpperCase().trim();
     const esAdmin = userRole === "ADMIN" || userRole === "ROLE_ADMIN";
 
@@ -14,11 +14,12 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
     const [division, setDivision] = useState("A");
     const [encargadoEmail, setEncargadoEmail] = useState("");
     const [estado, setEstado] = useState("activo");
-    const [tipo, setTipo] = useState("ABIERTO"); // Mantenemos el tipo para evitar el NULL en BD
+    const [tipo, setTipo] = useState("ABIERTO");
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // Cargamos los datos del torneo al abrir el modal
     useEffect(() => {
         if (torneo) {
             setNombre(torneo.nombre || "");
@@ -42,10 +43,11 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
             const payload = {
                 nombre,
                 division,
-                estado, // Se envía el estado actual (activo por defecto para encargados)
-                tipo,   // Se envía el tipo original para no romper la BD
+                estado,
+                tipo, // Se envía el tipo original para mantener consistencia en BD
             };
 
+            // Solo el ADMIN puede cambiar al encargado del torneo
             if (esAdmin) payload.encargadoEmail = encargadoEmail;
 
             await apiFetch(`/api/torneos/${torneo.id}`, {
@@ -53,7 +55,11 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
                 body: JSON.stringify(payload),
             });
 
-            if (onSuccess) onSuccess();
+            // EJECUCIÓN CLAVE: Llama a recargar() en el componente padre
+            if (onUpdated) {
+                await onUpdated();
+            }
+
             onClose();
 
         } catch (e) {
@@ -90,13 +96,11 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
                     )}
 
                     <div className="space-y-5">
-                        {/* Modalidad Bloqueada (Informativo) */}
+                        {/* Modalidad (Informativa y Bloqueada) */}
                         <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-700/30 flex items-center justify-between">
                             <div>
                                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">Modalidad Actual</p>
-                                <p className="text-xs font-bold text-emerald-400 uppercase italic tracking-widest">
-                                    {tipo}
-                                </p>
+                                <p className="text-xs font-bold text-emerald-400 uppercase italic tracking-widest">{tipo}</p>
                             </div>
                             <div className="flex items-center gap-2 text-slate-600 bg-slate-800/50 px-3 py-1 rounded-full">
                                 <FaLock size={10} />
@@ -104,7 +108,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
                             </div>
                         </div>
 
-                        {/* Nombre */}
+                        {/* Campo Nombre */}
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 text-emerald-500/80">Nombre del Torneo</label>
                             <input
@@ -114,9 +118,8 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
                             />
                         </div>
 
-                        {/* Fila Dual o Single según Rol */}
+                        {/* División y Estado */}
                         <div className={`grid gap-5 ${esAdmin ? "grid-cols-2" : "grid-cols-1"}`}>
-                            {/* División */}
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">División</label>
                                 <select
@@ -128,7 +131,6 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
                                 </select>
                             </div>
 
-                            {/* Estado: Solo visible para ADMIN */}
                             {esAdmin && (
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estado</label>
@@ -144,7 +146,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
                             )}
                         </div>
 
-                        {/* Responsable (Solo Admin) */}
+                        {/* Email del Responsable (Solo Admin) */}
                         {esAdmin && (
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
@@ -153,13 +155,13 @@ export default function ModalEditarTorneo({ torneo, onClose, onSuccess }) {
                                 <input
                                     value={encargadoEmail}
                                     onChange={(e) => setEncargadoEmail(e.target.value)}
-                                    placeholder="admin@torneo.com"
                                     className="w-full h-12 bg-[#0f172a] border border-slate-700/50 px-4 rounded-xl text-sm text-slate-200 outline-none focus:border-emerald-500 transition-all"
                                 />
                             </div>
                         )}
                     </div>
 
+                    {/* Botones de Acción */}
                     <div className="flex gap-4 pt-4">
                         <button
                             className="flex-1 h-12 bg-[#0f172a] text-slate-500 rounded-2xl text-[11px] font-black uppercase hover:text-white transition-all border border-slate-700/50 shadow-lg"

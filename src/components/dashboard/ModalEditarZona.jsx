@@ -1,27 +1,34 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { apiFetch } from "../../api/api";
+import { FaLayerGroup, FaCheckCircle, FaTimes } from "react-icons/fa";
 
-export default function ModalEditarZona({ zona, onClose, onSuccess }) {
-    // Usamos || "" para evitar el error de "value should not be null"
+export default function ModalEditarZona({ zona, onClose, onUpdated }) {
+    // Usamos onUpdated para ser consistentes con el nombre de la prop del padre
     const [nombre, setNombre] = useState(zona?.nombre || "");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
     const handleGuardar = async (e) => {
         e.preventDefault();
+        if (!nombre.trim()) return setError("El nombre es obligatorio");
+
         setLoading(true);
         setError("");
 
         try {
-            // Enviamos solo el nombre, sin descripción
             await apiFetch(`/api/zonas/${zona.id}`, {
                 method: "PUT",
                 body: JSON.stringify({ nombre }),
             });
-            onSuccess(); // Recarga los datos en el padre
-            onClose();   // Cierra el modal
+
+            // CLAVE: Esperamos a que la lista del padre se recargue antes de cerrar
+            if (onUpdated) {
+                await onUpdated();
+            }
+
+            onClose();
         } catch (err) {
-            // Aquí capturamos el 403 que ves en consola
+            // Captura errores de permisos (403) o de red
             setError(err.message || "Error al actualizar la zona");
         } finally {
             setLoading(false);
@@ -29,45 +36,67 @@ export default function ModalEditarZona({ zona, onClose, onSuccess }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-[#1e243a] border border-gray-700 p-8 rounded-2xl shadow-2xl w-full max-w-md">
-                <h2 className="text-2xl font-bold text-white mb-6 uppercase tracking-tight">Editar Zona</h2>
-
-                {error && (
-                    <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-xl mb-4 text-sm font-medium">
-                        {error}
+        <div className="fixed inset-0 bg-[#0f172a]/90 backdrop-blur-sm flex items-center justify-center z-[200] p-4" onClick={onClose}>
+            <div
+                className="bg-[#1e293b] w-full max-w-md rounded-[2.5rem] border border-slate-700/50 shadow-2xl overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Header Estilo Pro */}
+                <div className="bg-[#111827]/50 px-8 py-6 border-b border-slate-700/50 flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-emerald-500/10 rounded-lg">
+                            <FaLayerGroup className="text-emerald-500" />
+                        </div>
+                        <h2 className="text-xs font-black uppercase italic tracking-widest text-white leading-none">Editar Zona</h2>
                     </div>
-                )}
+                    <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
+                        <FaTimes size={18} />
+                    </button>
+                </div>
 
-                <form onSubmit={handleGuardar} className="space-y-6">
-                    <div>
-                        <label className="block text-xs font-bold text-gray-400 uppercase mb-2 tracking-widest">Nombre de la Zona</label>
-                        <input
-                            type="text"
-                            value={nombre}
-                            onChange={(e) => setNombre(e.target.value)}
-                            className="w-full bg-[#12172d] border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition"
-                            required
-                        />
-                    </div>
+                <div className="p-8 space-y-6">
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-xl text-[10px] font-bold uppercase text-center">
+                            {error}
+                        </div>
+                    )}
 
-                    <div className="flex gap-3 pt-2">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition uppercase text-xs tracking-widest"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition uppercase text-xs tracking-widest disabled:opacity-50"
-                        >
-                            {loading ? "Guardando..." : "Guardar"}
-                        </button>
-                    </div>
-                </form>
+                    <form onSubmit={handleGuardar} className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 text-emerald-500/80">
+                                Nombre de la Zona
+                            </label>
+                            <input
+                                type="text"
+                                value={nombre}
+                                onChange={(e) => setNombre(e.target.value)}
+                                className="w-full h-12 bg-[#0f172a] border border-slate-700/50 px-4 rounded-xl focus:border-emerald-500 text-sm text-slate-200 outline-none transition-all shadow-inner"
+                                required
+                            />
+                        </div>
+
+                        <div className="flex gap-4 pt-2">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="flex-1 h-12 bg-[#0f172a] text-slate-500 rounded-2xl text-[11px] font-black uppercase hover:text-white transition-all border border-slate-700/50"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="flex-[1.5] h-12 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-xl shadow-emerald-900/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {loading ? (
+                                    <span className="animate-pulse">Guardando...</span>
+                                ) : (
+                                    <><FaCheckCircle size={14} /> Guardar Cambios</>
+                                )}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );

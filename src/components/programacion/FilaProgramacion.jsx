@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
+import { FaChevronDown, FaExclamationCircle } from "react-icons/fa";
 
 export default function FilaProgramacion({
                                              tarjeta,
                                              opciones,
-                                             equipoYaProgramado, // Nueva prop restaurada
+                                             equipoYaProgramado,
                                              open,
                                              onOpen,
                                              onClose,
@@ -29,39 +30,58 @@ export default function FilaProgramacion({
     return (
         <div
             ref={ref}
-            className="flex items-center gap-4 bg-[#ECECFF] border border-gray-300 rounded-xl px-5 py-3 hover:shadow-md transition-all duration-200"
+            className={`
+                flex flex-col sm:flex-row items-center gap-5 sm:gap-8 
+                bg-[#1e293b] border border-slate-700/50 rounded-[2rem] 
+                p-6 sm:px-8 sm:py-5 transition-all duration-300 
+                w-full sm:w-fit mb-4 shadow-2xl
+            `}
         >
-            <div className="flex flex-col min-w-[140px]">
-                {/* Color rojo y cartel informativo */}
-                <span className={`font-bold text-base transition-colors ${equipoYaProgramado ? "text-red-500" : "text-black"}`}>
+            {/* EQUIPO BASE - Letras más grandes */}
+            <div className="flex flex-col w-full sm:w-[240px] text-center sm:text-left">
+                <span className="font-black text-xl md:text-2xl uppercase tracking-tighter text-slate-100 leading-none">
                     {tarjeta.equipoNombre}
                 </span>
+
+                {/* Cartel informativo - Letra aumentada */}
                 {equipoYaProgramado && (
-                    <span className="text-[9px] uppercase font-black text-red-400 leading-tight">
-                        Ya juega en esta fecha
-                    </span>
+                    <div className="flex items-center justify-center sm:justify-start gap-2 mt-2 text-red-500 bg-red-500/10 py-1.5 px-3 rounded-xl sm:bg-transparent sm:p-0">
+                        <FaExclamationCircle size={12} />
+                        <span className="text-[11px] md:text-xs uppercase font-black leading-tight tracking-widest">
+                            Ya juega en esta fecha
+                        </span>
+                    </div>
                 )}
             </div>
 
-            <span className="text-gray-400 font-bold italic text-sm">VS</span>
+            {/* DIVISOR VS - Más grande e intenso */}
+            <span className="text-slate-700 font-black italic text-lg hidden sm:block">VS</span>
 
-            <div className="relative flex-1 max-w-xs">
+            {/* SELECTOR DE RIVAL - Más robusto */}
+            <div className="relative w-full sm:w-64">
                 <button
                     type="button"
                     onClick={(e) => {
                         e.stopPropagation();
                         onOpen();
                     }}
-                    className="w-full flex justify-between items-center bg-white text-black px-4 py-2.5 rounded-lg border border-gray-300 shadow-sm hover:border-gray-400 transition-all font-medium"
+                    className={`
+                        w-full h-14 flex justify-between items-center px-6 rounded-2xl border transition-all font-black text-base
+                        ${open
+                        ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/40"
+                        : "bg-[#0f172a] border-slate-700 text-slate-300 hover:border-slate-500 hover:text-white"}
+                    `}
                 >
-                    <span className="truncate text-sm">Seleccionar equipo</span>
-                    <span className={`text-[10px] transition-transform ${open ? "rotate-180" : ""}`}>▼</span>
+                    <span className="truncate">{open ? "Elegir..." : "Seleccionar"}</span>
+                    <FaChevronDown className={`text-xs transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
                 </button>
 
                 {open && (
-                    <div className="absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-2xl max-h-60 overflow-y-auto">
+                    <div className="absolute z-[100] mt-3 w-full sm:w-80 bg-[#1e293b] border border-slate-700 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-h-72 overflow-y-auto left-0 sm:left-auto">
                         {opciones.length === 0 ? (
-                            <div className="px-4 py-3 text-sm text-gray-500 italic text-center">Sin rivales disponibles</div>
+                            <div className="px-6 py-8 text-xs text-slate-500 italic text-center uppercase font-black tracking-[0.2em]">
+                                Sin rivales libres
+                            </div>
                         ) : (
                             opciones.map((op) => (
                                 <button
@@ -71,16 +91,16 @@ export default function FilaProgramacion({
                                         e.preventDefault();
                                         seleccionar(op);
                                     }}
-                                    className="w-full text-left px-4 py-3 text-sm text-gray-700 font-bold hover:bg-blue-50 hover:text-blue-700 border-b border-gray-50 last:border-0 transition-colors"
+                                    className="w-full text-left px-6 py-5 text-sm text-slate-100 font-black uppercase hover:bg-blue-600 hover:text-white border-b border-slate-700/50 last:border-0 transition-all flex items-center gap-4"
                                 >
-                                    <span className="text-gray-400 mr-2">VS</span> {op.vs}
+                                    <span className="text-slate-500 font-black italic text-xs">VS</span>
+                                    <span className="truncate tracking-tight">{op.vs}</span>
                                 </button>
                             ))
                         )}
                     </div>
                 )}
             </div>
-            <div className="w-4"></div>
         </div>
     );
 }

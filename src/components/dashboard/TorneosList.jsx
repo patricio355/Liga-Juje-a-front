@@ -31,9 +31,15 @@ export default function TorneosList() {
 
     const recargar = async () => {
         try {
+            // Opcional: podrías poner un pequeño estado de 'refreshing' aquí
             const data = await apiFetch("/api/torneos/dashboard");
-            setTorneos(data);
-        } catch (err) { console.error(err); }
+
+            // Al setear los datos nuevos, React comparará el ID y actualizará
+            // el nombre en la tarjeta correspondiente automáticamente.
+            setTorneos([...data]);
+        } catch (err) {
+            console.error("Error al refrescar el dashboard:", err);
+        }
     };
 
     useEffect(() => {
@@ -180,7 +186,17 @@ export default function TorneosList() {
                 <ConfirmModal
                     mensaje={mensajeConfirm}
                     onCancel={() => setModalConfirm(false)}
-                    onConfirm={() => { accionEliminar(); setModalConfirm(false); }}
+                    onConfirm={async () => {
+                        // 1. Esperamos a que la API elimine el torneo
+                        await accionEliminar();
+
+                        // 2. Esperamos a que la lista se recargue con los datos nuevos
+                        // IMPORTANTE: 'recargar' ahora debe ser 'awaitable'
+                        await recargar();
+
+                        // 3. RECIÉN ACÁ cerramos el modal, cuando el estado ya cambió
+                        setModalConfirm(false);
+                    }}
                 />
             )}
         </div>
