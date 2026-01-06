@@ -153,12 +153,15 @@ export default function TorneoDetalleAdmin() {
                             </button>
                         )}
 
-                        <button
-                            onClick={() => navigate(`/dashboard/gestion-partidos/${torneo.id}`)}
-                            className="bg-[#0f172a] hover:bg-slate-800 px-6 py-4 rounded-2xl font-black flex items-center gap-3 border border-slate-700/50 text-white transition-all uppercase text-[10px] tracking-widest shadow-lg"
-                        >
-                            <FaCogs /> Gestión de Partidos
-                        </button>
+                        {/* Solo aparece si el fixture ya existe y el torneo NO es abierto (es cerrado) */}
+                        {fixtureYaGenerado && !esAbierto && (
+                            <button
+                                onClick={() => navigate(`/dashboard/gestion-partidos/${torneo.id}`)}
+                                className="bg-indigo-600 hover:bg-indigo-500 px-6 py-4 rounded-2xl font-black flex items-center gap-3 border border-indigo-400/50 text-white transition-all uppercase text-[10px] tracking-widest shadow-xl shadow-indigo-900/40"
+                            >
+                                <FaCogs className="text-lg" /> Gestión de Partidos
+                            </button>
+                        )}
                     </div>
                 </header>
 

@@ -10,6 +10,24 @@ export default function ProgramacionComoFixture({ zonaId }) {
 
     const API_URL = import.meta.env.VITE_API_URL;
 
+    // --- FUNCIÓN DE ORDENAMIENTO ---
+    const ordenarPartidos = (lista) => {
+        return [...lista].sort((a, b) => {
+            // 1. Prioridad: Cancha (Normalizada)
+            const canchaA = (a.cancha || a.canchaNombre || "ZZZ").toLowerCase();
+            const canchaB = (b.cancha || b.canchaNombre || "ZZZ").toLowerCase();
+
+            if (canchaA < canchaB) return -1;
+            if (canchaA > canchaB) return 1;
+
+            // 2. Misma cancha, ordenar por Hora
+            const horaA = a.hora || a.Hora || "99:99";
+            const horaB = b.hora || b.Hora || "99:99";
+
+            return horaA.localeCompare(horaB);
+        });
+    };
+
     useEffect(() => {
         const cargarFechasReales = async () => {
             setLoading(true);
@@ -63,18 +81,24 @@ export default function ProgramacionComoFixture({ zonaId }) {
                 </div>
             </div>
 
-            {/* AQUÍ ESTÁ EL CAMBIO: p-2 en móvil (antes p-4) para ganar espacio lateral */}
             <div className="p-2 md:p-10 space-y-4 md:space-y-8 bg-transparent">
-                {partidos.map((p, index) => (
+                {/* APLICAMOS ORDENAMIENTO ANTES DEL MAP */}
+                {ordenarPartidos(partidos).map((p, index) => (
                     <PartidoCard
-                        key={p.partidId || p.id || `partido-${index}`}
+                        key={p.partidoId || p.id || `partido-${index}`}
                         partido={{
                             ...p,
+                            // Mapeo exhaustivo para que coincida con PartidoCard
                             equipoLocalNombre: p.local || p.equipoLocalNombre,
                             equipoVisitanteNombre: p.visitante || p.equipoVisitanteNombre,
                             equipoLocalEscudo: p.localEscudo || p.equipoLocalEscudo,
                             equipoVisitanteEscudo: p.visitanteEscudo || p.equipoVisitanteEscudo,
-                            canchaNombre: p.cancha || p.canchaNombre
+                            canchaNombre: p.cancha || p.canchaNombre,
+                            hora: p.hora || p.Hora,
+                            arbitro: p.arbitro || p.arbitroNombre,
+                            golesLocal: p.golesLocal ?? p.golesL,
+                            golesVisitante: p.golesVisitante ?? p.golesV,
+                            partidoId: p.partidoId || p.id
                         }}
                     />
                 ))}

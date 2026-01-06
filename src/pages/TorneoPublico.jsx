@@ -24,9 +24,15 @@ export default function TorneoPublico() {
                 const data = await apiFetch("/api/torneos/activos");
                 const t = data.find(item => item.id === Number(id));
                 if (t) {
+                    // --- CORRECCIÓN AQUÍ: Ordenamos las zonas por nombre ---
+                    const zonasOrdenadas = (t.zonas || []).sort((a, b) =>
+                        a.nombre.localeCompare(b.nombre, undefined, { numeric: true, sensitivity: 'base' })
+                    );
+
                     setTorneo(t);
-                    setZonas(t.zonas || []);
-                    setZonaActiva(t.zonas?.[0] ?? null);
+                    setZonas(zonasOrdenadas);
+                    // Ahora el primer elemento [0] será siempre la Zona A (o la de menor nombre)
+                    setZonaActiva(zonasOrdenadas[0] ?? null);
                 }
             } catch (e) { console.error(e); }
         };
@@ -49,7 +55,7 @@ export default function TorneoPublico() {
     if (!torneo) return (
         <div className="min-h-screen bg-[#02040a] flex flex-col items-center justify-center gap-4">
             <FaFutbol className="text-4xl text-blue-500 animate-spin" />
-            <span className="text-[10px] font-black text-blue-900 uppercase tracking-widest text-center italic">Sincronizando...</span>
+            <span className="text-[10px] font-black text-blue-900 uppercase tracking-widest text-center italic">Cargando equipos...</span>
         </div>
     );
 

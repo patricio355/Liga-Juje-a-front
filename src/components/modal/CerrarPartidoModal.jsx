@@ -22,12 +22,12 @@ export default function CerrarPartidoModal({
     }, [partido]);
 
     if (!open || !partido) return null;
-
+    const idFinal = partido.partidoId || partido.id;
     const cerrar = async () => {
         try {
             setLoading(true);
             const res = await fetch(
-                `${API_URL}/api/partidos/${partido.partidoId}/cerrar`,
+                `${API_URL}/api/partidos/${idFinal}/cerrar`,
                 {
                     method: "POST",
                     headers: {

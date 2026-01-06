@@ -9,6 +9,24 @@ export default function FixtureTorneo({ zonaId }) {
 
     const API_URL = import.meta.env.VITE_API_URL;
 
+    // --- FUNCIÓN DE ORDENAMIENTO (Mismo criterio que en gestión) ---
+    const ordenarPartidos = (partidos) => {
+        return [...partidos].sort((a, b) => {
+            // 1. Prioridad: Cancha (Normalizada)
+            const canchaA = (a.canchaNombre || a.cancha || "ZZZ").toLowerCase();
+            const canchaB = (b.canchaNombre || b.cancha || "ZZZ").toLowerCase();
+
+            if (canchaA < canchaB) return -1;
+            if (canchaA > canchaB) return 1;
+
+            // 2. Si es la misma cancha, ordenar por Hora
+            const horaA = a.hora || a.Hora || "99:99";
+            const horaB = b.hora || b.Hora || "99:99";
+
+            return horaA.localeCompare(horaB);
+        });
+    };
+
     useEffect(() => {
         const cargarFixture = async () => {
             try {
@@ -29,16 +47,10 @@ export default function FixtureTorneo({ zonaId }) {
     if (fixture.length === 0) return <p className="text-center py-10 text-slate-500 italic text-sm">No hay partidos programados</p>;
 
     return (
-        /* W-FULL para igualar el ancho de la tabla de posiciones */
         <div className="w-full bg-[#0e1630]/60 backdrop-blur-md rounded-3xl border border-blue-900/40 shadow-2xl overflow-hidden">
 
-            {/* SELECTOR DE FECHAS */}
             <div className="bg-[#050814]/90 border-b border-blue-900/40 p-4 md:p-6 flex flex-col items-center gap-4">
-
-                <span className="text-[10px] md:text-xs font-black text-blue-500 uppercase tracking-[0.4em] italic">
-                    FECHA
-                </span>
-
+                <span className="text-[10px] md:text-xs font-black text-blue-500 uppercase tracking-[0.4em] italic">FECHA</span>
                 <div className="flex items-center justify-center gap-4 w-full">
                     <button
                         onClick={() => setFechaSeleccionada(f => Math.max(fixture[0].numeroFecha, f - 1))}
@@ -73,22 +85,32 @@ export default function FixtureTorneo({ zonaId }) {
                 </div>
             </div>
 
-            {/* LISTADO DE PARTIDOS: p-2 en móvil para ganar espacio lateral */}
             <div className="p-2 md:p-10 space-y-4 md:space-y-8 bg-transparent">
                 {fixture.filter(f => f.numeroFecha === fechaSeleccionada).map(fecha => (
-                    fecha.partidos.map(partido => (
+                    // LLAMAMOS A LA FUNCIÓN DE ORDENAR ANTES DEL MAP
+                    ordenarPartidos(fecha.partidos).map(partido => (
                         <PartidoCard
-                            key={`partido-${partido.id || partido.partidId}`}
-                            partido={partido}
+                            key={`partido-${partido.partidoId || partido.id}`}
+                            partido={{
+                                ...partido,
+                                equipoLocalNombre: partido.equipoLocalNombre || partido.local,
+                                equipoVisitanteNombre: partido.equipoVisitanteNombre || partido.visitante,
+                                equipoLocalEscudo: partido.equipoLocalEscudo || partido.localEscudo,
+                                equipoVisitanteEscudo: partido.equipoVisitanteEscudo || partido.visitanteEscudo,
+                                canchaNombre: partido.canchaNombre || partido.cancha,
+                                hora: partido.hora || partido.Hora,
+                                arbitro: partido.arbitro || partido.arbitroNombre,
+                                golesLocal: partido.golesLocal ?? partido.golesL,
+                                golesVisitante: partido.golesVisitante ?? partido.golesV,
+                                partidoId: partido.partidoId || partido.id
+                            }}
                         />
                     ))
                 ))}
             </div>
 
             <div className="bg-[#050814] py-3 px-4 border-t border-blue-900/30">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-900/60 text-center">
-                    Programación Sujeta a Cambios
-                </p>
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-900/60 text-center">Programación Sujeta a Cambios</p>
             </div>
         </div>
     );
