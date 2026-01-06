@@ -2,65 +2,67 @@ import { FaShieldAlt } from "react-icons/fa";
 
 export default function TablaPosiciones({ posiciones }) {
     return (
-        <div className="w-full overflow-hidden rounded-xl border border-gray-800 bg-[#12172d] shadow-2xl">
+        /* Eliminamos márgenes internos del contenedor padre para aprovechar todo el cuadro */
+        <div className="w-full overflow-hidden rounded-2xl border border-blue-900/40 bg-[#0e1630]/50 backdrop-blur-md shadow-2xl">
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse table-auto">
                     <thead>
-                    <tr className="bg-[#1c213b] text-emerald-400 border-b border-gray-800">
-                        <th className="py-3 px-2 text-[10px] font-black text-center w-[30px] shrink-0">#</th>
-                        <th className="py-3 px-3 text-[10px] font-black text-left min-w-[140px]">EQUIPOS</th>
-                        <th className="py-3 px-2 text-[10px] font-black text-center w-[40px] bg-[#232a4d]/30 shrink-0">PTS</th>
-                        <th className="py-3 px-1 text-[10px] font-black text-center w-[30px] shrink-0">J</th>
-                        <th className="py-3 px-1 text-[10px] font-black text-center w-[30px] shrink-0">G</th>
-                        <th className="py-3 px-1 text-[10px] font-black text-center w-[30px] shrink-0">E</th>
-                        <th className="py-3 px-1 text-[10px] font-black text-center w-[30px] shrink-0">P</th>
-                        <th className="py-3 px-2 text-[10px] font-black text-center w-[45px] shrink-0">+/-</th>
+                    <tr className="bg-[#050814]/90 text-blue-400 border-b border-blue-900/50">
+                        {/* Letras crecen en md: (PC) */}
+                        <th className="py-4 px-2 text-[10px] md:text-sm font-black text-center w-[30px] md:w-[50px] shrink-0">#</th>
+                        <th className="py-4 px-3 text-[10px] md:text-sm font-black text-left min-w-[140px] md:min-w-[300px]">EQUIPOS</th>
+                        <th className="py-4 px-2 text-[10px] md:text-sm font-black text-center w-[40px] md:w-[80px] bg-blue-900/20 shrink-0">PTS</th>
+                        <th className="py-4 px-1 text-[10px] md:text-sm font-black text-center w-[30px] md:w-[60px] shrink-0">J</th>
+                        <th className="py-4 px-1 text-[10px] md:text-sm font-black text-center w-[30px] md:w-[60px] shrink-0">G</th>
+                        <th className="py-4 px-1 text-[10px] md:text-sm font-black text-center w-[30px] md:w-[60px] shrink-0">E</th>
+                        <th className="py-4 px-1 text-[10px] md:text-sm font-black text-center w-[30px] md:w-[60px] shrink-0">P</th>
+                        <th className="py-4 px-2 text-[10px] md:text-sm font-black text-center w-[45px] md:w-[80px] shrink-0">+/-</th>
                     </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-gray-800/50">
+                    <tbody className="divide-y divide-blue-900/30">
                     {posiciones.map((p, index) => {
                         const diferenciaGoles = (p.golesAFavor || 0) - (p.golesEnContra || 0);
 
                         return (
-                            <tr key={p.id || index} className="hover:bg-emerald-500/5 border-b border-gray-800/30">
-                                <td className="py-3 px-2 text-center font-black text-[10px] text-gray-500">
+                            <tr key={p.id || index} className="hover:bg-blue-500/5 transition-colors border-b border-blue-900/20">
+                                <td className="py-4 px-2 text-center font-black text-[10px] md:text-base text-slate-500">
                                     {index + 1}
                                 </td>
 
-                                <td className="py-3 px-3">
-                                    <div className="flex items-center gap-3">
-                                        {/* CONTENEDOR DE ESCUDO UNIFICADO */}
-                                        <div className="shrink-0 w-7 h-7 flex items-center justify-center">
+                                <td className="py-4 px-3">
+                                    <div className="flex items-center gap-3 md:gap-5">
+                                        <div className="shrink-0 w-7 h-7 md:w-10 md:h-10 flex items-center justify-center">
                                             {p.escudo || p.urlEscudo ? (
                                                 <img
                                                     src={p.escudo || p.urlEscudo}
                                                     alt={`Escudo de ${p.nombreEquipo}`}
-                                                    className="w-full h-full object-contain filter drop-shadow-md"
+                                                    className="w-full h-full object-contain filter drop-shadow-2xl"
                                                 />
                                             ) : (
-                                                /* ESCUDO GENÉRICO - Tamaño aumentado para igualar a las imágenes */
-                                                <FaShieldAlt className="text-gray-700 text-lg sm:text-xl opacity-40" />
+                                                <FaShieldAlt className="text-blue-900 text-lg md:text-3xl opacity-40" />
                                             )}
                                         </div>
 
-                                        <span className="text-[11px] font-bold text-gray-200 uppercase tracking-tighter italic whitespace-nowrap">
+                                        {/* AJUSTADO: Se quitó 'font-black' e 'italic' por 'font-bold' normal */}
+                                        <span className="text-[11px] md:text-lg font-bold text-slate-100 uppercase tracking-tighter whitespace-nowrap">
                                             {p.nombreEquipo}
                                         </span>
                                     </div>
                                 </td>
 
-                                <td className="py-3 px-2 text-center bg-[#1c213b]/40 font-black text-emerald-400 text-xs">
+                                {/* AJUSTADO: Puntos en blanco (text-white) */}
+                                <td className="py-4 px-2 text-center bg-blue-900/10 font-black text-white text-xs md:text-xl">
                                     {p.puntos}
                                 </td>
 
-                                <td className="py-3 px-1 text-center text-[10px] font-bold text-gray-400">{p.partidosJugados}</td>
-                                <td className="py-3 px-1 text-center text-[10px] font-bold text-gray-400">{p.ganados}</td>
-                                <td className="py-3 px-1 text-center text-[10px] font-bold text-gray-400">{p.empatados}</td>
-                                <td className="py-3 px-1 text-center text-[10px] font-bold text-gray-400">{p.perdidos}</td>
+                                <td className="py-4 px-1 text-center text-[10px] md:text-base font-bold text-slate-400">{p.partidosJugados}</td>
+                                <td className="py-4 px-1 text-center text-[10px] md:text-base font-bold text-slate-400">{p.ganados}</td>
+                                <td className="py-4 px-1 text-center text-[10px] md:text-base font-bold text-slate-400">{p.empatados}</td>
+                                <td className="py-4 px-1 text-center text-[10px] md:text-base font-bold text-slate-400">{p.perdidos}</td>
 
-                                <td className="py-3 px-2 text-center">
-                                    <span className={`text-[10px] font-black ${diferenciaGoles > 0 ? 'text-emerald-500' : diferenciaGoles < 0 ? 'text-red-500' : 'text-gray-600'}`}>
+                                <td className="py-4 px-2 text-center">
+                                    <span className={`text-[10px] md:text-base font-black ${diferenciaGoles > 0 ? 'text-blue-400' : diferenciaGoles < 0 ? 'text-red-500' : 'text-slate-600'}`}>
                                         {diferenciaGoles > 0 ? `+${diferenciaGoles}` : diferenciaGoles}
                                     </span>
                                 </td>
@@ -71,9 +73,9 @@ export default function TablaPosiciones({ posiciones }) {
                 </table>
             </div>
 
-            <div className="bg-[#0b1023] py-2 px-4 border-t border-gray-800 text-center">
-                <p className="text-[8px] font-black uppercase tracking-[0.2em] text-gray-600">
-                    POSICIONES OFICIALES • 2026
+            <div className="bg-[#050814] py-3 px-4 border-t border-blue-900/40 text-center">
+                <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] text-blue-900/60">
+                    POSICIONES OFICIALES • TEMPORADA 2026
                 </p>
             </div>
         </div>

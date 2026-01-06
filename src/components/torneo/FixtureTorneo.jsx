@@ -25,38 +25,38 @@ export default function FixtureTorneo({ zonaId }) {
         cargarFixture();
     }, [zonaId, API_URL]);
 
-    if (loading) return <p className="text-center py-10 text-emerald-500 font-black animate-pulse uppercase tracking-widest text-xs">Cargando Fixture...</p>;
-    if (fixture.length === 0) return <p className="text-center py-10 text-gray-500 italic text-sm">No hay partidos programados</p>;
+    if (loading) return <p className="text-center py-10 text-blue-500 font-black animate-pulse uppercase tracking-widest text-[10px]">Cargando Fixture...</p>;
+    if (fixture.length === 0) return <p className="text-center py-10 text-slate-500 italic text-sm">No hay partidos programados</p>;
 
     return (
-        <div className="bg-[#12172d] rounded-xl border border-gray-800 shadow-2xl overflow-hidden max-w-lg mx-auto">
-            {/* SELECTOR DE FECHAS ESTILO PROMIEDOS */}
-            <div className="bg-[#1c213b] border-b border-gray-800 p-4 flex flex-col items-center gap-3">
+        /* W-FULL para igualar el ancho de la tabla de posiciones */
+        <div className="w-full bg-[#0e1630]/60 backdrop-blur-md rounded-3xl border border-blue-900/40 shadow-2xl overflow-hidden">
 
-                {/* Texto arriba con acento esmeralda */}
-                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] italic">
+            {/* SELECTOR DE FECHAS */}
+            <div className="bg-[#050814]/90 border-b border-blue-900/40 p-4 md:p-6 flex flex-col items-center gap-4">
+
+                <span className="text-[10px] md:text-xs font-black text-blue-500 uppercase tracking-[0.4em] italic">
                     FECHA
                 </span>
 
-                <div className="flex items-center justify-center gap-3 w-full">
+                <div className="flex items-center justify-center gap-4 w-full">
                     <button
                         onClick={() => setFechaSeleccionada(f => Math.max(fixture[0].numeroFecha, f - 1))}
                         disabled={fechaSeleccionada === fixture[0].numeroFecha}
-                        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-700 text-gray-400 hover:border-emerald-500 hover:text-emerald-500 transition-all disabled:opacity-10 bg-[#0b1023]"
+                        className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full border border-blue-900/60 text-blue-400 hover:border-blue-400 hover:text-white transition-all disabled:opacity-5 bg-[#02040a]"
                     >
-                        <FaChevronLeft size={10} />
+                        <FaChevronLeft size={10} className="md:size-3" />
                     </button>
 
-                    {/* Selector numérico compacto */}
-                    <div className="flex flex-wrap gap-1 justify-center">
+                    <div className="flex flex-wrap gap-2 justify-center">
                         {fixture.map(f => (
                             <button
                                 key={`fixture-fecha-${f.numeroFecha}`}
                                 onClick={() => setFechaSeleccionada(f.numeroFecha)}
-                                className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all border
+                                className={`w-8 h-8 md:w-10 md:h-10 rounded-xl text-[10px] md:text-xs font-black transition-all border flex items-center justify-center
                                     ${fechaSeleccionada === f.numeroFecha
-                                    ? "bg-emerald-600 text-white border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)] scale-110"
-                                    : "bg-[#0b1023] text-gray-500 border-gray-800 hover:border-gray-600 hover:text-gray-300"}`}
+                                    ? "bg-blue-600 text-white border-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.4)] scale-105"
+                                    : "bg-[#02040a] text-blue-900 border-blue-900/40 hover:border-blue-700 hover:text-blue-300"}`}
                             >
                                 {f.numeroFecha}
                             </button>
@@ -66,15 +66,15 @@ export default function FixtureTorneo({ zonaId }) {
                     <button
                         onClick={() => setFechaSeleccionada(f => Math.min(fixture[fixture.length - 1].numeroFecha, f + 1))}
                         disabled={fechaSeleccionada === fixture[fixture.length - 1].numeroFecha}
-                        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-700 text-gray-400 hover:border-emerald-500 hover:text-emerald-500 transition-all disabled:opacity-10 bg-[#0b1023]"
+                        className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full border border-blue-900/60 text-blue-400 hover:border-blue-400 hover:text-white transition-all disabled:opacity-5 bg-[#02040a]"
                     >
-                        <FaChevronRight size={10} />
+                        <FaChevronRight size={10} className="md:size-3" />
                     </button>
                 </div>
             </div>
 
-            {/* LISTADO DE PARTIDOS CON FONDO OSCURO */}
-            <div className="p-4 space-y-3 bg-[#12172d]">
+            {/* LISTADO DE PARTIDOS: p-2 en móvil para ganar espacio lateral */}
+            <div className="p-2 md:p-10 space-y-4 md:space-y-8 bg-transparent">
                 {fixture.filter(f => f.numeroFecha === fechaSeleccionada).map(fecha => (
                     fecha.partidos.map(partido => (
                         <PartidoCard
@@ -85,9 +85,8 @@ export default function FixtureTorneo({ zonaId }) {
                 ))}
             </div>
 
-            {/* Pie del fixture */}
-            <div className="bg-[#0b1023] py-2 px-4 border-t border-gray-800">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-600 text-center">
+            <div className="bg-[#050814] py-3 px-4 border-t border-blue-900/30">
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-900/60 text-center">
                     Programación Sujeta a Cambios
                 </p>
             </div>
