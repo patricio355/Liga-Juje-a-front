@@ -40,7 +40,7 @@ export default function PartidoCardAdmin({
                         </span>
                     </div>
 
-                    {/* INFO CENTRAL (Marcador + Datos) */}
+                    {/* INFO CENTRAL (Marcador) */}
                     <div className="flex flex-col items-center justify-center">
                         <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] mb-4
                             ${finalizado ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
@@ -58,34 +58,6 @@ export default function PartidoCardAdmin({
                                 {finalizado ? (partido.golesVisitante ?? 0) : ""}
                             </span>
                         </div>
-
-                        {/* BLOQUE DE DATOS LOGÍSTICOS - MÁS GRANDES */}
-                        <div className="mt-5 flex flex-col items-center gap-2 w-full">
-                            <div className="flex items-center gap-2 text-blue-400 bg-blue-500/5 px-3 py-1 rounded-lg border border-blue-500/10">
-                                <FaMapMarkerAlt size={12} />
-                                <span className="text-[10px] md:text-xs font-black uppercase tracking-wider">
-                                    {partido.cancha || "A definir"}
-                                </span>
-                            </div>
-
-                            <div className="flex items-center gap-4 mt-1">
-                                <div className="flex items-center gap-2 text-slate-300">
-                                    <FaCalendarAlt size={10} className="text-slate-500" />
-                                    <span className="text-[10px] md:text-xs font-bold uppercase">{partido.fecha || "S/F"}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-slate-300">
-                                    <FaClock size={10} className="text-slate-500" />
-                                    <span className="text-[10px] md:text-xs font-bold uppercase">{partido.hora ? `${partido.hora} HS` : "S/H"}</span>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-2 text-emerald-400 mt-2 bg-emerald-500/5 px-4 py-1.5 rounded-full border border-emerald-500/10">
-                                <FaUserTie size={11} />
-                                <span className="text-[10px] md:text-xs font-black uppercase italic tracking-tight">
-                                    {partido.arbitro || "Sin Árbitro"}
-                                </span>
-                            </div>
-                        </div>
                     </div>
 
                     {/* VISITANTE */}
@@ -99,6 +71,33 @@ export default function PartidoCardAdmin({
                             ${esVisitaDuplicado ? "text-red-500" : "text-slate-100"}`}>
                             {visitante}
                         </span>
+                    </div>
+                </div>
+
+                {/* BLOQUE DE DATOS LOGÍSTICOS - 4 en línea en PC, 2x2 en Mobile */}
+                <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 border-t border-slate-700/30 pt-6">
+                    {/* CANCHA */}
+                    <div className="flex items-center justify-center gap-2 bg-blue-500/5 px-3 py-2 rounded-xl border border-blue-500/10 text-blue-400">
+                        <FaMapMarkerAlt size={12} />
+                        <span className="text-[10px] md:text-xs font-black uppercase truncate">{partido.cancha || "A definir"}</span>
+                    </div>
+
+                    {/* FECHA */}
+                    <div className="flex items-center justify-center gap-2 bg-slate-500/5 px-3 py-2 rounded-xl border border-slate-700/20 text-slate-300">
+                        <FaCalendarAlt size={11} />
+                        <span className="text-[10px] md:text-xs font-bold uppercase">{partido.fecha || "S/F"}</span>
+                    </div>
+
+                    {/* HORA */}
+                    <div className="flex items-center justify-center gap-2 bg-slate-500/5 px-3 py-2 rounded-xl border border-slate-700/20 text-slate-300">
+                        <FaClock size={11} />
+                        <span className="text-[10px] md:text-xs font-bold uppercase">{partido.hora ? `${partido.hora} HS` : "S/H"}</span>
+                    </div>
+
+                    {/* ARBITRO */}
+                    <div className="flex items-center justify-center gap-2 bg-emerald-500/5 px-3 py-2 rounded-xl border border-emerald-500/10 text-emerald-400">
+                        <FaUserTie size={12} />
+                        <span className="text-[10px] md:text-xs font-black uppercase italic truncate">{partido.arbitro || "Sin Árbitro"}</span>
                     </div>
                 </div>
             </div>

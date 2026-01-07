@@ -12,6 +12,7 @@ import ModalCrearZona from "../components/dashboard/ModalCrearZona";
 import ModalEditarZona from "../components/dashboard/ModalEditarZona";
 import ModalEditarTorneo from "../components/dashboard/ModalEditarTorneo";
 import ModalEquipoEditar from "../components/equipos/ModalEditarEquipo";
+import ModalCrearEquipo from "../components/equipos/ModalCrearEquipo"; // <--- Importamos el modal
 import Navbar from "../components/Navbar.jsx";
 
 export default function TorneoDetalleAdmin() {
@@ -26,6 +27,7 @@ export default function TorneoDetalleAdmin() {
     const [modalZonaEditar, setModalZonaEditar] = useState(false);
     const [modalTorneoEditar, setModalTorneoEditar] = useState(false);
     const [modalEquipoEditar, setModalEquipoEditar] = useState(false);
+    const [modalEquipoCrear, setModalEquipoCrear] = useState(false); // <--- Nuevo estado
 
     const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
     const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
@@ -188,12 +190,10 @@ export default function TorneoDetalleAdmin() {
                                 {zona.equipos?.length > 0 ? (
                                     zona.equipos.map((equipo) => (
                                         <div key={equipo.id} className="bg-[#0f172a] p-4 rounded-xl border border-slate-700/30 flex justify-between items-center transition-all hover:bg-slate-800">
-                                            {/* Nombre del equipo ocupa el espacio disponible */}
                                             <span className="flex-1 text-slate-300 font-black uppercase text-[10px] tracking-widest truncate mr-2">
                                                 {equipo.nombre}
                                             </span>
 
-                                            {/* Contenedor de botones agrupados a la derecha */}
                                             <div className="flex items-center gap-2">
                                                 <button
                                                     onClick={() => { setEquipoSeleccionado(equipo); setModalEquipoEditar(true); }}
@@ -223,8 +223,15 @@ export default function TorneoDetalleAdmin() {
                             <div className="flex gap-3 mt-auto border-t border-slate-700/30 pt-6">
                                 {(esAbierto || !fixtureYaGenerado) && (
                                     <>
-                                        <button onClick={() => { setZonaSeleccionada(zona); setModalInscribir(true); }} className="flex-1 bg-emerald-600 py-4 rounded-xl text-[10px] font-black uppercase text-white hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/10">Inscribir</button>
-                                        <button onClick={() => setModalZonaCrear(true)} className="flex-1 bg-[#0f172a] border border-slate-700/50 py-4 rounded-xl text-[10px] font-black text-slate-400 uppercase hover:text-emerald-500 transition-all">Nueva</button>
+                                        <button onClick={() => { setZonaSeleccionada(zona); setModalInscribir(true); }} className="flex-1 bg-emerald-600 py-4 rounded-xl text-[10px] font-black uppercase text-white hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/10">Inscribir Equipo</button>
+
+                                        {/* MODIFICADO: Botón Crear Equipo ahora activa el modal con la zona seleccionada */}
+                                        <button
+                                            onClick={() => { setZonaSeleccionada(zona); setModalEquipoCrear(true); }}
+                                            className="flex-1 bg-[#0f172a] border border-slate-700/50 py-4 rounded-xl text-[10px] font-black text-slate-400 uppercase hover:text-emerald-500 transition-all"
+                                        >
+                                            Crear Equipo
+                                        </button>
                                     </>
                                 )}
 
@@ -254,6 +261,15 @@ export default function TorneoDetalleAdmin() {
             )}
             {modalInscribir && zonaSeleccionada && (
                 <ModalInscribirEnZona zona={zonaSeleccionada} torneo={torneo} onClose={() => setModalInscribir(false)} onUpdated={cargarDatos} />
+            )}
+
+            {/* NUEVO MODAL: Crear Equipo directamente en zona */}
+            {modalEquipoCrear && zonaSeleccionada && (
+                <ModalCrearEquipo
+                    zonaId={zonaSeleccionada.id}
+                    onClose={() => setModalEquipoCrear(false)}
+                    onCreated={cargarDatos}
+                />
             )}
         </div>
     );

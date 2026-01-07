@@ -23,6 +23,7 @@ export default function ProgramacionZona() {
     const [tarjetas, setTarjetas] = useState([]);
     const [programados, setProgramados] = useState([]);
     const [nombreZona, setNombreZona] = useState("");
+    const [nombreTorneo, setNombreTorneo] = useState("");
     const [openEquipoId, setOpenEquipoId] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -33,11 +34,22 @@ export default function ProgramacionZona() {
 
     const userEmail = "m@gmail.com";
 
-    const obtenerNombreZona = useCallback(async () => {
+    const obtenerNombres = useCallback(async () => {
         try {
-            const data = await apiFetch(`/api/zonas/${zonaId}`);
-            if (data?.nombre) setNombreZona(data.nombre);
-        } catch (error) { console.error("Error nombre zona:", error); }
+            const zonaData = await apiFetch(`/api/zonas/${zonaId}`);
+            if (zonaData?.nombre) setNombreZona(zonaData.nombre);
+
+            if (zonaData?.torneoNombre) {
+                setNombreTorneo(zonaData.torneoNombre);
+            } else if (zonaData?.torneo?.nombre) {
+                setNombreTorneo(zonaData.torneo.nombre);
+            } else if (zonaData?.torneoId) {
+                const torneoData = await apiFetch(`/api/torneos/${zonaData.torneoId}`);
+                if (torneoData?.nombre) setNombreTorneo(torneoData.nombre);
+            }
+        } catch (error) {
+            console.error("Error obteniendo nombres:", error);
+        }
     }, [zonaId]);
 
     const cargarTodo = useCallback(async () => {
@@ -67,9 +79,9 @@ export default function ProgramacionZona() {
     useEffect(() => {
         if (zonaId) {
             cargarTodo();
-            obtenerNombreZona();
+            obtenerNombres();
         }
-    }, [zonaId, fechaSeleccionada, cargarTodo, obtenerNombreZona]);
+    }, [zonaId, fechaSeleccionada, cargarTodo, obtenerNombres]);
 
     const agregarFecha = () => {
         setTotalFechas(prev => prev + 1);
@@ -122,13 +134,20 @@ export default function ProgramacionZona() {
                     </div>
                 </div>
 
-                <div className="text-center lg:text-left mb-12">
-                    <h1 className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white">
-                        Programación <span className="text-emerald-500">"{nombreZona || '...'}"</span>
+                <div className="text-center lg:text-left mb-12 px-2">
+                    <h1 className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white mb-2 leading-none">
+                        {nombreTorneo || "Cargando Torneo..."}
                     </h1>
+                    <p className="text-slate-400 font-black uppercase text-[11px] md:text-xs tracking-[0.3em] opacity-90 flex flex-col lg:flex-row lg:items-center">
+                        Programación de fechas
+                        <span className="hidden lg:inline mx-2 text-slate-600">|</span>
+                        <span className="text-emerald-500 mt-2 lg:mt-0">
+                            "{nombreZona || '...'}"
+                        </span>
+                    </p>
                 </div>
 
-                <div className="flex items-center gap-4 mb-12 bg-[#1e293b] p-3 rounded-2xl border border-slate-700/50 w-fit overflow-x-auto">
+                <div className="flex items-center gap-4 mb-12 bg-[#1e293b] p-3 rounded-2xl border border-slate-700/50 w-full lg:w-fit overflow-x-auto shadow-xl">
                     <div className="flex gap-2">
                         {Array.from({ length: totalFechas }, (_, i) => i + 1).map((f) => (
                             <button
@@ -137,7 +156,7 @@ export default function ProgramacionZona() {
                                 className={`px-6 py-2 rounded-xl font-black text-[10px] uppercase transition-all ${
                                     fechaSeleccionada === f
                                         ? "bg-emerald-600 text-white shadow-lg border-emerald-500"
-                                        : "bg-transparent text-slate-500 border border-transparent hover:text-slate-300"
+                                        : "bg-transparent text-slate-500 border border-transparent hover:text-slate-300 hover:bg-slate-700/30"
                                 }`}
                             > Fecha {f} </button>
                         ))}
@@ -150,7 +169,8 @@ export default function ProgramacionZona() {
 
                 <div className="grid grid-cols-1 xl:grid-cols-5 gap-10">
                     <section className="xl:col-span-3 space-y-6">
-                        <div className="bg-[#1e293b] border border-slate-700/50 rounded-[2rem] p-8 shadow-2xl">
+                        {/* SE ELIMINÓ 'overflow-hidden' Y LA LÍNEA VERDE LATERAL */}
+                        <div className="bg-[#1e293b] border border-slate-700/50 rounded-[2rem] p-6 md:p-8 shadow-2xl relative">
                             <div className="flex items-center gap-3 mb-8">
                                 <FaFutbol className="text-emerald-500" />
                                 <h2 className="text-slate-400 font-black text-[10px] uppercase tracking-[0.2em]">Enfrentamientos Disponibles</h2>
@@ -158,22 +178,28 @@ export default function ProgramacionZona() {
 
                             {loading ? (
                                 <div className="py-20 flex flex-col items-center gap-3 opacity-30">
-                                    <FaFutbol size={30} className="animate-spin" />
+                                    <FaFutbol size={30} className="animate-spin text-emerald-500" />
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {tarjetas.map((t) => (
-                                        <FilaProgramacion
-                                            key={t.equipoId}
-                                            tarjeta={t}
-                                            opciones={(t.opciones || []).filter(op => !op.jugado && !programadosIds.has(op.partidoId))}
-                                            equipoYaProgramado={equiposOcupadosSet.has(t.equipoNombre)}
-                                            open={openEquipoId === t.equipoId}
-                                            onOpen={() => setOpenEquipoId(t.equipoId)}
-                                            onClose={() => setOpenEquipoId(null)}
-                                            onSelect={(op) => handleSeleccionDirecta(op.partidoId)}
-                                        />
-                                    ))}
+                                    {tarjetas.length === 0 ? (
+                                        <div className="py-20 text-center border border-dashed border-slate-700/50 rounded-2xl">
+                                            <p className="text-slate-600 text-[10px] font-bold uppercase italic">No hay equipos para programar</p>
+                                        </div>
+                                    ) : (
+                                        tarjetas.map((t) => (
+                                            <FilaProgramacion
+                                                key={t.equipoId}
+                                                tarjeta={t}
+                                                opciones={(t.opciones || []).filter(op => !op.jugado && !programadosIds.has(op.partidoId))}
+                                                equipoYaProgramado={equiposOcupadosSet.has(t.equipoNombre)}
+                                                open={openEquipoId === t.equipoId}
+                                                onOpen={() => setOpenEquipoId(t.equipoId)}
+                                                onClose={() => setOpenEquipoId(null)}
+                                                onSelect={(op) => handleSeleccionDirecta(op.partidoId)}
+                                            />
+                                        ))
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -181,8 +207,6 @@ export default function ProgramacionZona() {
 
                     <aside className="xl:col-span-2">
                         <div className="bg-[#1e293b] border border-slate-700/50 rounded-[2rem] p-6 shadow-2xl sticky top-24">
-
-                            {/* CABECERA DERECHA CORREGIDA CON CARTEL ROJO */}
                             <div className="flex flex-wrap items-center justify-between gap-3 mb-8 px-2">
                                 <div className="flex items-center gap-3">
                                     <FaCalendarAlt className="text-emerald-500" />
@@ -192,7 +216,7 @@ export default function ProgramacionZona() {
                                 {equiposDuplicados.size > 0 && (
                                     <div className="flex items-center gap-2 bg-red-600/20 border border-red-500/50 px-3 py-1.5 rounded-xl animate-pulse">
                                         <FaExclamationTriangle className="text-red-500" size={12} />
-                                        <span className="text-red-500 text-[9px] font-black uppercase tracking-wider">Equipos con 2 partidos</span>
+                                        <span className="text-red-500 text-[9px] font-black uppercase tracking-wider">Duplicados</span>
                                     </div>
                                 )}
                             </div>
@@ -200,7 +224,7 @@ export default function ProgramacionZona() {
                             <div className="space-y-3">
                                 {programados.length === 0 ? (
                                     <div className="py-16 text-center border border-dashed border-slate-700/50 rounded-2xl">
-                                        <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest italic">Sin partidos</p>
+                                        <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest italic">Sin partidos programados</p>
                                     </div>
                                 ) : (
                                     programados.map((p) => (
@@ -220,8 +244,19 @@ export default function ProgramacionZona() {
                 </div>
             </main>
 
-            <CerrarPartidoModal open={modalCerrar} partido={partidoSeleccionado} onClose={() => setModalCerrar(false)} onSuccess={cargarTodo} />
-            <EditarResultadoModal open={modalEditar} partido={partidoSeleccionado} onClose={() => setModalEditar(false)} onSuccess={cargarTodo} />
+            {/* MODALES */}
+            <CerrarPartidoModal
+                open={modalCerrar}
+                partido={partidoSeleccionado}
+                onClose={() => setModalCerrar(false)}
+                onSuccess={cargarTodo}
+            />
+            <EditarResultadoModal
+                open={modalEditar}
+                partido={partidoSeleccionado}
+                onClose={() => setModalEditar(false)}
+                onSuccess={cargarTodo}
+            />
             <EditarInfoModal
                 open={modalEditarInfo}
                 partido={partidoSeleccionado}
