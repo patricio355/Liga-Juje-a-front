@@ -12,12 +12,13 @@ export default function AppRouter() {
     return (
         <BrowserRouter>
             <Routes>
+                <Route path="/" element={<Navigate to="/torneos" replace />} />
 
                 {/* HOME público */}
-                <Route path="/" element={<Home />} />
+                <Route path="/torneos" element={<Home />} />
 
                 {/* TORNEO PÚBLICO */}
-                <Route path="/torneo/:id" element={<TorneoPublico />} />
+                <Route path="/torneo/:slug" element={<TorneoPublico />} />
 
                 <Route path="/dashboard/torneos/:id" element={<TorneoDetalleAdmin />} />
 
@@ -48,7 +49,7 @@ export default function AppRouter() {
                 <Route path="/dashboard/gestion-partidos/:id" element={<GestionPartidosFixture />} />
 
                 {/* fallback */}
-                <Route path="*" element={<Navigate to="/" />} />
+                <Route path="*" element={<Navigate to="/torneos" />} />
             </Routes>
         </BrowserRouter>
     );

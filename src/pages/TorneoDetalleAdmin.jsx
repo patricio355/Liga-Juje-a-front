@@ -30,10 +30,9 @@ export default function TorneoDetalleAdmin() {
     const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
     const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
 
-    // Función de carga optimizada: Ahora es "awaitable" para los manejadores de eventos
     const cargarDatos = useCallback(async () => {
         try {
-            const data = await apiFetch(`/api/torneos/${id}`);
+            const data = await apiFetch(`/api/torneos/${id}?t=${new Date().getTime()}`);
             setTorneo(data);
         } catch (error) {
             if (error.status === 403 || error.status === 401) {
@@ -53,19 +52,14 @@ export default function TorneoDetalleAdmin() {
         return torneo.zonas.some(z => z.partidos && z.partidos.length > 0);
     }, [torneo?.zonas]);
 
-    // Lógica de Generar Fixture: Espera la confirmación del backend antes de refrescar
     const handleGenerarFixtureGlobal = async () => {
-        // ... confirmaciones ...
         setLoading(true);
         try {
             const promesas = torneo.zonas.map(zona =>
                 apiFetch(`/api/partidos/zona/${zona.id}/fixture`, { method: "POST" })
             );
             await Promise.all(promesas);
-
-            // Pequeño delay de seguridad para que el caché de persistencia se asiente
             await new Promise(resolve => setTimeout(resolve, 500));
-
             await cargarDatos();
         } catch (error) {
             console.error(error);
@@ -77,7 +71,7 @@ export default function TorneoDetalleAdmin() {
     const handleEliminarZona = async (zonaId) => {
         if (!confirm("¿Seguro que deseas eliminar esta zona?")) return;
         try {
-            await apiFetch(`/api/torneos/${id}/zonas/${zonaId}`, { method: "DELETE" });
+            await apiFetch(`/api/torneos/${torneo.id}/zonas/${zonaId}`, { method: "DELETE" });
             await cargarDatos();
         } catch (error) { console.error(error); }
     };
@@ -111,7 +105,6 @@ export default function TorneoDetalleAdmin() {
                     <span className="font-black uppercase text-[10px] tracking-[0.2em]">Volver al Panel</span>
                 </button>
 
-                {/* HEADER DEL TORNEO */}
                 <header className="bg-[#1e293b] p-8 rounded-3xl border border-slate-700/50 mb-10 shadow-2xl flex flex-col xl:flex-row justify-between items-center gap-8">
                     <div className="flex items-center gap-6">
                         <div className="bg-[#0f172a] p-5 rounded-2xl border border-slate-700/50 text-emerald-500 shadow-inner">
@@ -153,7 +146,6 @@ export default function TorneoDetalleAdmin() {
                             </button>
                         )}
 
-                        {/* Solo aparece si el fixture ya existe y el torneo NO es abierto (es cerrado) */}
                         {fixtureYaGenerado && !esAbierto && (
                             <button
                                 onClick={() => navigate(`/dashboard/gestion-partidos/${torneo.id}`)}
@@ -165,7 +157,6 @@ export default function TorneoDetalleAdmin() {
                     </div>
                 </header>
 
-                {/* GRID DE ZONAS */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
                     {torneo.zonas?.map((zona) => (
                         <div key={zona.id} className="bg-[#1e293b] p-6 rounded-3xl border border-slate-700/40 flex flex-col shadow-2xl hover:border-emerald-500/30 transition-all duration-300">
@@ -196,18 +187,32 @@ export default function TorneoDetalleAdmin() {
                             <div className="space-y-2.5 mb-8 flex-1">
                                 {zona.equipos?.length > 0 ? (
                                     zona.equipos.map((equipo) => (
-                                        <div key={equipo.id} className="bg-[#0f172a] p-4 rounded-xl border border-slate-700/30 flex justify-between items-center group transition-all hover:bg-slate-800">
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-slate-300 font-black uppercase text-[10px] tracking-widest">{equipo.nombre}</span>
-                                                <button onClick={() => { setEquipoSeleccionado(equipo); setModalEquipoEditar(true); }} className="opacity-0 group-hover:opacity-100 text-emerald-500 transition">
+                                        <div key={equipo.id} className="bg-[#0f172a] p-4 rounded-xl border border-slate-700/30 flex justify-between items-center transition-all hover:bg-slate-800">
+                                            {/* Nombre del equipo ocupa el espacio disponible */}
+                                            <span className="flex-1 text-slate-300 font-black uppercase text-[10px] tracking-widest truncate mr-2">
+                                                {equipo.nombre}
+                                            </span>
+
+                                            {/* Contenedor de botones agrupados a la derecha */}
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => { setEquipoSeleccionado(equipo); setModalEquipoEditar(true); }}
+                                                    className="text-emerald-500 hover:text-emerald-400 transition p-1"
+                                                    title="Editar Equipo"
+                                                >
                                                     <FaEdit size={12}/>
                                                 </button>
+
+                                                {(!fixtureYaGenerado || esAbierto) && (
+                                                    <button
+                                                        onClick={() => handleQuitarEquipo(equipo.equipoZonaId)}
+                                                        className="text-red-500 hover:text-red-400 transition p-1"
+                                                        title="Quitar de Zona"
+                                                    >
+                                                        <FaTrash size={12}/>
+                                                    </button>
+                                                )}
                                             </div>
-                                            {(!fixtureYaGenerado || esAbierto) && (
-                                                <button onClick={() => handleQuitarEquipo(equipo.equipoZonaId)} className="opacity-0 group-hover:opacity-100 text-red-500 transition">
-                                                    <FaTrash size={12}/>
-                                                </button>
-                                            )}
                                         </div>
                                     ))
                                 ) : (
@@ -234,23 +239,19 @@ export default function TorneoDetalleAdmin() {
                 </div>
             </main>
 
-            {/* MODALES SINCRONIZADOS */}
+            {/* MODALES */}
             {modalTorneoEditar && (
                 <ModalEditarTorneo torneo={torneo} onClose={() => setModalTorneoEditar(false)} onUpdated={cargarDatos} />
             )}
-
             {modalZonaEditar && zonaSeleccionada && (
                 <ModalEditarZona zona={zonaSeleccionada} onClose={() => setModalZonaEditar(false)} onUpdated={cargarDatos} />
             )}
-
             {modalEquipoEditar && equipoSeleccionado && (
                 <ModalEquipoEditar equipo={equipoSeleccionado} onClose={() => setModalEquipoEditar(false)} onUpdated={cargarDatos} />
             )}
-
             {modalZonaCrear && (
                 <ModalCrearZona torneo={torneo} onClose={() => setModalZonaCrear(false)} onCreated={cargarDatos} />
             )}
-
             {modalInscribir && zonaSeleccionada && (
                 <ModalInscribirEnZona zona={zonaSeleccionada} torneo={torneo} onClose={() => setModalInscribir(false)} onUpdated={cargarDatos} />
             )}

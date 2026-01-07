@@ -6,7 +6,7 @@ export default function TorneoCard({ torneo }) {
 
     return (
         <div
-            onClick={() => navigate(`/torneo/${torneo.id}`)}
+            onClick={() => navigate(`/torneo/${torneo.slug}`)}
             className="w-full max-w-2xl mx-auto bg-[#0e1630] p-6 rounded-[2rem] cursor-pointer border border-blue-900/40 hover:border-blue-500/60 transition-all shadow-[0_10px_30px_rgba(0,0,0,0.5)] group relative overflow-hidden"
         >
             {/* Resplandor de fondo al hacer hover */}

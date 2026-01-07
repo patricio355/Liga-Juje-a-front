@@ -10,7 +10,6 @@ import { AuthContext } from "../../context/AuthContext";
 export default function TorneosList() {
     const { user } = useContext(AuthContext);
 
-    // Usamos 'role' como pediste y normalizamos para evitar fallos de lectura
     const userRole = user?.role?.toUpperCase().trim();
     const esAdmin = userRole === "ADMIN" || userRole === "ROLE_ADMIN";
 
@@ -31,11 +30,7 @@ export default function TorneosList() {
 
     const recargar = async () => {
         try {
-            // Opcional: podrías poner un pequeño estado de 'refreshing' aquí
             const data = await apiFetch("/api/torneos/dashboard");
-
-            // Al setear los datos nuevos, React comparará el ID y actualizará
-            // el nombre en la tarjeta correspondiente automáticamente.
             setTorneos([...data]);
         } catch (err) {
             console.error("Error al refrescar el dashboard:", err);
@@ -72,7 +67,6 @@ export default function TorneosList() {
 
     const torneosFiltrados = torneos
         .filter((t) => {
-            // Si no es ADMIN, forzamos activos. Si es ADMIN, depende del botón.
             if (!esAdmin) return t.estado === "activo";
             return filtro === "activos" ? t.estado === "activo" : true;
         })
@@ -94,8 +88,6 @@ export default function TorneosList() {
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-5 w-full lg:w-auto">
-
-                    {/* El botón de filtro solo aparece para ADMIN */}
                     {esAdmin && (
                         <div className="bg-[#0f172a] p-2 rounded-2xl border border-slate-700/50 flex gap-1 w-full md:w-auto">
                             {["activos", "todos"].map((f) => (
@@ -131,7 +123,8 @@ export default function TorneosList() {
                 {torneosFiltrados.map((t) => (
                     <div
                         key={t.id}
-                        onClick={() => navigate(`/dashboard/torneos/${t.id}`)}
+                        // CORRECCIÓN: Navegación por Slug (con respaldo ID)
+                        onClick={() => navigate(`/dashboard/torneos/${t.slug || t.id}`)}
                         className="bg-[#1e293b] p-8 rounded-[2rem] border border-slate-700/30 shadow-2xl flex flex-col lg:flex-row justify-between items-start lg:items-center cursor-pointer hover:border-emerald-500/40 transition-all group relative overflow-hidden"
                     >
                         <div className="flex-1 w-full">
@@ -142,7 +135,6 @@ export default function TorneosList() {
                                 </span>
                             </div>
 
-                            {/* Detalles del Torneo Restaurados */}
                             <div className="mt-3 flex gap-6 text-xs font-bold text-slate-500 uppercase tracking-widest">
                                 <span>División: <span className="text-slate-200">{t.division}</span></span>
                                 <span>Zonas: <span className="text-slate-200">{t.zonas?.length || 0}</span></span>
@@ -157,7 +149,11 @@ export default function TorneosList() {
                             <button
                                 title="Gestionar"
                                 className="flex-1 lg:w-14 lg:h-14 p-4 bg-[#0f172a] hover:bg-emerald-600 border border-slate-700/50 rounded-2xl text-emerald-500 hover:text-white transition-all shadow-inner flex items-center justify-center"
-                                onClick={() => navigate(`/dashboard/torneos/${t.id}`)}
+                                // CORRECCIÓN: Navegación por Slug (con respaldo ID)
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/dashboard/torneos/${t.slug || t.id}`);
+                                }}
                             >
                                 <FaEye size={20} />
                             </button>
@@ -187,14 +183,8 @@ export default function TorneosList() {
                     mensaje={mensajeConfirm}
                     onCancel={() => setModalConfirm(false)}
                     onConfirm={async () => {
-                        // 1. Esperamos a que la API elimine el torneo
                         await accionEliminar();
-
-                        // 2. Esperamos a que la lista se recargue con los datos nuevos
-                        // IMPORTANTE: 'recargar' ahora debe ser 'awaitable'
                         await recargar();
-
-                        // 3. RECIÉN ACÁ cerramos el modal, cuando el estado ya cambió
                         setModalConfirm(false);
                     }}
                 />

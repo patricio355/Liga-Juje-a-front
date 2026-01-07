@@ -28,28 +28,21 @@ export default function GestionPartidosFixture() {
     const [modalEditar, setModalEditar] = useState(false);
     const [modalEditarInfo, setModalEditarInfo] = useState(false);
 
-    // --- FUNCIÓN DE ORDENAMIENTO ---
     const ordenarPartidos = (partidos) => {
         return [...partidos].sort((a, b) => {
-            // 1. Obtener nombres de cancha (Normalizados)
             const canchaA = (a.canchaNombre || a.cancha || "ZZZ").toLowerCase();
             const canchaB = (b.canchaNombre || b.cancha || "ZZZ").toLowerCase();
-
-            // Comparar por Cancha
             if (canchaA < canchaB) return -1;
             if (canchaA > canchaB) return 1;
-
-            // 2. Si la cancha es la misma, comparar por Hora
             const horaA = a.hora || a.Hora || "99:99";
             const horaB = b.hora || b.Hora || "99:99";
-
             return horaA.localeCompare(horaB);
         });
     };
 
     const cargarTorneo = useCallback(async () => {
         try {
-            const data = await apiFetch(`/api/torneos/${id}`);
+            const data = await apiFetch(`/api/torneos/${id}?t=${new Date().getTime()}`);
             setTorneo(data);
             setZonas(data.zonas || []);
             if (data.zonas?.length > 0 && !zonaActiva) setZonaActiva(data.zonas[0]);
@@ -60,19 +53,21 @@ export default function GestionPartidosFixture() {
         if (!zonaActiva) return;
         setLoading(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/partidos/zona/${zonaActiva.id}/fixture`);
-            const data = await res.json();
+            const data = await apiFetch(`/api/partidos/zona/${zonaActiva.id}/fixture?t=${new Date().getTime()}`);
             const fixtureArray = Array.isArray(data) ? data : [];
             setFixture(fixtureArray);
             if (fixtureArray.length > 0 && !fechaSeleccionada) {
                 setFechaSeleccionada(fixtureArray[0].numeroFecha);
             }
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+            setFixture([]);
+        }
         finally { setLoading(false); }
     }, [zonaActiva, fechaSeleccionada]);
 
-    useEffect(() => { cargarTorneo(); }, [cargarTorneo]);
-    useEffect(() => { cargarFixture(); }, [cargarFixture]);
+    useEffect(() => { cargarTorneo(); }, [id]);
+    useEffect(() => { cargarFixture(); }, [zonaActiva]);
 
     return (
         <div className="min-h-screen bg-[#02040a] text-slate-200">
@@ -84,9 +79,14 @@ export default function GestionPartidosFixture() {
                 </button>
 
                 <header className="text-center mb-10">
-                    <h1 className="text-4xl md:text-6xl font-black italic uppercase text-white">
+                    <h1 className="text-4xl md:text-6xl font-black italic uppercase text-white leading-none">
                         PANEL <span className="text-emerald-500">GESTIÓN</span>
                     </h1>
+                    {torneo && (
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mt-2">
+                            {torneo.nombre} • {torneo.division}
+                        </p>
+                    )}
                 </header>
 
                 {/* SELECTOR ZONA */}
@@ -109,27 +109,47 @@ export default function GestionPartidosFixture() {
                     </div>
                 </div>
 
-                {/* SELECTOR FECHAS */}
+                {/* SELECTOR JORNADAS (FLECHAS ORIGINALES Y CENTRADO) */}
                 <div className="bg-[#050814]/90 border border-blue-900/40 rounded-3xl p-6 mb-10 flex flex-col items-center gap-4">
                     <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em]">JORNADA</span>
                     <div className="flex items-center justify-center gap-4 w-full">
-                        <button onClick={() => setFechaSeleccionada(f => Math.max(fixture[0].numeroFecha, f - 1))} disabled={!fixture.length || fechaSeleccionada === fixture[0].numeroFecha} className="w-10 h-10 rounded-full border border-blue-900/60 text-emerald-400 bg-[#02040a] disabled:opacity-5 hover:border-emerald-500 transition-all"><FaChevronLeft /></button>
-                        <div className="flex gap-2">
+
+                        <button
+                            onClick={() => setFechaSeleccionada(f => Math.max(fixture[0]?.numeroFecha || 1, f - 1))}
+                            disabled={!fixture.length || fechaSeleccionada === fixture[0]?.numeroFecha}
+                            className="w-10 h-10 flex items-center justify-center rounded-full border border-blue-900/60 text-emerald-400 bg-[#02040a] disabled:opacity-20 hover:border-emerald-500 transition-all"
+                        >
+                            <FaChevronLeft size={12} />
+                        </button>
+
+                        <div className="flex items-center gap-2">
                             {fixture.map(f => (
-                                <button key={f.numeroFecha} onClick={() => setFechaSeleccionada(f.numeroFecha)} className={`w-10 h-10 rounded-xl text-xs font-black border transition-all ${fechaSeleccionada === f.numeroFecha ? "bg-emerald-600 text-white border-emerald-400 shadow-lg scale-110" : "bg-[#02040a] text-emerald-900 border-blue-900/40 hover:text-emerald-400"}`}>{f.numeroFecha}</button>
+                                <button
+                                    key={f.numeroFecha}
+                                    onClick={() => setFechaSeleccionada(f.numeroFecha)}
+                                    className={`w-10 h-10 rounded-xl text-xs font-black border transition-all ${fechaSeleccionada === f.numeroFecha ? "bg-emerald-600 text-white border-emerald-400 shadow-lg scale-110" : "bg-[#02040a] text-emerald-900 border-blue-900/40 hover:text-emerald-400"}`}
+                                >
+                                    {f.numeroFecha}
+                                </button>
                             ))}
                         </div>
-                        <button onClick={() => setFechaSeleccionada(f => Math.min(fixture[fixture.length - 1].numeroFecha, f + 1))} disabled={!fixture.length || fechaSeleccionada === fixture[fixture.length - 1].numeroFecha} className="w-10 h-10 rounded-full border border-blue-900/60 text-emerald-400 bg-[#02040a] disabled:opacity-5 hover:border-emerald-500 transition-all"><FaChevronRight /></button>
+
+                        <button
+                            onClick={() => setFechaSeleccionada(f => Math.min(fixture[fixture.length - 1]?.numeroFecha || 1, f + 1))}
+                            disabled={!fixture.length || fechaSeleccionada === fixture[fixture.length - 1]?.numeroFecha}
+                            className="w-10 h-10 flex items-center justify-center rounded-full border border-blue-900/60 text-emerald-400 bg-[#02040a] disabled:opacity-20 hover:border-emerald-500 transition-all"
+                        >
+                            <FaChevronRight size={12} />
+                        </button>
+
                     </div>
                 </div>
 
-                {/* LISTADO CON ORDENAMIENTO */}
                 <div className="space-y-4 pb-20">
                     {loading ? (
                         <div className="py-20 flex justify-center"><FaFutbol className="animate-spin text-emerald-500 text-3xl" /></div>
                     ) : (
                         fixture.filter(f => f.numeroFecha === fechaSeleccionada).map(fechaObj => (
-                            // APLICAMOS LA FUNCIÓN DE ORDENAR AQUÍ
                             ordenarPartidos(fechaObj.partidos).map(partido => (
                                 <PartidoGestionCard
                                     key={partido.id || partido.partidoId}
