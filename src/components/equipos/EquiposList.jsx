@@ -1,18 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import EquipoCard from "./EquiposCard";
 import ModalInscribirEquipo from "./ModalInscribirEquipo";
 import ConfirmModal from "../dashboard/ConfirmModal";
 import ModalCrearEquipo from "./ModalCrearEquipo";
 import ModalEditarEquipo from "./ModalEditarEquipo";
 import { apiFetch } from "../../api/api";
-import { FaPlus, FaShieldAlt, FaFutbol } from "react-icons/fa";
-import {
-    getEquiposActivos,
-    getTodosEquipos,
-    eliminarEquipo
-} from "../../api/equipos.api";
+import { AuthContext } from "../../context/AuthContext"; // Importante para roles
+import { FaPlus, FaShieldAlt, FaFutbol, FaTrash, FaEdit } from "react-icons/fa";
+import { eliminarEquipo } from "../../api/equipos.api";
 
 export default function EquiposList() {
+    const { user } = useContext(AuthContext);
+
+    // Normalización de roles
+    const userRole = user?.role?.toUpperCase().trim();
+    const esAdmin = userRole === "ADMIN" || userRole === "ROLE_ADMIN";
+
     const [equipos, setEquipos] = useState([]);
     const [filtro, setFiltro] = useState("activos");
     const [busqueda, setBusqueda] = useState("");
@@ -28,12 +31,11 @@ export default function EquiposList() {
     const cargar = async () => {
         setLoading(true);
         try {
-            const data = filtro === "activos"
-                ? await getEquiposActivos()
-                : await getTodosEquipos();
-            setEquipos(data);
+            // Usamos el endpoint que filtra por el usuario autenticado (dueño/creador)
+            const data = await apiFetch("/api/equipos/mis-equipos");
+            setEquipos(data || []);
         } catch (error) {
-            console.error(error);
+            console.error("Error cargando equipos:", error);
         } finally {
             setLoading(false);
         }
@@ -41,11 +43,16 @@ export default function EquiposList() {
 
     useEffect(() => {
         cargar();
-    }, [filtro]);
+    }, []);
 
-    const equiposFiltrados = equipos.filter(e =>
-        e.nombre.toLowerCase().includes(busqueda.toLowerCase())
-    );
+    // Lógica de filtrado idéntica a TorneosList
+    const equiposFiltrados = equipos
+        .filter((e) => {
+            // Si no es admin, solo ve activos. Si es admin, depende del botón de filtro.
+            if (!esAdmin) return e.estado === true;
+            return filtro === "activos" ? e.estado === true : true;
+        })
+        .filter((e) => e.nombre.toLowerCase().includes(busqueda.toLowerCase()));
 
     if (loading) return (
         <div className="flex flex-col items-center py-32 gap-4">
@@ -64,18 +71,20 @@ export default function EquiposList() {
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-5 w-full lg:w-auto">
-                    {/* Filtros Estilo Torneos */}
-                    <div className="bg-[#0f172a] p-2 rounded-2xl border border-slate-700/50 flex gap-1 w-full md:w-auto">
-                        {["activos", "todos"].map((f) => (
-                            <button
-                                key={f}
-                                className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl text-[11px] font-black uppercase transition-all ${filtro === f ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/20" : "text-slate-500 hover:text-slate-300"}`}
-                                onClick={() => setFiltro(f)}
-                            >
-                                {f}
-                            </button>
-                        ))}
-                    </div>
+                    {/* Filtros Estilo Torneos: Solo visibles para Admin */}
+                    {esAdmin && (
+                        <div className="bg-[#0f172a] p-2 rounded-2xl border border-slate-700/50 flex gap-1 w-full md:w-auto">
+                            {["activos", "todos"].map((f) => (
+                                <button
+                                    key={f}
+                                    className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl text-[11px] font-black uppercase transition-all ${filtro === f ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/20" : "text-slate-500 hover:text-slate-300"}`}
+                                    onClick={() => setFiltro(f)}
+                                >
+                                    {f}
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
                     <input
                         type="text"
@@ -112,18 +121,26 @@ export default function EquiposList() {
                     ))
                 ) : (
                     <div className="text-center py-20 bg-[#1c213b]/30 rounded-[2rem] border border-dashed border-slate-700/50">
-                        <p className="text-slate-600 text-[11px] font-black uppercase tracking-widest italic">No se encontraron clubes registrados</p>
+                        <p className="text-slate-600 text-[11px] font-black uppercase tracking-widest italic">
+                            {busqueda ? "No hay coincidencias para la búsqueda" : "No tienes equipos registrados o activos"}
+                        </p>
                     </div>
                 )}
             </div>
 
             {/* MODALES */}
+            {modalCrearEquipo && (
+                <ModalCrearEquipo onClose={() => setModalCrearEquipo(false)} onCreated={cargar} />
+            )}
+
             {equipoEditar && (
                 <ModalEditarEquipo equipo={equipoEditar} onClose={() => setEquipoEditar(null)} onUpdated={cargar} />
             )}
+
             {equipoInscribir && (
                 <ModalInscribirEquipo equipo={equipoInscribir} onClose={() => setEquipoInscribir(null)} onInscripto={cargar} />
             )}
+
             {inscripcionEliminar && (
                 <ConfirmModal
                     mensaje={`¿Eliminar del torneo ${inscripcionEliminar.nombreTorneo}?`}
@@ -135,6 +152,7 @@ export default function EquiposList() {
                     }}
                 />
             )}
+
             {confirmEliminarEquipo && (
                 <ConfirmModal
                     mensaje="¿Eliminar definitivamente este equipo?"
@@ -145,9 +163,6 @@ export default function EquiposList() {
                         cargar();
                     }}
                 />
-            )}
-            {modalCrearEquipo && (
-                <ModalCrearEquipo onClose={() => setModalCrearEquipo(false)} onCreated={cargar} />
             )}
         </div>
     );

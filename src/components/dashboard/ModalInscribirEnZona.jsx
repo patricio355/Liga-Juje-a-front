@@ -9,15 +9,17 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
     const [enviando, setEnviando] = useState(false);
     const [error, setError] = useState(null);
 
-    // 1. Carga de equipos global (Catálogo)
+    // 1. CARGA DE EQUIPOS SEGÚN ROL
     useEffect(() => {
         const cargarEquipos = async () => {
             try {
-                const data = await apiFetch("/api/equipos");
+                // CAMBIO CLAVE: Usamos el endpoint que ya filtra según el rol (Admin o Encargado)
+                // Esto garantiza que el encargado vea solo sus equipos y el admin todos.
+                const data = await apiFetch("/api/equipos/mis-equipos");
                 setEquiposBase(data || []);
             } catch (err) {
                 console.error("Error al cargar equipos:", err);
-                setError("No se pudieron cargar los equipos");
+                setError("No se pudieron cargar los equipos autorizados");
             } finally {
                 setLoading(false);
             }
@@ -25,7 +27,7 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
         cargarEquipos();
     }, []);
 
-    // 2. Lógica de Filtrado: Obtenemos IDs de todos los equipos ya inscritos en CUALQUIER zona del torneo
+    // 2. Lógica de Filtrado: Se mantiene igual
     const idsEquiposInscritos = torneo?.zonas?.flatMap(z =>
         z.equipos?.map(e => e.id) || []
     ) || [];
@@ -36,18 +38,15 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
         setError(null);
 
         try {
-            // REVISIÓN DE URL: Asegúrate que el orden idEquipo/idZona sea el que espera tu Controller
             await apiFetch(`/api/torneos/inscribir/${equipoId}/zona/${zona.id}`, {
                 method: "POST"
             });
 
-            // Sincronización asíncrona: Esperamos la recarga del caché antes de cerrar
             if (onUpdated) {
                 await onUpdated();
             }
             onClose();
         } catch (err) {
-            // Si el backend lanza el error de "ya existe", lo capturamos aquí
             setError(err.message || "Este equipo ya está registrado en la competición.");
         } finally {
             setEnviando(false);
@@ -68,7 +67,7 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
                 className="bg-[#1e293b] w-full max-w-md rounded-[2.5rem] border border-slate-700/50 shadow-2xl overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header Estilo Pro */}
+                {/* Header */}
                 <div className="bg-[#111827]/50 px-8 py-6 border-b border-slate-700/50 flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-emerald-500/10 rounded-lg">
@@ -84,13 +83,13 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
                     </button>
                 </div>
 
-                {/* Buscador Optimizado */}
+                {/* Buscador */}
                 <div className="p-6 pb-0">
                     <div className="relative">
                         <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" />
                         <input
                             type="text"
-                            placeholder="Buscar equipo disponible..."
+                            placeholder="Buscar entre tus equipos disponibles..."
                             className="w-full bg-[#0f172a] border border-slate-700/50 rounded-2xl py-3.5 pl-11 pr-4 text-sm text-slate-200 outline-none focus:border-emerald-500 transition-all placeholder:text-slate-700 shadow-inner"
                             autoFocus
                             value={busqueda}
@@ -106,12 +105,12 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
                     </div>
                 )}
 
-                {/* Lista de equipos con Scroll Esmeralda */}
+                {/* Lista */}
                 <div className="max-h-[350px] overflow-y-auto p-4 space-y-2 custom-scrollbar">
                     {loading ? (
                         <div className="flex flex-col items-center py-12 gap-4">
                             <FaFutbol className="text-3xl text-emerald-600 animate-spin" />
-                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Consultando Catálogo...</p>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Consultando tus equipos...</p>
                         </div>
                     ) : disponibles.length > 0 ? (
                         disponibles.map(equipo => (
@@ -134,14 +133,14 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
                     ) : (
                         <div className="text-center py-12 px-6">
                             <p className="text-[11px] font-bold text-slate-600 uppercase tracking-widest leading-relaxed italic">
-                                No se encontraron equipos disponibles o ya forman parte de este torneo.
+                                {busqueda ? "No hay coincidencias en tus equipos." : "No tienes equipos disponibles para inscribir."}
                             </p>
                         </div>
                     )}
                 </div>
 
                 <div className="p-5 bg-[#111827]/30 text-center border-t border-slate-700/50">
-                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Validación de inscripción centralizada</p>
+                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Acceso restringido según privilegios</p>
                 </div>
             </div>
         </div>

@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react"; // Añadimos useContext
 import { getCanchas } from "../../api/canchas.api";
-import { apiFetch } from "../../api/api"; // Usamos apiFetch para mayor control
+import { apiFetch } from "../../api/api";
 import ImageUpload from "../../images/ImageUpload";
+import { AuthContext } from "../../context/AuthContext"; // Importamos el contexto
 
-// Recibimos zonaId como prop opcional
 export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
+    const { user } = useContext(AuthContext); // Obtenemos el usuario
+    const esAdmin = user?.role === "ROLE_ADMIN";
+
     const [form, setForm] = useState({
         nombre: "",
         localidad: "",
@@ -13,13 +16,15 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
         camisetaSuplente: "",
         estado: true,
         canchaId: "",
-        encargadoEmail: ""
+        encargadoEmail: "",
+        creadorEmail: "" // Nuevo campo para cuando el Admin asigna un dueño
     });
 
     const [canchas, setCanchas] = useState([]);
+    const [listaEncargados, setListaEncargados] = useState([]); // Lista para el select de Admin
     const [error, setError] = useState("");
     const [isUploading, setIsUploading] = useState(false);
-    const [loading, setLoading] = useState(false); // Estado para el envío
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const cargarCanchas = async () => {
@@ -29,7 +34,18 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
             } catch (e) { console.error(e); }
         };
         cargarCanchas();
-    }, []);
+
+        // Si es Admin, cargamos la lista de encargados para el nuevo label
+        if (esAdmin) {
+            const cargarEncargados = async () => {
+                try {
+                    const data = await apiFetch("/api/usuarios/encargados");
+                    if (data) setListaEncargados(data);
+                } catch (e) { console.error("Error cargando encargados:", e); }
+            };
+            cargarEncargados();
+        }
+    }, [esAdmin]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -56,7 +72,6 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
         setError("");
 
         try {
-            // DETECTAR ENDPOINT: Si hay zonaId, usamos el nuevo camino
             const url = zonaId
                 ? `/api/equipos/zona/${zonaId}`
                 : `/api/equipos`;
@@ -66,7 +81,8 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
                 body: JSON.stringify({
                     ...form,
                     canchaId: Number(form.canchaId),
-                    encargadoEmail: form.encargadoEmail || null
+                    encargadoEmail: form.encargadoEmail || null,
+                    creadorEmail: form.creadorEmail || null // Enviamos el creador asignado
                 })
             });
 
@@ -102,6 +118,24 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
                             currentImage={form.escudo}
                         />
                     </div>
+
+                    {/* NUEVA SECCIÓN: SOLO PARA ADMIN - ASIGNAR CREADOR/DUEÑO */}
+                    {esAdmin && (
+                        <div className="space-y-1 bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10">
+                            <label className="text-[10px] font-black text-emerald-500 uppercase ml-1">Asignar Creador (Dueño del Equipo)</label>
+                            <select
+                                name="creadorEmail"
+                                value={form.creadorEmail}
+                                onChange={handleChange}
+                                className="w-full p-3 rounded-xl bg-[#0f172a] border border-slate-800 focus:border-emerald-500 outline-none text-sm appearance-none cursor-pointer"
+                            >
+                                <option value="">Asignarme a mí mismo (Admin)</option>
+                                {listaEncargados.map(enc => (
+                                    <option key={enc.id} value={enc.email}>{enc.nombre} ({enc.email})</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1">

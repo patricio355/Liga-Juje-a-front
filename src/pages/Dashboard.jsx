@@ -6,19 +6,23 @@ import EquiposList from "../components/equipos/EquiposList";
 import UsuariosList from "../components/usuarios/UsuariosList";
 import { FaFutbol, FaTrophy, FaUsers, FaUserShield, FaTimes, FaBars } from "react-icons/fa";
 
-/* --- 1. DEFINICIÓN DE COMPONENTES AUXILIARES (ARRIBA PARA EVITAR ERRORES) --- */
+/* --- 1. DEFINICIÓN DE COMPONENTES AUXILIARES --- */
 
 function SidebarMenu({ selected, setSelected, user }) {
+    // Definimos qué roles tienen acceso a la gestión completa
+    const tieneAccesoTotal = user?.role === "ROLE_ADMIN" || user?.role === "ROLE_ENCARGADOTORNEO";
+
     const items = [
         { id: "torneos", icon: <FaFutbol />, label: "Torneos" },
-        { id: "equipos", icon: <FaTrophy />, label: "Equipos", adminOnly: true  },
-        { id: "usuarios", icon: <FaUsers />, label: "Usuarios", adminOnly: true },
+        // Ahora permitimos que ambos roles vean Equipos y Usuarios
+        { id: "equipos", icon: <FaTrophy />, label: "Equipos", restricted: true },
+        { id: "usuarios", icon: <FaUsers />, label: "Usuarios", restricted: true },
     ];
 
     return (
         <ul className="space-y-2">
             {items
-                .filter(item => !item.adminOnly || user?.role === "ROLE_ADMIN")
+                .filter(item => !item.restricted || tieneAccesoTotal)
                 .map(item => (
                     <li
                         key={item.id}
@@ -43,12 +47,12 @@ function UserSection({ user }) {
     return (
         <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-700/50 flex items-center gap-3 mt-auto">
             <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center font-black text-white text-xs">
-                {user?.sub?.charAt(0).toUpperCase() || "A"}
+                {user?.sub?.charAt(0).toUpperCase() || "U"}
             </div>
             <div className="overflow-hidden">
-                <p className="text-[10px] font-black text-white truncate uppercase italic">{user?.sub || "Admin"}</p>
+                <p className="text-[10px] font-black text-white truncate uppercase italic">{user?.sub || "Usuario"}</p>
                 <p className="text-[9px] font-bold text-emerald-500 uppercase tracking-tighter opacity-70">
-                    {user?.role?.replace("ROLE_", "") || "ADMIN"}
+                    {user?.role?.replace("ROLE_", "") || "USUARIO"}
                 </p>
             </div>
         </div>
@@ -57,9 +61,14 @@ function UserSection({ user }) {
 
 function Content({ selected, user }) {
     const sectionClass = "bg-[#1e293b] p-4 md:p-8 rounded-3xl border border-slate-700/50 shadow-2xl";
+    const tieneAccesoTotal = user?.role === "ROLE_ADMIN" || user?.role === "ROLE_ENCARGADOTORNEO";
+
     if (selected === "torneos") return <div className={sectionClass}><TorneosList /></div>;
-    if (selected === "equipos" && user?.role === "ROLE_ADMIN") return <div className={sectionClass}><EquiposList /></div>;
-    if (selected === "usuarios" && user?.role === "ROLE_ADMIN") return <div className={sectionClass}><UsuariosList /></div>;
+
+    // Validamos acceso total para estas dos secciones
+    if (selected === "equipos" && tieneAccesoTotal) return <div className={sectionClass}><EquiposList /></div>;
+    if (selected === "usuarios" && tieneAccesoTotal) return <div className={sectionClass}><UsuariosList /></div>;
+
     return null;
 }
 
@@ -70,28 +79,30 @@ export default function Dashboard() {
     const [selected, setSelected] = useState("torneos");
     const [mobileSidebar, setMobileSidebar] = useState(false);
 
+    // Título dinámico para el header lateral
+    const panelTitle = user?.role === "ROLE_ADMIN" ? "Panel Admin" : "Panel Gestión";
+
     return (
         <div className="min-h-screen bg-[#0f172a] text-slate-200">
-            {/* Navbar fijo: z-index alto para quedar arriba de todo */}
             <div className="fixed top-0 left-0 right-0 z-[100]">
                 <Navbar onMenuClick={() => setMobileSidebar(true)} />
             </div>
 
             <div className="flex pt-[64px] min-h-screen relative">
 
-                {/* SIDEBAR PC: Fijo a la izquierda */}
+                {/* SIDEBAR PC */}
                 <aside className="w-72 bg-[#1e293b] border-r border-slate-700/50 hidden lg:flex flex-col p-6 fixed h-[calc(100vh-64px)]">
                     <div className="flex items-center gap-3 mb-10 px-2">
                         <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20 text-emerald-500">
                             <FaUserShield size={18} />
                         </div>
-                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-white italic">Panel Admin</h2>
+                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-white italic">{panelTitle}</h2>
                     </div>
                     <SidebarMenu selected={selected} setSelected={setSelected} user={user} />
                     <UserSection user={user} />
                 </aside>
 
-                {/* SIDEBAR MOBILE: Aparece sobre el contenido */}
+                {/* SIDEBAR MOBILE */}
                 {mobileSidebar && (
                     <div className="fixed inset-0 z-[110] lg:hidden">
                         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setMobileSidebar(false)} />
@@ -110,11 +121,8 @@ export default function Dashboard() {
                     </div>
                 )}
 
-                {/* CONTENIDO: ml-72 en PC para no tapar el sidebar */}
                 <main className="flex-1 lg:ml-72 p-4 md:p-10 transition-all">
                     <div className="max-w-5xl mx-auto">
-
-                        {/* Botón flotante para móvil si el Navbar no tiene el trigger */}
                         <button
                             onClick={() => setMobileSidebar(true)}
                             className="lg:hidden mb-6 flex items-center gap-2 bg-emerald-600/10 text-emerald-500 px-4 py-2 rounded-xl border border-emerald-500/20 font-black text-[10px] uppercase italic"
@@ -125,7 +133,9 @@ export default function Dashboard() {
                         <header className="mb-8 flex items-center justify-between border-b border-slate-700/30 pb-6">
                             <div>
                                 <h1 className="text-3xl font-black uppercase italic tracking-tighter text-white">{selected}</h1>
-                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Control General de la Liga</p>
+                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">
+                                    Gestión de {selected} para la Liga
+                                </p>
                             </div>
                         </header>
 

@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react"; // Añadimos useEffect
 import { apiFetch } from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
 import { FaTrophy, FaUserAlt, FaCheckCircle, FaTimes, FaQuestionCircle, FaStar } from "react-icons/fa";
@@ -17,8 +17,26 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
     const [puntosGanador, setPuntosGanador] = useState(3);
     const [puntosEmpate, setPuntosEmpate] = useState(1);
 
+    // NUEVO ESTADO PARA LA LISTA DE ENCARGADOS
+    const [listaEncargados, setListaEncargados] = useState([]);
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    // CARGAR ENCARGADOS AL ABRIR EL MODAL
+    useEffect(() => {
+        if (esAdmin) {
+            const cargarEncargados = async () => {
+                try {
+                    const data = await apiFetch("/api/usuarios/encargados");
+                    if (data) setListaEncargados(data);
+                } catch (e) {
+                    console.error("Error cargando encargados:", e);
+                }
+            };
+            cargarEncargados();
+        }
+    }, [esAdmin]);
 
     const crearTorneo = async () => {
         if (!nombre.trim()) {
@@ -107,7 +125,7 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             </div>
                         </div>
 
-                        {/* CONFIGURACIÓN DE PUNTOS (Nueva Sección) */}
+                        {/* CONFIGURACIÓN DE PUNTOS */}
                         <div className="pt-2">
                             <label className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] ml-1 mb-3 block">Reglas de Puntuación</label>
                             <div className="grid grid-cols-2 gap-5 p-4 bg-[#0f172a]/50 rounded-2xl border border-slate-700/30">
@@ -132,7 +150,7 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             </div>
                         </div>
 
-                        {/* Visibilidad y Encargado */}
+                        {/* Visibilidad y Encargado (CAMBIADO A SELECT) */}
                         <div className="space-y-4 pt-2">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Visibilidad</label>
@@ -145,14 +163,20 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             {esAdmin && (
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                        <FaUserAlt size={10} className="text-emerald-500" /> Email del Encargado
+                                        <FaUserAlt size={10} className="text-emerald-500" /> Asignar Encargado
                                     </label>
-                                    <input
+                                    <select
                                         value={encargadoEmail}
                                         onChange={(e) => setEncargadoEmail(e.target.value)}
-                                        placeholder="ejemplo@liga.com"
-                                        className="w-full h-12 bg-[#0f172a] border border-slate-700/50 px-4 rounded-xl text-sm text-slate-200 outline-none focus:border-emerald-500"
-                                    />
+                                        className="w-full h-12 bg-[#0f172a] border border-slate-700/50 px-4 rounded-xl text-sm text-slate-200 outline-none focus:border-emerald-500 appearance-none cursor-pointer"
+                                    >
+                                        <option value="">Seleccione un encargado...</option>
+                                        {listaEncargados.map(enc => (
+                                            <option key={enc.id} value={enc.email}>
+                                                {enc.nombre} ({enc.email})
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             )}
                         </div>
