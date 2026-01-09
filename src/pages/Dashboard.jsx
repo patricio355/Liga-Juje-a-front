@@ -4,36 +4,35 @@ import Navbar from "../components/Navbar";
 import TorneosList from "../components/dashboard/TorneosList";
 import EquiposList from "../components/equipos/EquiposList";
 import UsuariosList from "../components/usuarios/UsuariosList";
-import { FaFutbol, FaTrophy, FaUsers, FaUserShield, FaTimes, FaBars } from "react-icons/fa";
+import { FaTrophy, FaUsers, FaUserShield, FaTimes, FaBars, FaFutbol, FaLayerGroup } from "react-icons/fa";
 
-/* --- 1. DEFINICIÓN DE COMPONENTES AUXILIARES --- */
+/* --- 1. COMPONENTES AUXILIARES --- */
 
 function SidebarMenu({ selected, setSelected, user }) {
-    // Definimos qué roles tienen acceso a la gestión completa
-    const tieneAccesoTotal = user?.role === "ROLE_ADMIN" || user?.role === "ROLE_ENCARGADOTORNEO";
+    const userRole = user?.role?.toUpperCase().trim();
+    const tieneAccesoTotal = userRole === "ROLE_ADMIN" || userRole === "ROLE_ENCARGADOTORNEO" || userRole === "ADMIN";
 
     const items = [
-        { id: "torneos", icon: <FaFutbol />, label: "Torneos" },
-        // Ahora permitimos que ambos roles vean Equipos y Usuarios
+        { id: "torneos", icon: <FaLayerGroup />, label: "Torneos" },
         { id: "equipos", icon: <FaTrophy />, label: "Equipos", restricted: true },
         { id: "usuarios", icon: <FaUsers />, label: "Usuarios", restricted: true },
     ];
 
     return (
-        <ul className="space-y-2">
+        <ul className="space-y-3">
             {items
                 .filter(item => !item.restricted || tieneAccesoTotal)
                 .map(item => (
                     <li
                         key={item.id}
                         onClick={() => setSelected(item.id)}
-                        className={`group cursor-pointer flex items-center gap-4 p-4 rounded-xl font-bold uppercase text-[10px] tracking-widest transition-all border
+                        className={`group cursor-pointer flex items-center gap-4 p-4 rounded-2xl font-bold uppercase text-[11px] tracking-widest transition-all border
                             ${selected === item.id
-                            ? "bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-900/20"
-                            : "bg-transparent text-slate-400 border-transparent hover:bg-[#0f172a] hover:text-slate-200"
+                            ? "bg-cyan-600 text-white border-cyan-500 shadow-lg shadow-cyan-900/20"
+                            : "bg-transparent text-slate-400 border-transparent hover:bg-[#0a0f2c] hover:text-slate-200"
                         }`}
                     >
-                        <span className={`${selected === item.id ? "text-white" : "text-emerald-500 transition-transform"}`}>
+                        <span className={`text-base ${selected === item.id ? "text-white" : "text-cyan-500"}`}>
                             {item.icon}
                         </span>
                         {item.label}
@@ -45,13 +44,13 @@ function SidebarMenu({ selected, setSelected, user }) {
 
 function UserSection({ user }) {
     return (
-        <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-700/50 flex items-center gap-3 mt-auto">
-            <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center font-black text-white text-xs">
+        <div className="bg-[#0a0f2c] p-5 rounded-[1.5rem] border border-slate-800 flex items-center gap-3 mt-auto shadow-inner">
+            <div className="w-10 h-10 rounded-xl bg-cyan-600 flex items-center justify-center font-bold text-white text-sm shadow-lg">
                 {user?.sub?.charAt(0).toUpperCase() || "U"}
             </div>
             <div className="overflow-hidden">
-                <p className="text-[10px] font-black text-white truncate uppercase italic">{user?.sub || "Usuario"}</p>
-                <p className="text-[9px] font-bold text-emerald-500 uppercase tracking-tighter opacity-70">
+                <p className="text-xs font-bold text-white truncate">{user?.sub || "Usuario"}</p>
+                <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-wider opacity-80">
                     {user?.role?.replace("ROLE_", "") || "USUARIO"}
                 </p>
             </div>
@@ -60,14 +59,12 @@ function UserSection({ user }) {
 }
 
 function Content({ selected, user }) {
-    const sectionClass = "bg-[#1e293b] p-4 md:p-8 rounded-3xl border border-slate-700/50 shadow-2xl";
-    const tieneAccesoTotal = user?.role === "ROLE_ADMIN" || user?.role === "ROLE_ENCARGADOTORNEO";
+    const userRole = user?.role?.toUpperCase().trim();
+    const tieneAccesoTotal = userRole === "ROLE_ADMIN" || userRole === "ROLE_ENCARGADOTORNEO" || userRole === "ADMIN";
 
-    if (selected === "torneos") return <div className={sectionClass}><TorneosList /></div>;
-
-    // Validamos acceso total para estas dos secciones
-    if (selected === "equipos" && tieneAccesoTotal) return <div className={sectionClass}><EquiposList /></div>;
-    if (selected === "usuarios" && tieneAccesoTotal) return <div className={sectionClass}><UsuariosList /></div>;
+    if (selected === "torneos") return <TorneosList />;
+    if (selected === "equipos" && tieneAccesoTotal) return <EquiposList />;
+    if (selected === "usuarios" && tieneAccesoTotal) return <UsuariosList />;
 
     return null;
 }
@@ -79,37 +76,42 @@ export default function Dashboard() {
     const [selected, setSelected] = useState("torneos");
     const [mobileSidebar, setMobileSidebar] = useState(false);
 
-    // Título dinámico para el header lateral
-    const panelTitle = user?.role === "ROLE_ADMIN" ? "Panel Admin" : "Panel Gestión";
+    const panelTitle = user?.role?.includes("ADMIN") ? "Administración" : "Gestión de Liga";
 
     return (
-        <div className="min-h-screen bg-[#0f172a] text-slate-200">
+        <div className="min-h-screen bg-[#05081c] text-slate-200">
             <div className="fixed top-0 left-0 right-0 z-[100]">
                 <Navbar onMenuClick={() => setMobileSidebar(true)} />
             </div>
 
-            <div className="flex pt-[64px] min-h-screen relative">
+            <div className="flex pt-[64px] min-h-screen">
 
-                {/* SIDEBAR PC */}
-                <aside className="w-72 bg-[#1e293b] border-r border-slate-700/50 hidden lg:flex flex-col p-6 fixed h-[calc(100vh-64px)]">
-                    <div className="flex items-center gap-3 mb-10 px-2">
-                        <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20 text-emerald-500">
-                            <FaUserShield size={18} />
+                {/* SIDEBAR PC - Azul noche profundo */}
+                <aside className="w-72 bg-[#0a0f2c] border-r border-slate-800/50 hidden lg:flex flex-col p-6 fixed h-[calc(100vh-64px)] z-40">
+                    <div className="flex items-center gap-3 mb-10 px-2 pt-2">
+                        <div className="bg-cyan-500/10 p-2 rounded-xl border border-cyan-500/20 text-cyan-500">
+                            <FaUserShield size={20} />
                         </div>
-                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-white italic">{panelTitle}</h2>
+                        <h2 className="text-xs font-bold uppercase tracking-widest text-white">{panelTitle}</h2>
                     </div>
-                    <SidebarMenu selected={selected} setSelected={setSelected} user={user} />
+
+                    <nav className="flex-1">
+                        <SidebarMenu selected={selected} setSelected={setSelected} user={user} />
+                    </nav>
+
                     <UserSection user={user} />
                 </aside>
 
                 {/* SIDEBAR MOBILE */}
                 {mobileSidebar && (
                     <div className="fixed inset-0 z-[110] lg:hidden">
-                        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setMobileSidebar(false)} />
-                        <aside className="absolute left-0 top-0 h-full w-72 bg-[#1e293b] p-6 shadow-2xl border-r border-slate-700/50 flex flex-col">
+                        <div className="absolute inset-0 bg-[#05081c]/95 backdrop-blur-sm" onClick={() => setMobileSidebar(false)} />
+                        <aside className="absolute left-0 top-0 h-full w-72 bg-[#0a0f2c] p-6 shadow-2xl border-r border-slate-800 flex flex-col">
                             <div className="flex justify-between items-center mb-10">
-                                <h2 className="text-[10px] font-black uppercase text-white">Administración</h2>
-                                <button onClick={() => setMobileSidebar(false)} className="text-slate-500"><FaTimes size={20} /></button>
+                                <h2 className="text-xs font-bold uppercase text-white tracking-widest">Menú</h2>
+                                <button onClick={() => setMobileSidebar(false)} className="text-slate-500 hover:text-white transition-colors">
+                                    <FaTimes size={24} />
+                                </button>
                             </div>
                             <SidebarMenu
                                 selected={selected}
@@ -121,25 +123,32 @@ export default function Dashboard() {
                     </div>
                 )}
 
-                <main className="flex-1 lg:ml-72 p-4 md:p-10 transition-all">
-                    <div className="max-w-5xl mx-auto">
-                        <button
-                            onClick={() => setMobileSidebar(true)}
-                            className="lg:hidden mb-6 flex items-center gap-2 bg-emerald-600/10 text-emerald-500 px-4 py-2 rounded-xl border border-emerald-500/20 font-black text-[10px] uppercase italic"
-                        >
-                            <FaBars /> Menú de Gestión
-                        </button>
+                {/* CONTENIDO PRINCIPAL - Expandido y alineado a la izquierda */}
+                <main className="flex-1 lg:ml-72 p-6 md:p-10 lg:p-12 transition-all">
+                    {/* Botón menú mobile */}
+                    <button
+                        onClick={() => setMobileSidebar(true)}
+                        className="lg:hidden mb-8 flex items-center gap-3 bg-cyan-600/10 text-cyan-400 px-5 py-3 rounded-xl border border-cyan-500/20 font-bold text-xs uppercase tracking-widest"
+                    >
+                        <FaBars /> Panel de Control
+                    </button>
 
-                        <header className="mb-8 flex items-center justify-between border-b border-slate-700/30 pb-6">
+                    <div className="w-full max-w-[1500px]"> {/* Aumenté el max-w para aprovechar el ancho */}
+                        <header className="mb-12 flex items-center justify-between border-b border-slate-800 pb-8">
                             <div>
-                                <h1 className="text-3xl font-black uppercase italic tracking-tighter text-white">{selected}</h1>
-                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">
-                                    Gestión de {selected} para la Liga
+                                <h1 className="text-4xl font-bold text-white tracking-tight capitalize">
+                                    {selected}
+                                </h1>
+                                <p className="text-xs font-medium text-slate-500 uppercase tracking-[0.2em] mt-2">
+                                    Sistema de Gestión Profesional <span className="text-cyan-500 mx-2">•</span> Liga de Fútbol
                                 </p>
                             </div>
                         </header>
 
-                        <Content selected={selected} user={user} />
+                        {/* Contenedor de las listas sin el padding excesivo de Content para que use el ancho real */}
+                        <div className="min-h-[60vh]">
+                            <Content selected={selected} user={user} />
+                        </div>
                     </div>
                 </main>
             </div>

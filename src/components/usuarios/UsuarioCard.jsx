@@ -1,63 +1,107 @@
-import { FaEdit, FaTrash, FaUserShield, FaEnvelope, FaCircle } from "react-icons/fa";
+import { FaEdit, FaTrash, FaUserShield, FaEnvelope, FaCircle, FaPhoneAlt, FaLock } from "react-icons/fa";
 
 export default function UsuarioCard({ usuario, onEdit, onDelete }) {
+
+    // Determinar si el usuario está activo o no
+    const isActivo = usuario.activo === true;
+
+    // Mapeo de colores por rol
+    const getRolStyle = (rol) => {
+        const r = rol?.toUpperCase();
+        if (!isActivo) return 'bg-slate-900 text-slate-600 border-slate-800'; // Estilo apagado
+        if (r === 'ADMIN') return 'bg-cyan-500/10 text-cyan-400 border-cyan-400/20';
+        if (r === 'ENCARGADOTORNEO') return 'bg-emerald-500/10 text-emerald-400 border-emerald-400/20';
+        return 'bg-slate-800 text-slate-400 border-slate-700';
+    };
+
     return (
-        <div className="bg-[#1e293b] p-6 md:p-8 rounded-[2rem] border border-slate-700/30 shadow-2xl flex flex-col lg:flex-row justify-between items-start lg:items-center group hover:border-emerald-500/40 transition-all relative overflow-hidden">
+        <div className={`bg-[#0a0f2c] p-6 rounded-[1.5rem] border transition-all flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 group relative
+            ${isActivo
+            ? 'border-slate-800 hover:border-cyan-500/30'
+            : 'border-red-900/20 opacity-60 grayscale-[0.5]'
+        }`}
+        >
+            {/* Marca de agua / Icono de candado si está inactivo */}
+            {!isActivo && (
+                <div className="absolute right-6 top-6 text-red-500/20 pointer-events-none">
+                    <FaLock size={40} />
+                </div>
+            )}
 
             <div className="flex-1 w-full">
-                <div className="flex items-center gap-5 flex-wrap">
-                    {/* Icono de Perfil Estilizado */}
-                    <div className="w-12 h-12 bg-[#0f172a] rounded-2xl flex items-center justify-center text-emerald-500 border border-slate-700/50 shadow-inner">
-                        <FaUserShield size={20} />
+                <div className="flex items-start md:items-center gap-5">
+                    {/* Icono de Perfil */}
+                    <div className={`hidden md:flex w-14 h-14 rounded-2xl items-center justify-center border shadow-inner shrink-0 transition-colors
+                        ${isActivo ? 'bg-[#040714] text-cyan-500 border-slate-800' : 'bg-black text-slate-700 border-slate-900'}`}
+                    >
+                        <FaUserShield size={24} />
                     </div>
 
-                    <div>
-                        <h3 className="text-xl font-black text-white uppercase italic tracking-tight group-hover:text-emerald-400 transition-colors leading-none">
-                            {usuario.nombre}
-                        </h3>
+                    <div className="flex-1">
+                        <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2">
+                            <h3 className={`text-lg font-bold tracking-tight ${isActivo ? 'text-white' : 'text-slate-500'}`}>
+                                {usuario.nombre}
+                            </h3>
+                            <span className={`w-fit text-[10px] px-3 py-1 rounded-lg font-bold border tracking-wider uppercase transition-colors ${getRolStyle(usuario.rol)}`}>
+                                {usuario.rol}
+                            </span>
+                        </div>
 
-                        <div className="mt-2 flex items-center gap-4">
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-                                <FaEnvelope className="text-emerald-500/50" />
-                                <span className="text-slate-300 lowercase">{usuario.email}</span>
+                        {/* Información de Contacto */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-2 gap-x-6">
+                            <div className="flex items-center gap-2 text-sm text-slate-400">
+                                <FaEnvelope className={`${isActivo ? 'text-cyan-500/70' : 'text-slate-700'} text-xs`} />
+                                <span className="truncate">{usuario.email}</span>
                             </div>
+
+                            {usuario.telefono && (
+                                <div className="flex items-center gap-2 text-sm text-slate-400">
+                                    <FaPhoneAlt className={`${isActivo ? 'text-cyan-500/70' : 'text-slate-700'} text-xs`} />
+                                    <span>{usuario.telefono}</span>
+                                </div>
+                            )}
+
+                            {usuario.dni && (
+                                <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+                                    <span className={isActivo ? 'text-cyan-500/50' : 'text-slate-800'}>DNI:</span>
+                                    <span className={isActivo ? 'text-slate-400' : 'text-slate-600'}>{usuario.dni}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
-
-                    {/* Badge de Rol estilo Torneos */}
-                    <span className={`ml-auto lg:ml-0 text-[10px] px-4 py-1.5 rounded-xl font-black border tracking-[0.1em] ${
-                        usuario.rol?.toUpperCase() === 'ADMIN'
-                            ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                            : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                    }`}>
-                        {usuario.rol?.toUpperCase()}
-                    </span>
                 </div>
 
-                <div className="mt-4 flex items-center gap-2">
-                    <FaCircle size={8} className="text-emerald-500 animate-pulse" />
-                    <p className="text-[10px] font-black uppercase text-slate-600 italic tracking-[0.2em]">
-                        Acceso habilitado al sistema
+                {/* Status bar inferior */}
+                <div className={`mt-4 flex items-center gap-2 border-t pt-3 transition-colors ${isActivo ? 'border-slate-800/50' : 'border-red-900/10'}`}>
+                    <FaCircle size={7} className={`${isActivo ? 'text-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse' : 'text-red-600 shadow-[0_0_8px_rgba(220,38,38,0.3)]'}`} />
+                    <p className={`text-[11px] font-bold uppercase tracking-wider ${isActivo ? 'text-slate-500' : 'text-red-900/60'}`}>
+                        {isActivo ? 'Acceso Habilitado' : 'Acceso Restringido / Inactivo'}
+                        <span className="mx-2 text-slate-800">•</span>
+                        <span className="text-slate-600 font-medium lowercase italic">Alta por: {usuario.creadorNombre || 'Sistema'}</span>
                     </p>
                 </div>
             </div>
 
-            {/* BOTONES DE ACCIÓN - Idénticos a TorneosList */}
-            <div className="flex gap-3 mt-8 lg:mt-0 w-full lg:w-auto">
+            {/* BOTONES DE ACCIÓN */}
+            <div className="flex gap-2 w-full lg:w-auto relative z-10">
                 <button
-                    title="Editar Usuario"
-                    className="flex-1 lg:w-14 lg:h-14 p-4 bg-[#0f172a] hover:bg-amber-600 border border-slate-700/50 rounded-2xl text-amber-500 hover:text-white transition-all shadow-inner flex items-center justify-center"
+                    title="Editar Perfil"
+                    className="flex-1 lg:w-12 lg:h-12 p-3 bg-[#040714] hover:bg-cyan-600/20 border border-slate-800 hover:border-cyan-500/50 rounded-xl text-slate-400 hover:text-cyan-400 transition-all flex items-center justify-center"
                     onClick={() => onEdit(usuario)}
                 >
-                    <FaEdit size={20} />
+                    <FaEdit size={18} />
                 </button>
 
                 <button
-                    title="Desactivar / Eliminar"
-                    className="flex-1 lg:w-14 lg:h-14 p-4 bg-[#0f172a] hover:bg-red-600 border border-slate-700/50 rounded-2xl text-red-500 hover:text-white transition-all shadow-inner flex items-center justify-center"
+                    title={isActivo ? "Desactivar Usuario" : "Activar Usuario"}
+                    className={`flex-1 lg:w-12 lg:h-12 p-3 bg-[#040714] border border-slate-800 rounded-xl transition-all flex items-center justify-center
+                        ${isActivo
+                        ? 'text-slate-500 hover:bg-red-600/10 hover:border-red-500/50 hover:text-red-500'
+                        : 'text-emerald-500 hover:bg-emerald-600/10 hover:border-emerald-500/50'
+                    }`}
                     onClick={() => onDelete(usuario.id)}
                 >
-                    <FaTrash size={20} />
+                    <FaTrash size={18} />
                 </button>
             </div>
         </div>

@@ -48,6 +48,8 @@ export default function AppRouter() {
                 {/* PROGRAMACIÓN DE fixture (ADMIN) */}
                 <Route path="/dashboard/gestion-partidos/:id" element={<GestionPartidosFixture />} />
 
+
+
                 {/* fallback */}
                 <Route path="*" element={<Navigate to="/torneos" />} />
             </Routes>

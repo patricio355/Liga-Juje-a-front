@@ -2,35 +2,35 @@ import { useState } from "react";
 import { editarUsuario } from "../../api/usuarios.api";
 
 export default function ModalEditarUsuario({ usuario, onClose, onUpdated }) {
-
     const [nombre, setNombre] = useState(usuario.nombre || "");
     const [email, setEmail] = useState(usuario.email || "");
-    const [rol, setRol] = useState(usuario.rol || "");
+    const [rol] = useState(usuario.rol || ""); // Lo dejamos como constante (solo lectura)
+    const [dni, setDni] = useState(usuario.dni || "");
+    const [telefono, setTelefono] = useState(usuario.telefono || "");
+    const [domicilio, setDomicilio] = useState(usuario.domicilio || "");
+
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    // Mapeo para mostrar un texto bonito en el rango bloqueado
+    const labelsRoles = {
+        ADMIN: "Administrador",
+        ENCARGADOTORNEO: "Encargado de Torneo",
+        ENCARGADOEQUIPO: "Encargado de Equipo",
+        ARBITRO: "Árbitro",
+        VEEDOR: "Veedor"
+    };
+
     const validar = () => {
-        if (!nombre.trim()) {
-            return "El nombre no puede estar vacío";
-        }
-
-        if (!email.trim()) {
-            return "El email no puede estar vacío";
-        }
-
+        if (!nombre.trim()) return "El nombre no puede estar vacío";
+        if (!email.trim()) return "El email no puede estar vacío";
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return "El email no tiene un formato válido";
-        }
-
-        if (!rol) {
-            return "Debe seleccionar un rol";
-        }
-
+        if (!emailRegex.test(email)) return "Formato de email inválido";
         return null;
     };
 
-    const guardar = async () => {
+    const guardar = async (e) => {
+        if(e) e.preventDefault();
         setError(null);
 
         const errorValidacion = validar();
@@ -45,7 +45,10 @@ export default function ModalEditarUsuario({ usuario, onClose, onUpdated }) {
             await editarUsuario(usuario.id, {
                 nombre: nombre.trim(),
                 email: email.trim(),
-                rol,
+                rol, // Se envía el rol original
+                dni: dni.trim() || null,
+                telefono: telefono.trim() || null,
+                domicilio: domicilio.trim() || null
             });
 
             onUpdated();
@@ -59,74 +62,115 @@ export default function ModalEditarUsuario({ usuario, onClose, onUpdated }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div
-                className="bg-[#1c213b] p-6 rounded-xl w-full max-w-md"
+        <div className="fixed inset-0 bg-[#040714]/95 backdrop-blur-md flex items-center justify-center z-[100] p-4" onClick={onClose}>
+            <form
+                className="bg-[#0a0f2c] border border-cyan-400/30 rounded-[2rem] w-full max-w-lg shadow-[0_0_60px_-15px_rgba(6,182,212,0.4)] overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
+                onSubmit={guardar}
             >
-                <h2 className="text-xl font-bold mb-4">
-                    Editar usuario
-                </h2>
-
-                <p className="text-sm text-gray-400 mb-4">
-                    {usuario.email}
-                </p>
-
-                {error && (
-                    <div className="bg-red-500/10 border border-red-500 text-red-400 p-3 mb-4 rounded text-sm">
-                        {error}
-                    </div>
-                )}
-
-                {/* NOMBRE */}
-                <input
-                    value={nombre}
-                    placeholder="Nombre *"
-                    className="w-full mb-3 px-3 py-2 bg-gray-700 rounded outline-none"
-                    onChange={e => setNombre(e.target.value)}
-                />
-
-                {/* EMAIL */}
-                <input
-                    value={email}
-                    placeholder="Email *"
-                    type="email"
-                    className="w-full mb-3 px-3 py-2 bg-gray-700 rounded outline-none"
-                    onChange={e => setEmail(e.target.value)}
-                />
-
-                {/* ROL */}
-                <select
-                    value={rol}
-                    className="w-full mb-4 px-3 py-2 bg-gray-700 rounded outline-none"
-                    onChange={e => setRol(e.target.value)}
-                >
-                    <option value="ADMIN">ADMIN</option>
-                    <option value="ENCARGADOEQUIPO">ENCARGADO EQUIPO</option>
-                    <option value="ENCARGADOTORNEO">ENCARGADO TORNEO</option>
-                    <option value="ARBITRO">ARBITRO</option>
-                    <option value="VEEDOR">VEEDOR</option>
-                </select>
-
-                {/* BOTONES */}
-                <div className="flex justify-end gap-3 mt-6">
-                    <button
-                        onClick={onClose}
-                        className="bg-gray-600 px-4 py-2 rounded hover:bg-gray-500 transition"
-                        disabled={loading}
-                    >
-                        Cancelar
-                    </button>
-
-                    <button
-                        onClick={guardar}
-                        className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-500 transition disabled:opacity-50"
-                        disabled={loading}
-                    >
-                        {loading ? "Guardando..." : "Guardar"}
-                    </button>
+                {/* Header Champions Style */}
+                <div className="bg-gradient-to-r from-[#0d143d] to-[#05091e] px-8 py-6 border-b border-cyan-400/10">
+                    <p className="text-2xl font-bold text-white tracking-tighter">
+                        Editar Perfil <span className="text-cyan-500">.</span>
+                    </p>
                 </div>
-            </div>
+
+                <div className="p-8">
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 mb-6 rounded-xl text-sm font-semibold text-center">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-5">
+                        {/* NOMBRE */}
+                        <div className="col-span-2 space-y-1.5">
+                            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Nombre Completo</label>
+                            <input
+                                name="full-name"
+                                autoComplete="name"
+                                placeholder="Nombre completo"
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-400 text-base text-white transition-all shadow-inner"
+                                value={nombre}
+                                onChange={e => setNombre(e.target.value)}
+                            />
+                        </div>
+
+                        {/* EMAIL */}
+                        <div className="space-y-1.5">
+                            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Email</label>
+                            <input
+                                name="email"
+                                autoComplete="email"
+                                placeholder="usuario@email.com"
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-400 text-base text-white transition-all shadow-inner"
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                            />
+                        </div>
+
+                        {/* RANGO (BLOQUEADO) */}
+                        <div className="space-y-1.5">
+                            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Rango del Usuario</label>
+                            <div className="w-full px-5 py-3.5 bg-[#1a1f3d]/30 border border-slate-800/50 rounded-xl text-base font-bold text-cyan-400/60 cursor-not-allowed italic">
+                                {labelsRoles[rol] || rol}
+                            </div>
+                        </div>
+
+                        {/* DNI */}
+                        <div className="space-y-1.5">
+                            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">DNI (Opcional)</label>
+                            <input
+                                placeholder="DNI"
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-400 text-base text-white transition-all shadow-inner"
+                                value={dni}
+                                onChange={e => setDni(e.target.value)}
+                            />
+                        </div>
+
+                        {/* TELÉFONO */}
+                        <div className="space-y-1.5">
+                            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Teléfono</label>
+                            <input
+                                placeholder="Teléfono"
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-400 text-base text-white transition-all shadow-inner"
+                                value={telefono}
+                                onChange={e => setTelefono(e.target.value)}
+                            />
+                        </div>
+
+                        {/* DOMICILIO */}
+                        <div className="col-span-2 space-y-1.5">
+                            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Domicilio</label>
+                            <input
+                                placeholder="Domicilio"
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-400 text-base text-white transition-all shadow-inner"
+                                value={domicilio}
+                                onChange={e => setDomicilio(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4 mt-10">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="flex-1 py-4 px-6 rounded-xl text-sm font-bold uppercase tracking-widest text-slate-500 border border-slate-800 hover:bg-slate-800/50 hover:text-white transition-all active:scale-95"
+                            disabled={loading}
+                        >
+                            Cancelar
+                        </button>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="flex-1 py-4 px-6 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-sm font-bold uppercase tracking-widest text-white transition-all shadow-[0_4px_25px_rgba(6,182,212,0.4)] active:scale-95"
+                        >
+                            {loading ? "PROCESANDO..." : "GUARDAR CAMBIOS"}
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     );
 }

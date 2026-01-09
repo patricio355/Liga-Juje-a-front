@@ -32,7 +32,7 @@ export default function ProgramacionZona() {
     const [modalEditar, setModalEditar] = useState(false);
     const [modalEditarInfo, setModalEditarInfo] = useState(false);
 
-    const userEmail = "m@gmail.com";
+    const userEmail = "";
 
     const obtenerNombres = useCallback(async () => {
         try {
@@ -120,71 +120,70 @@ export default function ProgramacionZona() {
     }, [programados]);
 
     return (
-        <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans">
+        <div className="min-h-screen bg-[#05081c] text-slate-200">
             <Navbar />
             <main className="p-4 md:p-8 max-w-[1500px] mx-auto w-full">
 
                 <div className="flex justify-between items-center mb-10">
-                    <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-500 hover:text-emerald-500 transition group">
+                    <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-500 hover:text-cyan-500 transition-all group">
                         <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-                        <span className="font-black uppercase text-[10px] tracking-widest">Volver</span>
+                        <span className="font-bold uppercase text-[10px] tracking-widest">Volver</span>
                     </button>
-                    <div className="bg-[#1e293b] px-4 py-2 rounded-xl border border-slate-700/50 flex items-center gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest shadow-lg">
-                        <FaUserCircle className="text-emerald-500 text-sm" /> {userEmail}
+                    <div className="bg-[#0a0f2c] px-4 py-2 rounded-xl border border-slate-800 flex items-center gap-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest shadow-lg">
+                        <FaUserCircle className="text-cyan-500 text-sm" /> {userEmail}
                     </div>
                 </div>
 
                 <div className="text-center lg:text-left mb-12 px-2">
-                    <h1 className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white mb-2 leading-none">
+                    <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-tight text-white mb-2 leading-none">
                         {nombreTorneo || "Cargando Torneo..."}
                     </h1>
-                    <p className="text-slate-400 font-black uppercase text-[11px] md:text-xs tracking-[0.3em] opacity-90 flex flex-col lg:flex-row lg:items-center">
+                    <p className="text-slate-500 font-bold uppercase text-[11px] md:text-xs tracking-[0.3em] opacity-80 flex flex-col lg:flex-row lg:items-center">
                         Programación de fechas
-                        <span className="hidden lg:inline mx-2 text-slate-600">|</span>
-                        <span className="text-emerald-500 mt-2 lg:mt-0">
+                        <span className="hidden lg:inline mx-2 text-slate-800">|</span>
+                        <span className="text-cyan-500 mt-2 lg:mt-0">
                             "{nombreZona || '...'}"
                         </span>
                     </p>
                 </div>
 
-                <div className="flex items-center gap-4 mb-12 bg-[#1e293b] p-3 rounded-2xl border border-slate-700/50 w-full lg:w-fit overflow-x-auto shadow-xl">
+                <div className="flex items-center gap-4 mb-12 bg-[#0a0f2c] p-3 rounded-2xl border border-slate-800 w-full lg:w-fit overflow-x-auto shadow-xl">
                     <div className="flex gap-2">
                         {Array.from({ length: totalFechas }, (_, i) => i + 1).map((f) => (
                             <button
                                 key={`btn-fecha-${f}`}
                                 onClick={() => setFechaSeleccionada(f)}
-                                className={`px-6 py-2 rounded-xl font-black text-[10px] uppercase transition-all ${
+                                className={`px-6 py-2 rounded-xl font-bold text-[10px] uppercase transition-all ${
                                     fechaSeleccionada === f
-                                        ? "bg-emerald-600 text-white shadow-lg border-emerald-500"
-                                        : "bg-transparent text-slate-500 border border-transparent hover:text-slate-300 hover:bg-slate-700/30"
+                                        ? "bg-cyan-600 text-white shadow-lg border-cyan-500"
+                                        : "bg-transparent text-slate-500 border border-transparent hover:text-slate-300 hover:bg-slate-800"
                                 }`}
                             > Fecha {f} </button>
                         ))}
                     </div>
-                    <button onClick={agregarFecha} className="bg-emerald-600/10 hover:bg-emerald-600 text-emerald-500 hover:text-white border border-emerald-500/20 px-4 py-2 rounded-xl flex items-center gap-2 transition-all group shrink-0">
+                    <button onClick={agregarFecha} className="bg-cyan-600/10 hover:bg-cyan-600 text-cyan-500 hover:text-white border border-cyan-500/20 px-4 py-2 rounded-xl flex items-center gap-2 transition-all group shrink-0">
                         <FaPlus size={10} className="group-hover:rotate-90 transition-transform" />
-                        <span className="text-[10px] font-black uppercase">Nueva Fecha</span>
+                        <span className="text-[10px] font-bold uppercase">Nueva Fecha</span>
                     </button>
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-5 gap-10">
                     <section className="xl:col-span-3 space-y-6">
-                        {/* SE ELIMINÓ 'overflow-hidden' Y LA LÍNEA VERDE LATERAL */}
-                        <div className="bg-[#1e293b] border border-slate-700/50 rounded-[2rem] p-6 md:p-8 shadow-2xl relative">
+                        <div className="bg-[#0a0f2c] border border-slate-800 rounded-[2.5rem] p-6 md:p-8 shadow-2xl relative">
                             <div className="flex items-center gap-3 mb-8">
-                                <FaFutbol className="text-emerald-500" />
-                                <h2 className="text-slate-400 font-black text-[10px] uppercase tracking-[0.2em]">Enfrentamientos Disponibles</h2>
+                                <FaFutbol className="text-cyan-500" />
+                                <h2 className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em]">Enfrentamientos Disponibles</h2>
                             </div>
 
                             {loading ? (
                                 <div className="py-20 flex flex-col items-center gap-3 opacity-30">
-                                    <FaFutbol size={30} className="animate-spin text-emerald-500" />
+                                    <div className="w-10 h-10 border-4 border-cyan-500/10 border-t-cyan-500 rounded-full animate-spin"></div>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
                                     {tarjetas.length === 0 ? (
-                                        <div className="py-20 text-center border border-dashed border-slate-700/50 rounded-2xl">
-                                            <p className="text-slate-600 text-[10px] font-bold uppercase italic">No hay equipos para programar</p>
+                                        <div className="py-20 text-center border border-dashed border-slate-800 rounded-2xl">
+                                            <p className="text-slate-700 text-[10px] font-bold uppercase tracking-widest">No hay equipos para programar</p>
                                         </div>
                                     ) : (
                                         tarjetas.map((t) => (
@@ -206,25 +205,25 @@ export default function ProgramacionZona() {
                     </section>
 
                     <aside className="xl:col-span-2">
-                        <div className="bg-[#1e293b] border border-slate-700/50 rounded-[2rem] p-6 shadow-2xl sticky top-24">
+                        <div className="bg-[#0a0f2c] border border-slate-800 rounded-[2.5rem] p-6 shadow-2xl sticky top-24">
                             <div className="flex flex-wrap items-center justify-between gap-3 mb-8 px-2">
                                 <div className="flex items-center gap-3">
-                                    <FaCalendarAlt className="text-emerald-500" />
-                                    <h2 className="text-slate-400 font-black text-[10px] uppercase tracking-[0.2em]">JORNADA {fechaSeleccionada}</h2>
+                                    <FaCalendarAlt className="text-cyan-500" />
+                                    <h2 className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em]">JORNADA {fechaSeleccionada}</h2>
                                 </div>
 
                                 {equiposDuplicados.size > 0 && (
-                                    <div className="flex items-center gap-2 bg-red-600/20 border border-red-500/50 px-3 py-1.5 rounded-xl animate-pulse">
+                                    <div className="flex items-center gap-2 bg-red-600/20 border border-red-500/50 px-3 py-1.5 rounded-xl">
                                         <FaExclamationTriangle className="text-red-500" size={12} />
-                                        <span className="text-red-500 text-[9px] font-black uppercase tracking-wider">Duplicados</span>
+                                        <span className="text-red-500 text-[9px] font-bold uppercase tracking-wider">Duplicados</span>
                                     </div>
                                 )}
                             </div>
 
                             <div className="space-y-3">
                                 {programados.length === 0 ? (
-                                    <div className="py-16 text-center border border-dashed border-slate-700/50 rounded-2xl">
-                                        <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest italic">Sin partidos programados</p>
+                                    <div className="py-16 text-center border border-dashed border-slate-800 rounded-2xl">
+                                        <p className="text-slate-700 text-[10px] font-bold uppercase tracking-widest">Sin partidos programados</p>
                                     </div>
                                 ) : (
                                     programados.map((p) => (
@@ -244,7 +243,6 @@ export default function ProgramacionZona() {
                 </div>
             </main>
 
-            {/* MODALES */}
             <CerrarPartidoModal
                 open={modalCerrar}
                 partido={partidoSeleccionado}
