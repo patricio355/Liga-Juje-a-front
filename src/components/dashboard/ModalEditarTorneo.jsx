@@ -1,36 +1,50 @@
 import { useState, useEffect, useContext } from "react";
 import { apiFetch } from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
-import { FaTrophy, FaUserAlt, FaCheckCircle, FaTimes, FaLock } from "react-icons/fa";
+import { FaTrophy, FaCheckCircle, FaTimes, FaLock, FaLayerGroup } from "react-icons/fa";
 
 export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
     const { user } = useContext(AuthContext);
 
-    // Normalizamos el rol para asegurar compatibilidad con el Backend
-    const userRole = user?.role?.toUpperCase().trim();
-    const esAdmin = userRole === "ADMIN" || userRole === "ROLE_ADMIN";
+    // Normalización de roles para control de permisos
+    const miRol = user?.role?.toUpperCase().replace("ROLE_", "") || "";
+    const esAdminGenuino = miRol === "ADMIN";
 
     const [nombre, setNombre] = useState("");
-    const [division, setDivision] = useState("A");
+    const [division, setDivision] = useState("");
     const [encargadoEmail, setEncargadoEmail] = useState("");
     const [estado, setEstado] = useState("activo");
     const [tipo, setTipo] = useState("ABIERTO");
 
+    const [listaEncargados, setListaEncargados] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Cargamos los datos del torneo al abrir el modal
     useEffect(() => {
         if (torneo) {
             setNombre(torneo.nombre || "");
-            setDivision(torneo.division || "A");
+            setDivision(torneo.division || "");
             setEncargadoEmail(torneo.encargadoEmail || "");
             setEstado(torneo.estado?.toLowerCase() || "activo");
             setTipo(torneo.tipo || "ABIERTO");
         }
-    }, [torneo]);
 
-    const actualizarTorneo = async () => {
+        // Solo cargamos la lista si realmente es un ADMIN el que edita
+        if (esAdminGenuino) {
+            const cargarEncargados = async () => {
+                try {
+                    const data = await apiFetch("/api/usuarios/encargados");
+                    if (data && Array.isArray(data)) setListaEncargados(data);
+                } catch (e) {
+                    console.error("Error cargando encargados:", e);
+                }
+            };
+            cargarEncargados();
+        }
+    }, [torneo, esAdminGenuino]);
+
+    const actualizarTorneo = async (e) => {
+        if (e) e.preventDefault();
         if (!nombre.trim()) {
             setError("El nombre es obligatorio");
             return;
@@ -41,27 +55,24 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
 
         try {
             const payload = {
-                nombre,
-                division,
+                nombre: nombre.trim(),
+                division: division || null,
                 estado,
-                tipo, // Se envía el tipo original para mantener consistencia en BD
+                tipo,
             };
 
-            // Solo el ADMIN puede cambiar al encargado del torneo
-            if (esAdmin) payload.encargadoEmail = encargadoEmail;
+            // Solo enviamos el email del encargado si el admin lo cambió
+            if (esAdminGenuino) {
+                payload.encargadoEmail = encargadoEmail || null;
+            }
 
             await apiFetch(`/api/torneos/${torneo.id}`, {
                 method: "PUT",
                 body: JSON.stringify(payload),
             });
 
-            // EJECUCIÓN CLAVE: Llama a recargar() en el componente padre
-            if (onUpdated) {
-                await onUpdated();
-            }
-
+            if (onUpdated) await onUpdated();
             onClose();
-
         } catch (e) {
             setError(e.message || "Error al actualizar torneo");
         } finally {
@@ -70,115 +81,137 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-[#0f172a]/90 backdrop-blur-sm flex items-center justify-center z-[200] p-4" onClick={onClose}>
-            <div
-                className="bg-[#1e293b] w-full max-w-md rounded-[2.5rem] border border-slate-700/50 shadow-2xl overflow-hidden"
+        <div className="fixed inset-0 bg-[#040714]/95 backdrop-blur-md flex items-center justify-center z-[200] p-4" onClick={onClose}>
+            <form
+                className="bg-[#0a0f2c] border border-cyan-500/30 rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden max-h-[95vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
+                onSubmit={actualizarTorneo}
             >
-                {/* Header */}
-                <div className="bg-[#111827]/50 px-8 py-6 border-b border-slate-700/50 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-emerald-500/10 rounded-lg">
-                            <FaTrophy className="text-emerald-500" />
-                        </div>
-                        <h2 className="text-xs font-black uppercase italic tracking-widest text-white leading-none">Configurar Torneo</h2>
+                {/* Header Estilo Champions Admin */}
+                <div className="bg-[#0d143d] px-8 py-7 border-b border-slate-800 flex justify-between items-center">
+                    <div>
+                        <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+                            <FaTrophy className="text-cyan-500" size={20} /> Editar Torneo
+                        </h2>
+                        <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-[0.2em] mt-1">
+                            Panel de Configuración
+                        </p>
                     </div>
-                    <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
-                        <FaTimes size={18} />
+                    <button onClick={onClose} type="button" className="p-2 text-slate-500 hover:text-white transition-colors">
+                        <FaTimes size={20} />
                     </button>
                 </div>
 
-                <div className="p-8 space-y-6">
+                <div className="p-8">
                     {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-xl text-[10px] font-bold uppercase text-center">
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 mb-6 rounded-xl text-[11px] font-bold uppercase tracking-wider text-center">
                             {error}
                         </div>
                     )}
 
-                    <div className="space-y-5">
-                        {/* Modalidad (Informativa y Bloqueada) */}
-                        <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-700/30 flex items-center justify-between">
+                    <div className="grid grid-cols-2 gap-5">
+
+                        {/* Info Bloqueada: Modalidad */}
+                        <div className="col-span-2 bg-[#040714] p-4 rounded-2xl border border-slate-800 flex items-center justify-between shadow-inner">
                             <div>
-                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">Modalidad Actual</p>
-                                <p className="text-xs font-bold text-emerald-400 uppercase italic tracking-widest">{tipo}</p>
+                                <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Modalidad (No editable)</p>
+                                <p className="text-sm font-black text-cyan-500 uppercase italic tracking-widest">{tipo}</p>
                             </div>
-                            <div className="flex items-center gap-2 text-slate-600 bg-slate-800/50 px-3 py-1 rounded-full">
-                                <FaLock size={10} />
-                                <span className="text-[9px] font-bold uppercase">No editable</span>
-                            </div>
+                            <FaLock className="text-slate-800" size={14} />
                         </div>
 
-                        {/* Campo Nombre */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 text-emerald-500/80">Nombre del Torneo</label>
+                        {/* Nombre */}
+                        <div className="col-span-2 space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Nombre de la Competición</label>
                             <input
+                                placeholder="NOMBRE DEL TORNEO"
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-medium text-white transition-all"
                                 value={nombre}
-                                onChange={(e) => setNombre(e.target.value)}
-                                className="w-full h-12 bg-[#0f172a] border border-slate-700/50 px-4 rounded-xl focus:border-emerald-500 text-sm text-slate-200 outline-none transition-all shadow-inner"
+                                onChange={e => setNombre(e.target.value.toUpperCase())}
                             />
                         </div>
 
-                        {/* División y Estado */}
-                        <div className={`grid gap-5 ${esAdmin ? "grid-cols-2" : "grid-cols-1"}`}>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">División</label>
+                        {/* División */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">División</label>
+                            <div className="relative">
                                 <select
+                                    className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
                                     value={division}
-                                    onChange={(e) => setDivision(e.target.value)}
-                                    className="w-full h-12 bg-[#0f172a] border border-slate-700/50 px-4 rounded-xl text-sm text-slate-200 outline-none appearance-none focus:border-emerald-500 cursor-pointer"
+                                    onChange={e => setDivision(e.target.value)}
                                 >
-                                    {["A", "B", "C", "D", "E"].map(d => <option key={d} value={d}>División {d}</option>)}
+                                    <option value="" className="bg-[#0a0f2c]">SIN ESPECIFICAR</option>
+                                    {["A", "B", "C", "D", "E"].map(d => (
+                                        <option key={d} value={d} className="bg-[#0a0f2c]">DIVISIÓN {d}</option>
+                                    ))}
                                 </select>
+                                <FaLayerGroup className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-700 pointer-events-none" size={12} />
                             </div>
-
-                            {esAdmin && (
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estado</label>
-                                    <select
-                                        value={estado}
-                                        onChange={(e) => setEstado(e.target.value)}
-                                        className="w-full h-12 bg-[#0f172a] border border-slate-700/50 px-4 rounded-xl text-sm text-slate-200 outline-none appearance-none focus:border-emerald-500 cursor-pointer"
-                                    >
-                                        <option value="activo">Activo</option>
-                                        <option value="inactivo">Inactivo</option>
-                                    </select>
-                                </div>
-                            )}
                         </div>
 
-                        {/* Email del Responsable (Solo Admin) */}
-                        {esAdmin && (
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                    <FaUserAlt size={10} className="text-emerald-500" /> Email del Responsable
-                                </label>
-                                <input
-                                    value={encargadoEmail}
-                                    onChange={(e) => setEncargadoEmail(e.target.value)}
-                                    className="w-full h-12 bg-[#0f172a] border border-slate-700/50 px-4 rounded-xl text-sm text-slate-200 outline-none focus:border-emerald-500 transition-all"
-                                />
-                            </div>
+                        {/* Estado */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Estado de Competición</label>
+                            <select
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
+                                value={estado}
+                                onChange={e => setEstado(e.target.value)}
+                            >
+                                <option value="activo" className="bg-[#0a0f2c]">ACTIVO (VISIBLE)</option>
+                                <option value="inactivo" className="bg-[#0a0f2c]">INACTIVO (BORRADOR)</option>
+                            </select>
+                        </div>
+
+                        {/* SECCIÓN DE ENCARGADO ELIMINADA PARA NO-ADMINS */}
+                        {esAdminGenuino && (
+                            <>
+                                <div className="col-span-2 py-2 flex items-center gap-3">
+                                    <div className="h-px bg-slate-800 flex-1"></div>
+                                    <span className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Administración Central</span>
+                                    <div className="h-px bg-slate-800 flex-1"></div>
+                                </div>
+
+                                <div className="col-span-2 space-y-1.5">
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                        Reasignar Responsable
+                                    </label>
+                                    <select
+                                        className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-[11px] font-bold text-cyan-400 appearance-none cursor-pointer"
+                                        value={encargadoEmail}
+                                        onChange={e => setEncargadoEmail(e.target.value)}
+                                    >
+                                        <option value="" className="bg-[#0a0f2c]">SIN ENCARGADO (VACÍO)</option>
+                                        {listaEncargados.map(enc => (
+                                            <option key={enc.id || enc.email} value={enc.email} className="bg-[#0a0f2c]">
+                                                {enc.nombre.toUpperCase()} — {enc.email}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </>
                         )}
                     </div>
 
-                    {/* Botones de Acción */}
-                    <div className="flex gap-4 pt-4">
+                    <div className="flex gap-4 mt-10">
                         <button
-                            className="flex-1 h-12 bg-[#0f172a] text-slate-500 rounded-2xl text-[11px] font-black uppercase hover:text-white transition-all border border-slate-700/50 shadow-lg"
+                            type="button"
                             onClick={onClose}
+                            className="flex-1 py-4 rounded-xl text-[11px] font-bold uppercase tracking-widest text-slate-500 border border-slate-800 hover:bg-slate-800 hover:text-white transition-all active:scale-95"
+                            disabled={loading}
                         >
                             Cancelar
                         </button>
+
                         <button
-                            className="flex-[1.5] h-12 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-xl shadow-emerald-900/20 flex items-center justify-center gap-2"
-                            onClick={actualizarTorneo}
+                            type="submit"
                             disabled={loading}
+                            className="flex-1 py-4 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-[11px] font-bold uppercase tracking-widest text-white transition-all shadow-lg shadow-cyan-900/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                         >
-                            {loading ? <span className="animate-pulse">Guardando...</span> : <><FaCheckCircle size={14} /> Aplicar Cambios</>}
+                            {loading ? "ACTUALIZANDO..." : <><FaCheckCircle size={14} /> GUARDAR CAMBIOS</>}
                         </button>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     );
 }

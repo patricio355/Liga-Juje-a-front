@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { FaLayerGroup, FaCheckCircle, FaTimes } from "react-icons/fa";
+import { apiFetch } from "../../api/api";
+import {
+    FaLayerGroup, FaCheckCircle, FaTimes, FaPlusCircle
+} from "react-icons/fa";
 
 export default function ModalCrearZona({ torneo, onClose, onCreated }) {
     const [nombre, setNombre] = useState("");
@@ -7,108 +10,116 @@ export default function ModalCrearZona({ torneo, onClose, onCreated }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const API_URL = import.meta.env.VITE_API_URL;
+    const crearZona = async (e) => {
+        if (e) e.preventDefault();
 
-    const crearZona = async () => {
         if (!nombre.trim()) {
-            setError("El nombre es obligatorio");
+            setError("El nombre de la zona es obligatorio");
             return;
         }
 
         setLoading(true);
         setError(null);
-        const token = localStorage.getItem("token");
 
         try {
-            const res = await fetch(
-                `${API_URL}/api/torneos/${torneo.id}/zonas`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ nombre, descripcion }),
-                }
-            );
+            // Usamos apiFetch para mantener consistencia con el resto de la app
+            await apiFetch(`/api/torneos/${torneo.id}/zonas`, {
+                method: "POST",
+                body: JSON.stringify({
+                    nombre: nombre.toUpperCase(),
+                    descripcion
+                }),
+            });
 
-            if (res.ok) {
-                // CLAVE: Esperamos a que la función de recarga termine antes de cerrar
-                // Esto evita el efecto de "modal cerrado y lista vieja"
-                if (onCreated) {
-                    await onCreated();
-                }
-                onClose();
-            } else {
-                const data = await res.json();
-                setError(data.message || "Error al crear la zona");
+            if (onCreated) {
+                await onCreated();
             }
-
+            onClose();
         } catch (err) {
             console.error("Error al crear zona:", err);
-            setError("Error de conexión con el servidor");
+            setError(err.message || "Error al crear la zona");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="fixed inset-0 bg-[#0f172a]/90 backdrop-blur-sm flex items-center justify-center z-[200] p-4" onClick={onClose}>
-            <div
-                className="bg-[#1e293b] w-full max-w-md rounded-[2.5rem] border border-slate-700/50 shadow-2xl overflow-hidden"
+        <div className="fixed inset-0 bg-[#040714]/95 backdrop-blur-md flex items-center justify-center z-[300] p-4" onClick={onClose}>
+            <form
+                className="bg-[#0a0f2c] border border-cyan-500/30 rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-300"
                 onClick={(e) => e.stopPropagation()}
+                onSubmit={crearZona}
             >
-                {/* Header */}
-                <div className="bg-[#111827]/50 px-8 py-6 border-b border-slate-700/50 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-emerald-500/10 rounded-lg">
-                            <FaLayerGroup className="text-emerald-500" />
-                        </div>
-                        <h2 className="text-xs font-black uppercase italic tracking-widest text-white leading-none">Nueva Zona</h2>
+                {/* Header Estilo Champions Admin */}
+                <div className="bg-[#0d143d] px-10 py-8 border-b border-slate-800 flex justify-between items-center">
+                    <div>
+                        <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+                            <FaLayerGroup className="text-cyan-500" size={24} /> Nueva Zona
+                        </h2>
+                        <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-[0.2em] mt-1">
+                            Torneo: {torneo.nombre}
+                        </p>
                     </div>
-                    <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
-                        <FaTimes size={18} />
+                    <button
+                        onClick={onClose}
+                        type="button"
+                        className="p-3 bg-[#040714] rounded-2xl text-slate-500 hover:text-white border border-slate-800 transition-all"
+                    >
+                        <FaTimes size={20} />
                     </button>
                 </div>
 
-                <div className="p-8 space-y-6">
+                <div className="p-10 space-y-8">
                     {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-xl text-[10px] font-bold uppercase text-center">
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-center animate-pulse">
                             {error}
                         </div>
                     )}
 
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nombre de la Zona</label>
+                    <div className="space-y-6">
+                        <div className="space-y-2.5">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1 flex items-center gap-2">
+                                <FaPlusCircle size={10} className="text-cyan-500" /> Nombre de la Zona / Grupo
+                            </label>
                             <input
                                 value={nombre}
-                                onChange={(e) => setNombre(e.target.value)}
-                                placeholder="Ej: Zona A, Clasificatorio..."
-                                className="w-full h-12 bg-[#0f172a] border border-slate-700/50 px-4 rounded-xl focus:border-emerald-500 text-sm text-slate-200 outline-none transition-all shadow-inner placeholder:text-slate-700"
+                                onChange={(e) => setNombre(e.target.value.toUpperCase())}
+                                placeholder="EJ: ZONA A, GRUPO 1, ELIMINATORIAS..."
+                                className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-base font-bold text-white transition-all placeholder:text-slate-800 shadow-inner"
+                                autoFocus
                             />
+                            <p className="text-[9px] text-slate-600 font-bold uppercase tracking-tighter ml-1">
+                                El nombre aparecerá en las tablas de posiciones y fixtures.
+                            </p>
                         </div>
-
-
                     </div>
 
-                    <div className="flex gap-4 pt-2">
+                    {/* Footer Actions con botones grandes */}
+                    <div className="flex gap-4 pt-4">
                         <button
-                            className="flex-1 h-12 bg-[#0f172a] text-slate-500 rounded-2xl text-[11px] font-black uppercase hover:text-white transition-all border border-slate-700/50"
+                            type="button"
+                            className="flex-1 py-5 rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest text-slate-500 border border-slate-800 hover:bg-slate-800 hover:text-white transition-all active:scale-95"
                             onClick={onClose}
                         >
                             Cancelar
                         </button>
                         <button
-                            className="flex-[1.5] h-12 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-xl shadow-emerald-900/20 flex items-center justify-center gap-2 disabled:opacity-50"
-                            onClick={crearZona}
-                            disabled={loading}
+                            type="submit"
+                            disabled={loading || !nombre.trim()}
+                            className="flex-[1.8] py-5 bg-cyan-600 hover:bg-cyan-500 rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest text-white transition-all shadow-[0_0_25px_-5px_rgba(6,182,212,0.4)] active:scale-95 disabled:opacity-30 disabled:grayscale flex items-center justify-center gap-3"
                         >
-                            {loading ? <span className="animate-pulse">Guardando...</span> : <><FaCheckCircle size={14} /> Crear Zona</>}
+                            {loading ? (
+                                <span className="animate-pulse">Procesando...</span>
+                            ) : (
+                                <>
+                                    <FaCheckCircle size={16} />
+                                    Confirmar Zona
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     );
 }

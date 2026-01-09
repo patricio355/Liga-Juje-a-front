@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom"; // Importante: el Router debe tener path="/torneo/:slug"
+import { useParams } from "react-router-dom";
 import { apiFetch } from "../api/api";
 import TablaPosiciones from "../components/torneo/TablaPosiciones";
 import FixtureTorneo from "../components/torneo/FixtureTorneo";
@@ -8,57 +8,70 @@ import Navbar from "../components/Navbar";
 import { FaTrophy, FaCalendarAlt, FaFutbol, FaChevronDown } from "react-icons/fa";
 
 export default function TorneoPublico() {
-    // 1. CAMBIO: Ahora extraemos 'slug' de la URL
     const { slug } = useParams();
     const [torneo, setTorneo] = useState(null);
     const [zonas, setZonas] = useState([]);
     const [zonaActiva, setZonaActiva] = useState(null);
     const [posiciones, setPosiciones] = useState([]);
-    const [loading, setLoading] = useState(true);
+
+    // CAMBIO 1: Estado de carga único para asegurar que todo esté listo antes de mostrar
+    const [isAppReady, setIsAppReady] = useState(false);
     const [menuAbierto, setMenuAbierto] = useState(false);
 
+    // Carga inicial del Torneo
     useEffect(() => {
         const cargarTorneo = async () => {
             try {
                 const data = await apiFetch("/api/torneos/activos");
-
-                // 2. CAMBIO: Buscamos por slug en lugar de ID
-                // Nota: Asegúrate que tu DTO de Torneo ya incluya el campo 'slug'
                 const t = data.find(item => item.slug === slug);
 
                 if (t) {
                     const zonasOrdenadas = (t.zonas || []).sort((a, b) =>
                         a.nombre.localeCompare(b.nombre, undefined, { numeric: true, sensitivity: 'base' })
                     );
-
                     setTorneo(t);
                     setZonas(zonasOrdenadas);
                     setZonaActiva(zonasOrdenadas[0] ?? null);
+
+                    // Si no hay zonas, marcamos como listo de una vez
+                    if (zonasOrdenadas.length === 0) setIsAppReady(true);
                 }
             } catch (e) {
                 console.error("Error cargando torneo:", e);
             }
         };
         cargarTorneo();
-    }, [slug]); // 3. CAMBIO: El efecto se dispara cuando cambia el slug en la URL
+    }, [slug]);
 
+    // Carga de Posiciones sincronizada
     useEffect(() => {
         if (!zonaActiva) return;
         const cargarPosiciones = async () => {
-            setLoading(true);
             try {
                 const data = await apiFetch(`/api/equipos/posiciones/zona/${zonaActiva.id}`);
                 setPosiciones(data);
-            } catch (e) { console.error(e); }
-            finally { setLoading(false); }
+
+                // CAMBIO 1.1: Una vez cargada la tabla (que suele ser lo último), liberamos la vista
+                // Damos un pequeño respiro para que los componentes de fixture también respiren
+                setTimeout(() => setIsAppReady(true), 300);
+            } catch (e) {
+                console.error(e);
+                setIsAppReady(true); // Liberamos igual para no bloquear en error
+            }
         };
         cargarPosiciones();
     }, [zonaActiva]);
 
-    if (!torneo) return (
+    // Pantalla de carga profesional
+    if (!isAppReady || !torneo) return (
         <div className="min-h-screen bg-[#02040a] flex flex-col items-center justify-center gap-4">
-            <FaFutbol className="text-4xl text-blue-500 animate-spin" />
-            <span className="text-[10px] font-black text-blue-900 uppercase tracking-widest text-center italic">Cargando datos del torneo...</span>
+            <div className="relative">
+                <FaFutbol className="text-4xl text-blue-500 animate-spin" />
+                <div className="absolute inset-0 blur-xl bg-blue-500/20 animate-pulse"></div>
+            </div>
+            <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] text-center animate-pulse">
+                Sincronizando Datos
+            </span>
         </div>
     );
 
@@ -70,13 +83,16 @@ export default function TorneoPublico() {
 
             <div className="relative z-10">
                 <Navbar />
-                <main className="max-w-[1100px] mx-auto p-4 md:px-8">
+                <main className="max-w-[1100px] mx-auto p-4 md:px-8 animate-in fade-in zoom-in-95 duration-700">
                     <div className="text-center mt-2 mb-6">
                         <h1 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter text-white leading-[0.85] drop-shadow-2xl">
                             {torneo.nombre}
-                            <span className="text-blue-500 bg-gradient-to-r from-blue-400 via-blue-200 to-indigo-300 bg-clip-text text-transparent block md:inline md:ml-4">
-                                Div. "{torneo.division}"
-                            </span>
+                            {/* CAMBIO 2: Solo muestra la división si tiene valor (no es nulo ni vacío) */}
+                            {torneo.division && (
+                                <span className="text-blue-500 bg-gradient-to-r from-blue-400 via-blue-200 to-indigo-300 bg-clip-text text-transparent block md:inline md:ml-4">
+                                    Div. "{torneo.division}"
+                                </span>
+                            )}
                         </h1>
                     </div>
 
@@ -104,6 +120,7 @@ export default function TorneoPublico() {
                                         onClick={() => {
                                             setZonaActiva(z);
                                             setMenuAbierto(false);
+                                            setIsAppReady(false); // Reiniciamos carga al cambiar de zona
                                         }}
                                         className={`w-full px-3 py-2.5 rounded-lg text-[10px] font-black uppercase text-center transition-all mb-1 last:mb-0
                                             ${zonaActiva?.id === z.id
@@ -129,12 +146,9 @@ export default function TorneoPublico() {
                                     <FaTrophy size={14} className="text-blue-500" />
                                     <h2 className="font-black uppercase italic tracking-wider text-[10px] text-white">Tabla de Posiciones</h2>
                                 </div>
-                                <span className="text-[8px] font-bold text-blue-400 uppercase bg-[#02040a] px-2 py-0.5 rounded-full border border-blue-900/40">
-                                    {zonaActiva?.nombre}
-                                </span>
                             </div>
                             <div className="p-1 md:p-4 overflow-x-auto">
-                                {loading ? <div className="py-12 flex justify-center"><div className="w-6 h-6 border-2 border-blue-500/10 border-t-blue-500 rounded-full animate-spin" /></div> : <TablaPosiciones posiciones={posiciones} />}
+                                <TablaPosiciones posiciones={posiciones} />
                             </div>
                         </section>
 
@@ -144,9 +158,6 @@ export default function TorneoPublico() {
                                     <FaCalendarAlt size={14} className="text-blue-500" />
                                     <h2 className="font-black uppercase italic tracking-wider text-[10px] text-white">Fixture de Jornadas</h2>
                                 </div>
-                                <span className="text-[8px] font-bold text-blue-400 uppercase bg-[#02040a] px-2 py-0.5 rounded-full border border-blue-900/40">
-                                    {zonaActiva?.nombre}
-                                </span>
                             </div>
                             <div className="w-full">
                                 {zonaActiva && (
@@ -160,7 +171,7 @@ export default function TorneoPublico() {
 
                     <footer className="mt-12 mb-6 text-center border-t border-blue-900/10 pt-4">
                         <p className="text-[8px] font-black text-blue-950 uppercase tracking-[0.3em] italic opacity-40">
-                            UEFA Premium Management • 2026
+                            LIGAS DE JUJUY • 2026
                         </p>
                     </footer>
                 </main>

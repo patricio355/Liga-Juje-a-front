@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { apiFetch } from "../api/api";
 import {
     FaArrowLeft, FaPlus, FaTrophy, FaTrash,
-    FaEdit, FaCalendarAlt, FaMagic, FaCogs, FaCheckCircle, FaLock, FaFutbol
+    FaEdit, FaCalendarAlt, FaMagic, FaCogs, FaCheckCircle, FaLock, FaFutbol, FaLayerGroup
 } from "react-icons/fa";
 
 // Modales
@@ -166,95 +166,113 @@ export default function TorneoDetalleAdmin() {
                     </div>
                 </header>
 
-                {/* Grid de Zonas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
-                    {torneo.zonas?.map((zona) => (
-                        <div key={zona.id} className="bg-[#0a0f2c] p-6 rounded-[2rem] border border-slate-800 flex flex-col shadow-xl hover:border-cyan-500/30 transition-all duration-300">
+                {/* Grid de Zonas o Estado Vacío */}
+                {torneo.zonas && torneo.zonas.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
+                        {torneo.zonas?.map((zona) => (
+                            <div key={zona.id} className="bg-[#0a0f2c] p-6 rounded-[2rem] border border-slate-800 flex flex-col shadow-xl hover:border-cyan-500/30 transition-all duration-300">
 
-                            <div className="bg-[#040714] border border-slate-800 p-5 rounded-2xl mb-6 flex justify-between items-center shadow-inner">
-                                <div className="flex flex-col text-left">
-                                    <h3 className="font-bold text-white uppercase text-xl tracking-tight">
-                                        {zona.nombre}
-                                    </h3>
-                                    {esAbierto && (
-                                        <button onClick={() => navigate(`/dashboard/programacion/zona/${zona.id}`)} className="text-[9px] text-cyan-500 font-bold mt-2 hover:text-cyan-400 transition uppercase tracking-widest">
-                                            <FaCalendarAlt size={10} className="inline mr-1" /> Programación
+                                <div className="bg-[#040714] border border-slate-800 p-5 rounded-2xl mb-6 flex justify-between items-center shadow-inner">
+                                    <div className="flex flex-col text-left">
+                                        <h3 className="font-bold text-white uppercase text-xl tracking-tight">
+                                            {zona.nombre}
+                                        </h3>
+                                        {esAbierto && (
+                                            <button onClick={() => navigate(`/dashboard/programacion/zona/${zona.id}`)} className="text-[9px] text-cyan-500 font-bold mt-2 hover:text-cyan-400 transition uppercase tracking-widest">
+                                                <FaCalendarAlt size={10} className="inline mr-1" /> Programación
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => { setZonaSeleccionada(zona); setModalZonaEditar(true); }} className="p-2 text-slate-500 hover:text-cyan-400 transition bg-[#0a0f2c] rounded-lg border border-slate-800">
+                                            <FaEdit size={14}/>
                                         </button>
-                                    )}
+                                        {(!fixtureYaGenerado || esAbierto) && (
+                                            <button onClick={() => handleEliminarZona(zona.id)} className="p-2 text-slate-500 hover:text-red-500 transition bg-[#0a0f2c] rounded-lg border border-slate-800">
+                                                <FaTrash size={14}/>
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button onClick={() => { setZonaSeleccionada(zona); setModalZonaEditar(true); }} className="p-2 text-slate-500 hover:text-cyan-400 transition bg-[#0a0f2c] rounded-lg border border-slate-800">
-                                        <FaEdit size={14}/>
-                                    </button>
-                                    {(!fixtureYaGenerado || esAbierto) && (
-                                        <button onClick={() => handleEliminarZona(zona.id)} className="p-2 text-slate-500 hover:text-red-500 transition bg-[#0a0f2c] rounded-lg border border-slate-800">
-                                            <FaTrash size={14}/>
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
 
-                            {/* Equipos con Escudos */}
-                            <div className="space-y-2.5 mb-8 flex-1">
-                                {zona.equipos?.length > 0 ? (
-                                    zona.equipos.map((equipo) => (
-                                        <div key={equipo.id} className="bg-[#040714] p-3 rounded-xl border border-slate-800 flex justify-between items-center transition-all hover:border-cyan-500/20 group/item">
-                                            <div className="flex items-center gap-3 overflow-hidden">
-                                                <div className="w-8 h-8 rounded-full bg-[#0a0f2c] border border-slate-800 flex items-center justify-center shrink-0 overflow-hidden shadow-inner group-hover/item:border-cyan-500/30 transition-colors">
-                                                    {equipo.escudo ? (
-                                                        <img src={equipo.escudo} alt={equipo.nombre} className="w-full h-full object-contain p-1" />
-                                                    ) : (
-                                                        <FaFutbol className="text-slate-700 text-sm" />
+                                {/* Equipos con Escudos */}
+                                <div className="space-y-2.5 mb-8 flex-1">
+                                    {zona.equipos?.length > 0 ? (
+                                        zona.equipos.map((equipo) => (
+                                            <div key={equipo.id} className="bg-[#040714] p-3 rounded-xl border border-slate-800 flex justify-between items-center transition-all hover:border-cyan-500/20 group/item">
+                                                <div className="flex items-center gap-3 overflow-hidden">
+                                                    <div className="w-8 h-8 rounded-full bg-[#0a0f2c] border border-slate-800 flex items-center justify-center shrink-0 overflow-hidden shadow-inner group-hover/item:border-cyan-500/30 transition-colors">
+                                                        {equipo.escudo ? (
+                                                            <img src={equipo.escudo} alt={equipo.nombre} className="w-full h-full object-contain p-1" />
+                                                        ) : (
+                                                            <FaFutbol className="text-slate-700 text-sm" />
+                                                        )}
+                                                    </div>
+                                                    <span className="text-slate-300 font-bold uppercase text-[10px] tracking-widest truncate">
+                                                        {equipo.nombre}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => { setEquipoSeleccionado(equipo); setModalEquipoEditar(true); }}
+                                                        className="text-cyan-500 hover:text-cyan-400 transition p-1"
+                                                    >
+                                                        <FaEdit size={12}/>
+                                                    </button>
+
+                                                    {(!fixtureYaGenerado || esAbierto) && (
+                                                        <button
+                                                            onClick={() => handleQuitarEquipo(equipo.equipoZonaId)}
+                                                            className="text-red-500 hover:text-red-400 transition p-1"
+                                                        >
+                                                            <FaTrash size={12}/>
+                                                        </button>
                                                     )}
                                                 </div>
-                                                <span className="text-slate-300 font-bold uppercase text-[10px] tracking-widest truncate">
-                                                    {equipo.nombre}
-                                                </span>
                                             </div>
-
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => { setEquipoSeleccionado(equipo); setModalEquipoEditar(true); }}
-                                                    className="text-cyan-500 hover:text-cyan-400 transition p-1"
-                                                >
-                                                    <FaEdit size={12}/>
-                                                </button>
-
-                                                {(!fixtureYaGenerado || esAbierto) && (
-                                                    <button
-                                                        onClick={() => handleQuitarEquipo(equipo.equipoZonaId)}
-                                                        className="text-red-500 hover:text-red-400 transition p-1"
-                                                    >
-                                                        <FaTrash size={12}/>
-                                                    </button>
-                                                )}
-                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-10 border border-dashed border-slate-800 rounded-xl">
+                                            <p className="text-slate-700 text-[9px] font-bold uppercase tracking-widest">Sin equipos registrados</p>
                                         </div>
-                                    ))
-                                ) : (
-                                    <div className="text-center py-10 border border-dashed border-slate-800 rounded-xl">
-                                        <p className="text-slate-700 text-[9px] font-bold uppercase tracking-widest">Sin equipos registrados</p>
-                                    </div>
-                                )}
-                            </div>
+                                    )}
+                                </div>
 
-                            <div className="flex gap-3 mt-auto border-t border-slate-800 pt-6">
-                                {(esAbierto || !fixtureYaGenerado) && (
-                                    <>
-                                        <button onClick={() => { setZonaSeleccionada(zona); setModalInscribir(true); }} className="flex-1 bg-cyan-600 py-4 rounded-xl text-[10px] font-bold uppercase text-white hover:bg-cyan-500 transition-all shadow-lg shadow-cyan-900/20 active:scale-95">Inscribir</button>
-                                        <button onClick={() => { setZonaSeleccionada(zona); setModalEquipoCrear(true); }} className="flex-1 bg-[#040714] border border-slate-800 py-4 rounded-xl text-[10px] font-bold text-slate-500 uppercase hover:text-cyan-400 transition-all active:scale-95">Crear</button>
-                                    </>
-                                )}
+                                <div className="flex gap-3 mt-auto border-t border-slate-800 pt-6">
+                                    {(esAbierto || !fixtureYaGenerado) && (
+                                        <>
+                                            <button onClick={() => { setZonaSeleccionada(zona); setModalInscribir(true); }} className="flex-1 bg-cyan-600 py-4 rounded-xl text-[10px] font-bold uppercase text-white hover:bg-cyan-500 transition-all shadow-lg shadow-cyan-900/20 active:scale-95">Inscribir</button>
+                                            <button onClick={() => { setZonaSeleccionada(zona); setModalEquipoCrear(true); }} className="flex-1 bg-[#040714] border border-slate-800 py-4 rounded-xl text-[10px] font-bold text-slate-500 uppercase hover:text-cyan-400 transition-all active:scale-95">Crear</button>
+                                        </>
+                                    )}
 
-                                {fixtureYaGenerado && !esAbierto && (
-                                    <div className="w-full py-2 flex items-center justify-center gap-2 text-cyan-500/40 text-[9px] font-bold uppercase tracking-[0.4em]">
-                                        <FaLock size={10} /> Fixture Iniciado
-                                    </div>
-                                )}
+                                    {fixtureYaGenerado && !esAbierto && (
+                                        <div className="w-full py-2 flex items-center justify-center gap-2 text-cyan-500/40 text-[9px] font-bold uppercase tracking-[0.4em]">
+                                            <FaLock size={10} /> Fixture Iniciado
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="bg-[#0a0f2c] border border-dashed border-slate-800 rounded-[3rem] p-20 flex flex-col items-center justify-center text-center shadow-2xl">
+                        <div className="bg-[#040714] p-8 rounded-full border border-slate-800 text-slate-700 mb-6 shadow-inner">
+                            <FaLayerGroup size={48} />
                         </div>
-                    ))}
-                </div>
+                        <h2 className="text-2xl font-bold text-white uppercase tracking-tight mb-2">No hay zonas configuradas</h2>
+                        <p className="text-slate-500 text-sm max-w-md mb-8 leading-relaxed">
+                            Aún no has creado ninguna zona para este torneo. Comienza agregando una para inscribir o crear equipos (Si tu torneo no contiene zonas, agrega una zona con el nombre ej: "General" y agrega a todos tus equipos ahí).
+                        </p>
+                        <button
+                            onClick={() => setModalZonaCrear(true)}
+                            className="bg-cyan-600 hover:bg-cyan-500 text-white px-10 py-4 rounded-2xl font-bold flex items-center gap-3 transition-all shadow-lg shadow-cyan-900/20 uppercase text-[10px] tracking-widest active:scale-95"
+                        >
+                            <FaPlus /> Crear Primera Zona
+                        </button>
+                    </div>
+                )}
             </main>
 
             {/* Modales */}

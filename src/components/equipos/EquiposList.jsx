@@ -73,7 +73,7 @@ export default function EquiposList() {
                         </h2>
                     </div>
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                        Registro oficial de clubes y plantillas institucionales
+                        Registro, baja y modificaciones
                     </p>
                 </div>
 
