@@ -66,12 +66,7 @@ export default function EquipoCard({ equipo, onEdit, onDelete, onInscribir, onEl
 
             {/* ACCIONES PROFESIONALES */}
             <div className="flex items-center justify-end gap-2 border-t border-slate-800 md:border-0 pt-4 md:pt-0">
-                <button
-                    onClick={() => onInscribir(equipo)}
-                    className="flex items-center gap-2 px-5 py-3 bg-cyan-600/10 hover:bg-cyan-600 text-cyan-400 hover:text-white rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all"
-                >
-                    <FaPlus size={10} /> Inscribir
-                </button>
+
 
                 <button
                     onClick={() => onEdit(equipo)}
