@@ -15,6 +15,34 @@ export default function PartidoCardAdmin({
     const esLocalDuplicado = equiposDuplicados?.has(local);
     const esVisitaDuplicado = equiposDuplicados?.has(visitante);
 
+    // Función 1: Formato corto (SÁBADO 16)
+    const formatFechaCorta = (fechaStr) => {
+        if (!fechaStr) return "S/F";
+        try {
+            const date = new Date(fechaStr + "T00:00:00");
+            const dias = ["DOMINGO", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"];
+            return `${dias[date.getDay()]} ${date.getDate()}`;
+        } catch (e) {
+            return fechaStr;
+        }
+    };
+
+    // Función 2: Formato largo (SÁBADO 16 DE ENERO DE 2026)
+    const formatFechaCompleta = (fechaStr) => {
+        if (!fechaStr) return "FECHA NO CARGADA";
+        try {
+            const date = new Date(fechaStr + "T00:00:00");
+            return new Intl.DateTimeFormat('es-AR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            }).format(date).toUpperCase();
+        } catch (e) {
+            return fechaStr;
+        }
+    };
+
     return (
         <div className={`
             relative overflow-hidden rounded-[2rem] border transition-all duration-300 mb-6
@@ -88,10 +116,21 @@ export default function PartidoCardAdmin({
                         <span className="text-[10px] font-bold uppercase truncate">{partido.cancha || "A definir"}</span>
                     </div>
 
-                    {/* FECHA */}
-                    <div className="flex items-center justify-center gap-2 bg-[#040714] px-3 py-2.5 rounded-xl border border-slate-800 text-slate-400">
-                        <FaCalendarAlt size={11} className="opacity-70" />
-                        <span className="text-[10px] font-bold uppercase">{partido.fecha || "S/F"}</span>
+                    {/* FECHA CON TOOLTIP (Igual al Home) */}
+                    <div className="group/fecha relative flex items-center justify-center gap-2 bg-[#040714] px-3 py-2.5 rounded-xl border border-slate-800 text-white cursor-help transition-colors hover:border-cyan-500/50">
+                        <FaCalendarAlt size={11} className="text-cyan-500" />
+                        <span className="text-[10px] font-bold uppercase">
+                            {formatFechaCorta(partido.fecha)}
+                        </span>
+
+                        {/* TOOLTIP FECHA COMPLETA */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover/fecha:opacity-100 transition-all duration-300 pointer-events-none z-[100] translate-y-2 group-hover/fecha:translate-y-0">
+                            <div className="bg-cyan-600 text-white text-[9px] font-black px-4 py-2 rounded-xl shadow-2xl border border-cyan-400/50 whitespace-nowrap flex items-center gap-2 uppercase">
+                                <FaCalendarAlt size={10} />
+                                {formatFechaCompleta(partido.fecha)}
+                            </div>
+                            <div className="w-2 h-2 bg-cyan-600 rotate-45 mx-auto -mt-1 border-r border-b border-cyan-400/50"></div>
+                        </div>
                     </div>
 
                     {/* HORA */}

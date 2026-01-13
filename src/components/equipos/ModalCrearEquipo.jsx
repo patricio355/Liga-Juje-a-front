@@ -5,7 +5,7 @@ import ImageUpload from "../../images/ImageUpload";
 import { AuthContext } from "../../context/AuthContext";
 import {
     FaShieldAlt, FaMapMarkerAlt, FaUserAlt,
-    FaCheckCircle, FaTimes, FaFutbol, FaPalette, FaEnvelope, FaTrash
+    FaCheckCircle, FaTimes, FaPalette, FaEnvelope, FaTrash, FaExternalLinkAlt
 } from "react-icons/fa";
 
 export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
@@ -55,11 +55,10 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
         setForm({ ...form, [name]: value });
     };
 
-    // Al recibir la URL (sea de archivo o IA), se guarda automáticamente
     const handleEscudoUpload = (url) => {
         setForm(prev => ({ ...prev, escudo: url }));
         setIsUploading(false);
-        setError(""); // Limpiamos error si existía por falta de imagen
+        setError("");
     };
 
     const quitarEscudo = () => {
@@ -68,7 +67,6 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
 
     const guardar = async (e) => {
         if (e) e.preventDefault();
-
         if (!form.nombre.trim() || !form.escudo) {
             setError("Faltan datos: El nombre y el escudo son requeridos.");
             return;
@@ -79,7 +77,6 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
 
         try {
             const url = zonaId ? `/api/equipos/zona/${zonaId}` : `/api/equipos`;
-
             await apiFetch(url, {
                 method: "POST",
                 body: JSON.stringify({
@@ -89,7 +86,6 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
                     creadorEmail: form.creadorEmail || null
                 })
             });
-
             if (onCreated) await onCreated();
             onClose();
         } catch (e) {
@@ -113,7 +109,7 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
                             <FaShieldAlt className="text-cyan-500" size={28} /> Nuevo Equipo
                         </h2>
                         <p className="text-[11px] font-bold text-cyan-500 uppercase tracking-[0.2em] mt-1">
-                            Registro de club
+                            Registro de club oficial
                         </p>
                     </div>
                     <button onClick={onClose} type="button" className="p-3 bg-[#040714] rounded-2xl text-slate-500 hover:text-white border border-slate-800 transition-all">
@@ -130,7 +126,7 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
 
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
 
-                        {/* Columna Izquierda: Escudo Dinámico */}
+                        {/* Columna Izquierda: Escudo y Recomendación */}
                         <div className="md:col-span-5 flex flex-col items-center">
                             <div className="relative w-full bg-[#040714] p-8 rounded-[3rem] border border-slate-800 shadow-inner flex flex-col items-center min-h-[250px] justify-center">
                                 {!form.escudo ? (
@@ -138,6 +134,9 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
                                         onUploadStart={() => setIsUploading(true)}
                                         onUploadSuccess={handleEscudoUpload}
                                         currentImage={form.escudo}
+                                        // Estas props deben estar programadas en tu ImageUpload
+                                        autoConfirm={true}
+                                        showAiOptions={false}
                                     />
                                 ) : (
                                     <div className="relative w-full aspect-square flex items-center justify-center">
@@ -150,7 +149,6 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
                                             type="button"
                                             onClick={quitarEscudo}
                                             className="absolute -top-2 -right-2 p-3 bg-red-600 text-white rounded-2xl hover:bg-red-500 transition-all shadow-xl z-20 active:scale-90"
-                                            title="Eliminar y subir otro"
                                         >
                                             <FaTrash size={16} />
                                         </button>
@@ -158,6 +156,21 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
                                 )}
                                 <p className="text-[10px] font-black text-slate-600 uppercase mt-6 tracking-[0.2em]">Escudo Oficial</p>
                             </div>
+
+                            {/* Sugerencia Externa */}
+                            <a
+                                href="https://www.remove.bg/es"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="mt-6 p-4 rounded-2xl bg-cyan-500/5 border border-cyan-500/10 flex flex-col gap-2 hover:bg-cyan-500/10 transition-all w-full"
+                            >
+                                <span className="text-[9px] font-black text-cyan-500 uppercase tracking-widest flex items-center gap-2">
+                                    ¿Tu foto tiene fondo? <FaExternalLinkAlt size={10} />
+                                </span>
+                                <p className="text-[10px] text-slate-400 font-medium leading-tight">
+                                    Usa <span className="text-white font-bold">remove.bg</span> para que el escudo quede transparente.
+                                </p>
+                            </a>
                         </div>
 
                         {/* Columna Derecha: Datos principales */}
@@ -171,7 +184,7 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
                                         name="creadorEmail"
                                         value={form.creadorEmail}
                                         onChange={handleChange}
-                                        className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
+                                        className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white cursor-pointer"
                                     >
                                         <option value="">ASIGNARME A MÍ (ADMIN)</option>
                                         {listaEncargados.map(enc => (
@@ -183,19 +196,26 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
 
                             <div className="space-y-2">
                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 text-cyan-500/70">Nombre del Equipo</label>
-                                <input name="nombre" maxLength={20} value={form.nombre} onChange={e => setForm({...form, nombre: e.target.value.toUpperCase()})} className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-base font-bold text-white transition-all placeholder:text-slate-800" placeholder="EJ: LOCOS F.C." />
+                                <input
+                                    name="nombre"
+                                    maxLength={20}
+                                    value={form.nombre}
+                                    onChange={e => setForm({...form, nombre: e.target.value.toUpperCase()})}
+                                    className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-base font-bold text-white"
+                                    placeholder="EJ: LOCOS F.C."
+                                />
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Localidad</label>
                                 <div className="relative">
-                                    <input name="localidad" value={form.localidad} onChange={handleChange} className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-base font-bold text-white transition-all" placeholder="CIUDAD" />
+                                    <input name="localidad" value={form.localidad} onChange={handleChange} className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-base font-bold text-white" placeholder="CIUDAD" />
                                     <FaMapMarkerAlt className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-700" size={16} />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Fila Inferior: Detalles adicionales */}
+                        {/* Detalles inferiores */}
                         <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-slate-800/50">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Cancha Principal (Opcional)</label>
@@ -203,7 +223,7 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
                                     name="canchaId"
                                     value={form.canchaId}
                                     onChange={handleChange}
-                                    className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
+                                    className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-sm font-bold text-white cursor-pointer"
                                 >
                                     <option value="">SIN CANCHA ASIGNADA</option>
                                     {canchas.map(c => (
@@ -216,7 +236,7 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
                                     <FaEnvelope size={12} className="text-cyan-500" /> Email Encargado
                                 </label>
-                                <input name="encargadoEmail" value={form.encargadoEmail} onChange={handleChange} className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-sm font-medium text-white transition-all" placeholder="USUARIO@EMAIL.COM" />
+                                <input name="encargadoEmail" value={form.encargadoEmail} onChange={handleChange} className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-sm font-medium text-white" placeholder="USUARIO@EMAIL.COM" />
                             </div>
 
                             <div className="space-y-2">
@@ -235,12 +255,12 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
                         </div>
                     </div>
 
-                    {/* Botones de Acción */}
+                    {/* Botones */}
                     <div className="flex gap-6 mt-12 pb-4">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 py-5 rounded-[1.5rem] text-[12px] font-black uppercase tracking-[0.2em] text-slate-500 border border-slate-800 hover:bg-slate-800 hover:text-white transition-all active:scale-95 shadow-lg"
+                            className="flex-1 py-5 rounded-[1.5rem] text-[12px] font-black uppercase tracking-[0.2em] text-slate-500 border border-slate-800 hover:bg-slate-800 hover:text-white transition-all"
                         >
                             Cancelar
                         </button>
@@ -248,15 +268,9 @@ export default function ModalCrearEquipo({ onClose, onCreated, zonaId }) {
                         <button
                             type="submit"
                             disabled={isUploading || loading || !form.escudo || !form.nombre}
-                            className="flex-[2] py-5 bg-cyan-600 hover:bg-cyan-500 rounded-[1.5rem] text-[12px] font-black uppercase tracking-[0.2em] text-white transition-all shadow-[0_0_25px_-5px_rgba(6,182,212,0.4)] active:scale-95 disabled:opacity-30 disabled:grayscale flex items-center justify-center gap-3"
+                            className="flex-[2] py-5 bg-cyan-600 hover:bg-cyan-500 rounded-[1.5rem] text-[12px] font-black uppercase tracking-[0.2em] text-white transition-all shadow-[0_0_25px_-5px_rgba(6,182,212,0.4)] disabled:opacity-30 disabled:grayscale flex items-center justify-center gap-3"
                         >
-                            {isUploading ? (
-                                "Procesando Escudo..."
-                            ) : loading ? (
-                                "Guardando Registro..."
-                            ) : (
-                                <><FaCheckCircle size={18} /> Registrar Equipo</>
-                            )}
+                            {isUploading ? "Subiendo..." : loading ? "Guardando..." : <><FaCheckCircle size={18} /> Registrar Equipo</>}
                         </button>
                     </div>
                 </div>

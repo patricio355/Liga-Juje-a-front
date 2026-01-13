@@ -13,15 +13,14 @@ export default function TorneoPublico() {
     const [zonas, setZonas] = useState([]);
     const [zonaActiva, setZonaActiva] = useState(null);
     const [posiciones, setPosiciones] = useState([]);
-
-    // CAMBIO 1: Estado de carga único para asegurar que todo esté listo antes de mostrar
-    const [isAppReady, setIsAppReady] = useState(false);
     const [menuAbierto, setMenuAbierto] = useState(false);
+    const [loadingTorneo, setLoadingTorneo] = useState(true);
 
-    // Carga inicial del Torneo
+    // 1. Carga inicial del Torneo (Solo bloquea el nombre y las zonas)
     useEffect(() => {
         const cargarTorneo = async () => {
             try {
+                setLoadingTorneo(true);
                 const data = await apiFetch("/api/torneos/activos");
                 const t = data.find(item => item.slug === slug);
 
@@ -32,132 +31,115 @@ export default function TorneoPublico() {
                     setTorneo(t);
                     setZonas(zonasOrdenadas);
                     setZonaActiva(zonasOrdenadas[0] ?? null);
-
-                    // Si no hay zonas, marcamos como listo de una vez
-                    if (zonasOrdenadas.length === 0) setIsAppReady(true);
                 }
             } catch (e) {
                 console.error("Error cargando torneo:", e);
+            } finally {
+                setLoadingTorneo(false);
             }
         };
         cargarTorneo();
     }, [slug]);
 
-    // Carga de Posiciones sincronizada
+    // 2. Carga de Posiciones (Carga independiente al fixture)
     useEffect(() => {
         if (!zonaActiva) return;
         const cargarPosiciones = async () => {
             try {
                 const data = await apiFetch(`/api/equipos/posiciones/zona/${zonaActiva.id}`);
                 setPosiciones(data);
-
-                // CAMBIO 1.1: Una vez cargada la tabla (que suele ser lo último), liberamos la vista
-                // Damos un pequeño respiro para que los componentes de fixture también respiren
-                setTimeout(() => setIsAppReady(true), 300);
             } catch (e) {
-                console.error(e);
-                setIsAppReady(true); // Liberamos igual para no bloquear en error
+                console.error("Error cargando posiciones:", e);
             }
         };
         cargarPosiciones();
     }, [zonaActiva]);
 
-    // Pantalla de carga profesional
-    if (!isAppReady || !torneo) return (
+    // Pantalla de carga solo para los datos base del torneo
+    if (loadingTorneo || !torneo) return (
         <div className="min-h-screen bg-[#02040a] flex flex-col items-center justify-center gap-4">
-            <div className="relative">
-                <FaFutbol className="text-4xl text-blue-500 animate-spin" />
-                <div className="absolute inset-0 blur-xl bg-blue-500/20 animate-pulse"></div>
-            </div>
-            <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] text-center animate-pulse">
-                Sincronizando Datos
+            <FaFutbol className="text-4xl text-blue-500 animate-spin" />
+            <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] animate-pulse">
+                Cargando Torneo
             </span>
         </div>
     );
 
     return (
         <div className="min-h-screen bg-[#02040a] relative overflow-hidden text-slate-200 font-sans">
+            {/* Fondo con resplandor */}
             <div className="absolute inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-50%] left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_rgba(37,99,235,0.22)_0%,_transparent_65%)]"></div>
+                <div className="absolute top-[-50%] left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_rgba(37,99,235,0.15)_0%,_transparent_65%)]"></div>
             </div>
 
             <div className="relative z-10">
                 <Navbar />
-                <main className="max-w-[1100px] mx-auto p-4 md:px-8 animate-in fade-in zoom-in-95 duration-700">
+                <main className="max-w-[1100px] mx-auto p-4 md:px-8 animate-in fade-in duration-500">
+
+                    {/* Header del Torneo */}
                     <div className="text-center mt-2 mb-6">
-                        <h1 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter text-white leading-[0.85] drop-shadow-2xl">
+                        <h1 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter text-white leading-tight">
                             {torneo.nombre}
-                            {/* CAMBIO 2: Solo muestra la división si tiene valor (no es nulo ni vacío) */}
                             {torneo.division && (
-                                <span className="text-blue-500 bg-gradient-to-r from-blue-400 via-blue-200 to-indigo-300 bg-clip-text text-transparent block md:inline md:ml-4">
+                                <span className="text-blue-500 block md:inline md:ml-4 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
                                     Div. "{torneo.division}"
                                 </span>
                             )}
                         </h1>
                     </div>
 
+                    {/* Selector de Zona */}
                     <div className="relative mb-8 flex justify-center z-50">
-                        <div className="relative w-fit min-w-[120px]">
+                        <div className="relative w-fit min-w-[150px]">
                             <div
                                 onClick={() => setMenuAbierto(!menuAbierto)}
-                                className="flex items-center justify-between gap-4 bg-[#0e1630]/95 backdrop-blur-md px-5 py-2 rounded-xl border border-blue-900/40 shadow-xl cursor-pointer hover:border-blue-500/50 transition-all select-none"
+                                className="flex items-center justify-between gap-4 bg-[#0e1630] px-5 py-3 rounded-xl border border-blue-900/40 cursor-pointer hover:border-blue-500 transition-all select-none shadow-lg"
                             >
-                                <span className="text-[11px] md:text-xs font-black text-blue-400 uppercase tracking-[0.2em] whitespace-nowrap">
-                                    {zonaActiva?.nombre || "ZONA"}
+                                <span className="text-xs font-black text-blue-400 uppercase tracking-widest">
+                                    {zonaActiva?.nombre || "SELECCIONAR ZONA"}
                                 </span>
-                                <FaChevronDown
-                                    size={10}
-                                    className={`text-blue-500 transition-transform duration-300 ${menuAbierto ? "rotate-180" : ""}`}
-                                />
-                            </div>
-
-                            <div className={`absolute top-full left-1/2 -translate-x-1/2 w-full mt-2 bg-[#0e1630] border border-blue-800/50 rounded-xl p-1.5 shadow-[0_10px_40px_rgba(0,0,0,0.9)] transition-all duration-200 origin-top
-                                ${menuAbierto ? "opacity-100 visible scale-100 translate-y-0" : "opacity-0 invisible scale-95 -translate-y-2"}
-                            `}>
-                                {zonas.map(z => (
-                                    <button
-                                        key={z.id}
-                                        onClick={() => {
-                                            setZonaActiva(z);
-                                            setMenuAbierto(false);
-                                            setIsAppReady(false); // Reiniciamos carga al cambiar de zona
-                                        }}
-                                        className={`w-full px-3 py-2.5 rounded-lg text-[10px] font-black uppercase text-center transition-all mb-1 last:mb-0
-                                            ${zonaActiva?.id === z.id
-                                            ? "bg-blue-600 text-white shadow-lg"
-                                            : "text-slate-400 hover:bg-blue-900/40 hover:text-blue-400"}
-                                        `}
-                                    >
-                                        {z.nombre}
-                                    </button>
-                                ))}
+                                <FaChevronDown size={10} className={`text-blue-500 transition-transform ${menuAbierto ? "rotate-180" : ""}`} />
                             </div>
 
                             {menuAbierto && (
-                                <div className="fixed inset-0 z-[-1]" onClick={() => setMenuAbierto(false)}></div>
+                                <div className="absolute top-full left-0 w-full mt-2 bg-[#0e1630] border border-blue-800 rounded-xl p-1 shadow-2xl animate-in slide-in-from-top-2">
+                                    {zonas.map(z => (
+                                        <button
+                                            key={z.id}
+                                            onClick={() => {
+                                                setZonaActiva(z);
+                                                setMenuAbierto(false);
+                                            }}
+                                            className={`w-full px-4 py-3 rounded-lg text-[10px] font-black uppercase text-center mb-1 last:mb-0 transition-colors
+                                                ${zonaActiva?.id === z.id ? "bg-blue-600 text-white" : "text-slate-400 hover:bg-blue-900/40"}
+                                            `}
+                                        >
+                                            {z.nombre}
+                                        </button>
+                                    ))}
+                                </div>
                             )}
+                            {menuAbierto && <div className="fixed inset-0 z-[-1]" onClick={() => setMenuAbierto(false)}></div>}
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-10">
-                        <section className="bg-[#0e1630]/50 backdrop-blur-sm rounded-3xl border border-blue-900/40 overflow-hidden shadow-2xl">
-                            <div className="bg-[#050814]/95 px-6 py-3 border-b border-blue-900/40 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <FaTrophy size={14} className="text-blue-500" />
-                                    <h2 className="font-black uppercase italic tracking-wider text-[10px] text-white">Tabla de Posiciones</h2>
-                                </div>
+                        {/* Tabla de Posiciones */}
+                        <section className="bg-[#0e1630]/40 backdrop-blur-md rounded-3xl border border-blue-900/40 overflow-hidden shadow-xl">
+                            <div className="bg-[#050814]/80 px-6 py-4 border-b border-blue-900/40 flex items-center gap-2">
+                                <FaTrophy size={14} className="text-blue-500" />
+                                <h2 className="font-black uppercase italic tracking-wider text-xs text-white">Tabla de Posiciones</h2>
                             </div>
-                            <div className="p-1 md:p-4 overflow-x-auto">
+                            <div className="p-2 md:p-6 overflow-x-auto">
                                 <TablaPosiciones posiciones={posiciones} />
                             </div>
                         </section>
 
-                        <section className="bg-[#0e1630]/50 backdrop-blur-sm rounded-3xl border border-blue-900/40 overflow-hidden shadow-2xl">
-                            <div className="bg-[#050814]/95 px-6 py-3 border-b border-blue-900/40 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <FaCalendarAlt size={14} className="text-blue-500" />
-                                    <h2 className="font-black uppercase italic tracking-wider text-[10px] text-white">Fixture de Jornadas</h2>
-                                </div>
+                        {/* Fixture / Programación */}
+                        <section className="bg-[#0e1630]/40 backdrop-blur-md rounded-3xl border border-blue-900/40 overflow-hidden shadow-xl">
+                            <div className="bg-[#050814]/80 px-6 py-4 border-b border-blue-900/40 flex items-center gap-2">
+                                <FaCalendarAlt size={14} className="text-blue-500" />
+                                <h2 className="font-black uppercase italic tracking-wider text-xs text-white">Cronograma de Partidos</h2>
                             </div>
                             <div className="w-full">
                                 {zonaActiva && (
@@ -169,9 +151,9 @@ export default function TorneoPublico() {
                         </section>
                     </div>
 
-                    <footer className="mt-12 mb-6 text-center border-t border-blue-900/10 pt-4">
-                        <p className="text-[8px] font-black text-blue-950 uppercase tracking-[0.3em] italic opacity-40">
-                            LIGAS DE JUJUY • 2026
+                    <footer className="mt-16 mb-8 text-center opacity-30">
+                        <p className="text-[9px] font-black text-blue-400 uppercase tracking-[0.5em] italic">
+                            LIGAS DE JUJUY • SISTEMA DE GESTIÓN
                         </p>
                     </footer>
                 </main>

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+// 1. Importa tu logo desde la carpeta de assets
+import logoLigas from "../assets/logo.jpg";
 import {
     FaUserCircle, FaBars, FaTimes,
     FaSignOutAlt, FaThLarge, FaHome, FaShieldAlt, FaUserEdit
@@ -39,20 +41,32 @@ export default function Navbar() {
     return (
         <nav className="relative w-full bg-[#050814]/90 backdrop-blur-2xl px-6 py-4 flex justify-between items-center z-[200] border-b border-blue-900/40 shadow-xl">
 
-            {/* LOGO */}
-            <Link to="/" className="flex items-center gap-3 group">
-                <div className="w-11 h-11 bg-gradient-to-br from-blue-600 to-indigo-900 rounded-xl flex items-center justify-center text-white text-2xl shadow-[0_0_20px_rgba(37,99,235,0.3)] group-hover:scale-105 transition-transform">
-                    ⚽
+            {/* LOGO PERSONALIZADO */}
+            <Link to="/" className="flex items-center gap-4 group">
+                <div className="relative">
+                    {/* Contenedor del logo con resplandor dinámico */}
+                    <div className="w-14 h-14 bg-[#0a0f2c] rounded-2xl flex items-center justify-center overflow-hidden border border-blue-500/30 shadow-[0_0_20px_rgba(37,99,235,0.2)] group-hover:scale-105 group-hover:border-blue-400 transition-all duration-300">
+                        <img
+                            src={logoLigas}
+                            alt="Logo Ligas Jujeñas"
+                            className="w-full h-full object-cover scale-110"
+                        />
+                    </div>
+                    {/* Efecto de luz detrás del logo */}
+                    <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                 </div>
+
                 <div className="text-white font-black text-xl leading-5 tracking-tighter uppercase italic">
-                    Ligas <br /> <span className="text-blue-500 bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">Jujeñas</span>
+                    Ligas <br />
+                    <span className="text-blue-500 bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+                        Jujeñas
+                    </span>
                 </div>
             </Link>
 
             <div className="flex items-center gap-4 md:gap-8">
                 {user && (
                     <>
-                        {/* INFO USUARIO PC: Una sola línea elegante */}
                         <div className="hidden md:flex items-center gap-3 bg-[#0e1630] border border-blue-500/20 px-6 py-2.5 rounded-full shadow-lg hover:border-blue-400 transition-colors group/user">
                             <FaShieldAlt className="text-blue-500 text-xs" />
                             <div className="flex items-center gap-2 whitespace-nowrap">
@@ -66,7 +80,6 @@ export default function Navbar() {
                             <FaUserCircle size={22} className="text-blue-500/80 group-hover/user:text-blue-400 transition-colors ml-1" />
                         </div>
 
-                        {/* INFO USUARIO MÓVIL (Personita) */}
                         <div className="relative md:hidden" ref={userDetailRef}>
                             <button
                                 onClick={() => setShowUserDetail(!showUserDetail)}
@@ -86,7 +99,6 @@ export default function Navbar() {
                     </>
                 )}
 
-                {/* HAMBURGUESA */}
                 <button
                     ref={buttonRef}
                     className="p-2.5 text-blue-400 hover:bg-blue-500/10 rounded-2xl transition-all border border-transparent hover:border-blue-900/40"

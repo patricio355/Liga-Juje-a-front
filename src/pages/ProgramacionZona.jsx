@@ -215,7 +215,7 @@ export default function ProgramacionZona() {
                                 {equiposDuplicados.size > 0 && (
                                     <div className="flex items-center gap-2 bg-red-600/20 border border-red-500/50 px-3 py-1.5 rounded-xl">
                                         <FaExclamationTriangle className="text-red-500" size={12} />
-                                        <span className="text-red-500 text-[9px] font-bold uppercase tracking-wider">Duplicados</span>
+                                        <span className="text-red-500 text-[9px] font-bold uppercase tracking-wider">Juega 2 partidos</span>
                                     </div>
                                 )}
                             </div>
