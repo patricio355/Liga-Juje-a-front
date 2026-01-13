@@ -3,7 +3,7 @@ import UsuarioCard from "./UsuarioCard";
 import ModalCrearUsuario from "./ModalCrearUsuario";
 import ModalEditarUsuario from "./ModalEditarUsuario";
 import ConfirmModal from "../dashboard/ConfirmModal";
-import { FaPlus, FaUsers, FaCircle, FaSearch } from "react-icons/fa";
+import { FaPlus, FaUsers, FaSearch, FaFilter } from "react-icons/fa";
 import { getUsuarios, eliminarUsuario } from "../../api/usuarios.api";
 import {AuthContext} from "../../context/AuthContext.jsx";
 
@@ -14,8 +14,14 @@ export default function UsuariosList() {
     const [loading, setLoading] = useState(true);
 
     const { user } = useContext(AuthContext);
-    const userRole = user?.role?.toUpperCase().trim();
-    const esAdmin = userRole === "ADMIN" || userRole === "ROLE_ADMIN";
+
+    // Normalización de roles para permisos de gestión
+    const userRole = user?.role?.toUpperCase().trim().replace("ROLE_", "") || "";
+    const esAdmin = userRole === "ADMIN";
+    const esEncargadoTorneo = userRole === "ENCARGADOTORNEO";
+
+    // Ambos roles pueden ver inactivos y gestionar estados
+    const puedeGestionar = esAdmin || esEncargadoTorneo;
 
     const [crear, setCrear] = useState(false);
     const [editar, setEditar] = useState(null);
@@ -37,16 +43,17 @@ export default function UsuariosList() {
         cargar();
     }, []);
 
-    // LÓGICA DE FILTRADO ACTUALIZADA (Activos, Inactivos, Todos)
+    // LÓGICA DE FILTRADO PARA GESTORES
     const usuariosFiltrados = usuarios
         .filter((u) => {
-            // Si no es admin, solo ve los activos (el backend ya filtra por creador)
-            if (!esAdmin) return u.activo === true;
-
-            // Filtro por estado para el Admin
-            if (filtro === "activos") return u.activo === true;
-            if (filtro === "inactivos") return u.activo === false;
-            return true; // "todos"
+            // Si tiene permisos de gestión, aplicamos el filtro de estado
+            if (puedeGestionar) {
+                if (filtro === "activos") return u.activo === true;
+                if (filtro === "inactivos") return u.activo === false;
+                return true; // "todos"
+            }
+            // Usuarios estándar solo ven activos
+            return u.activo === true;
         })
         .filter((u) => {
             const term = busqueda.toLowerCase();
@@ -68,7 +75,7 @@ export default function UsuariosList() {
 
     return (
         <div className="w-full max-w-6xl mx-auto px-4">
-            {/* HEADER PROFESIONAL */}
+            {/* HEADER */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-8">
                 <div>
                     <div className="flex items-center gap-3 mb-2">
@@ -80,26 +87,26 @@ export default function UsuariosList() {
                         </h2>
                     </div>
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                        {esAdmin
-                            ? "Control de acceso y administración de roles del sistema"
-                            : "Gestión de personal y colaboradores autorizados"}
+                        {puedeGestionar
+                            ? "Panel de administración y control de miembros"
+                            : "Directorio de personal autorizado"}
                     </p>
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full lg:w-auto">
 
-                    {/* FILTROS TRIPLES PARA ADMIN */}
-                    {esAdmin && (
+                    {/* SELECTOR DE ESTADOS (Solo para Admin y Encargado) */}
+                    {puedeGestionar && (
                         <div className="bg-[#0a0f2c] p-1.5 rounded-xl border border-slate-800 flex gap-1 w-full md:w-auto">
                             {["activos", "inactivos", "todos"].map((f) => (
                                 <button
                                     key={f}
-                                    className={`px-5 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                                    onClick={() => setFiltro(f)}
+                                    className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-tighter transition-all ${
                                         filtro === f
-                                            ? "bg-cyan-600 text-white shadow-lg shadow-cyan-900/20"
+                                            ? "bg-cyan-600 text-white shadow-lg"
                                             : "text-slate-500 hover:text-slate-300"
                                     }`}
-                                    onClick={() => setFiltro(f)}
                                 >
                                     {f}
                                 </button>
@@ -112,7 +119,7 @@ export default function UsuariosList() {
                         <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 text-xs" />
                         <input
                             type="text"
-                            placeholder="Buscar miembro..."
+                            placeholder="Buscar por nombre o email..."
                             value={busqueda}
                             onChange={e => setBusqueda(e.target.value)}
                             className="w-full pl-10 pr-5 py-3 rounded-xl bg-[#0a0f2c] text-sm text-slate-200 border border-slate-800 focus:border-cyan-500 outline-none transition-all placeholder:text-slate-700"
@@ -123,19 +130,19 @@ export default function UsuariosList() {
                         onClick={() => setCrear(true)}
                         className="w-full md:w-auto flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg active:scale-95"
                     >
-                        <FaPlus size={12} /> Nuevo Usuario
+                        <FaPlus size={12} /> Registrar Miembro
                     </button>
                 </div>
             </div>
 
-            {/* LISTADO */}
+            {/* LISTADO DE TARJETAS */}
             <div className="grid grid-cols-1 gap-4">
                 {usuariosFiltrados.length === 0 ? (
                     <div className="text-center py-24 bg-[#0a0f2c]/50 rounded-[2.5rem] border border-dashed border-slate-800">
                         <p className="text-slate-600 text-sm font-semibold uppercase tracking-widest">
                             {busqueda
-                                ? "No hay resultados para la búsqueda"
-                                : `No hay usuarios ${filtro} registrados`}
+                                ? "Sin coincidencias para esta búsqueda"
+                                : `No hay registros en la categoría: ${filtro}`}
                         </p>
                     </div>
                 ) : (
@@ -152,15 +159,29 @@ export default function UsuariosList() {
                 )}
             </div>
 
-            {/* MODALES */}
-            {crear && <ModalCrearUsuario onClose={() => setCrear(false)} onCreated={cargar} />}
-            {editar && <ModalEditarUsuario usuario={editar} onClose={() => setEditar(null)} onUpdated={cargar} />}
+            {/* MODALES DE ACCIÓN */}
+            {crear && (
+                <ModalCrearUsuario
+                    onClose={() => setCrear(false)}
+                    onCreated={cargar}
+                />
+            )}
+
+            {editar && (
+                <ModalEditarUsuario
+                    usuario={editar}
+                    onClose={() => setEditar(null)}
+                    onUpdated={cargar}
+                />
+            )}
+
             {eliminarId && (
                 <ConfirmModal
-                    mensaje="¿ESTÁ SEGURO DE DESACTIVAR EL ACCESO DE ESTE USUARIO?"
+                    mensaje="¿ESTÁ SEGURO DE SUSPENDER EL ACCESO DE ESTE USUARIO?"
+                    subMensaje="El usuario será movido a la lista de inactivos."
                     onCancel={() => setEliminarId(null)}
                     onConfirm={async () => {
-                        await eliminarUsuario(eliminarId);
+                        await eliminarUsuario(eliminarId); // Realiza el borrado lógico en el backend
                         setEliminarId(null);
                         cargar();
                     }}

@@ -1,17 +1,15 @@
 import { useState, useContext } from "react";
 import { crearUsuario } from "../../api/usuarios.api";
-import { AuthContext } from "../../context/AuthContext"; // Usamos el contexto para ser consistentes
+import { AuthContext } from "../../context/AuthContext";
 
 export default function ModalCrearUsuario({ onClose, onCreated }) {
     const { user } = useContext(AuthContext);
-
-    // Normalizamos el rol del usuario logueado
     const miRol = user?.role?.toUpperCase().replace("ROLE_", "") || "";
 
     const [form, setForm] = useState({
         nombre: "",
         email: "",
-        rol: "ENCARGADOEQUIPO",
+        rol: "", // 1. Cambiado a vacío para obligar a seleccionar
         password: "",
         dni: "",
         telefono: "",
@@ -28,7 +26,6 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
             { val: "VEEDOR", lab: "VEEDOR" }
         ];
 
-        // Si es ADMIN, habilitamos los rangos superiores
         if (miRol === "ADMIN") {
             return [
                 { val: "ADMIN", lab: "ADMINISTRADOR" },
@@ -43,8 +40,10 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
         if(e) e.preventDefault();
         setError(null);
 
+        // 2. Nuevas validaciones incluyendo el Rango
         if (!form.nombre.trim()) { setError("El nombre es obligatorio"); return; }
         if (!form.email.trim()) { setError("El email es obligatorio"); return; }
+        if (!form.rol) { setError("Debes seleccionar un rango para el miembro"); return; } // <--- Validación de rol
         if (form.password.length < 6) { setError("Contraseña mínima 6 caracteres"); return; }
 
         setLoading(true);
@@ -63,6 +62,7 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
             onCreated();
             onClose();
         } catch (e) {
+            // El backend ahora enviará mensajes claros gracias al GlobalExceptionHandler
             setError(e.message || "Error al crear usuario");
         } finally {
             setLoading(false);
@@ -76,7 +76,6 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                 onClick={(e) => e.stopPropagation()}
                 onSubmit={guardar}
             >
-                {/* Header Estilo Champions Admin */}
                 <div className="bg-[#0d143d] px-8 py-7 border-b border-slate-800">
                     <h2 className="text-2xl font-bold text-white tracking-tight">
                         Crear Usuario
@@ -94,6 +93,7 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                     )}
 
                     <div className="grid grid-cols-2 gap-5">
+                        {/* ... campos de nombre, email, password ... */}
                         <div className="col-span-2 space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Nombre Completo</label>
                             <input
@@ -126,10 +126,9 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                             />
                         </div>
 
-                        <div className="col-span-2 py-1">
-                            <div className="h-px bg-slate-800/50 w-full"></div>
-                        </div>
+                        <div className="col-span-2 py-1"><div className="h-px bg-slate-800/50 w-full"></div></div>
 
+                        {/* ... DNI y Teléfono ... */}
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">DNI (Opcional)</label>
                             <input
@@ -150,13 +149,19 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                             />
                         </div>
 
+                        {/* SELECT CON OPCIÓN POR DEFECTO */}
                         <div className="col-span-2 space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Rango del Miembro</label>
                             <select
-                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-cyan-400 appearance-none cursor-pointer shadow-inner"
+                                className={`w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold appearance-none cursor-pointer shadow-inner transition-colors ${
+                                    !form.rol ? "text-slate-600" : "text-cyan-400"
+                                }`}
                                 value={form.rol}
                                 onChange={e => setForm({ ...form, rol: e.target.value })}
                             >
+                                {/* 3. Opción deshabilitada para obligar a elegir */}
+                                <option value="" disabled>--- SELECCIONAR RANGO ---</option>
+
                                 {renderOptions().map(op => (
                                     <option key={op.val} value={op.val} className="bg-[#0a0f2c] text-white">
                                         {op.lab}
@@ -170,8 +175,7 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 py-4 rounded-xl text-[11px] font-bold uppercase tracking-widest text-slate-500 border border-slate-800 hover:bg-slate-800 hover:text-white transition-all"
-                            disabled={loading}
+                            className="flex-1 py-4 rounded-xl text-[11px] font-bold uppercase tracking-widest text-slate-500 border border-slate-800 hover:bg-slate-800 transition-all"
                         >
                             Cancelar
                         </button>
@@ -179,7 +183,7 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 py-4 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-[11px] font-bold uppercase tracking-widest text-white transition-all shadow-lg shadow-cyan-900/20 active:scale-95 disabled:opacity-50"
+                            className="flex-1 py-4 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-[11px] font-bold uppercase tracking-widest text-white transition-all shadow-lg active:scale-95 disabled:opacity-50"
                         >
                             {loading ? "Registrando..." : "Registrar Alta"}
                         </button>

@@ -209,7 +209,7 @@ export default function ProgramacionZona() {
                             <div className="flex flex-wrap items-center justify-between gap-3 mb-8 px-2">
                                 <div className="flex items-center gap-3">
                                     <FaCalendarAlt className="text-cyan-500" />
-                                    <h2 className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em]">JORNADA {fechaSeleccionada}</h2>
+                                    <h2 className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em]">FECHA {fechaSeleccionada}</h2>
                                 </div>
 
                                 {equiposDuplicados.size > 0 && (

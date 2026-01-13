@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../api/api";
-import { FaSearch, FaTimes, FaUserPlus, FaFutbol } from "react-icons/fa";
+// AGREGADO FaLayerGroup AQUÍ ABAJO
+import { FaSearch, FaTimes, FaUserPlus, FaFutbol, FaShieldAlt, FaLayerGroup } from "react-icons/fa";
 
 export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated }) {
     const [equiposBase, setEquiposBase] = useState([]);
@@ -9,12 +10,9 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
     const [enviando, setEnviando] = useState(false);
     const [error, setError] = useState(null);
 
-    // 1. CARGA DE EQUIPOS SEGÚN ROL
     useEffect(() => {
         const cargarEquipos = async () => {
             try {
-                // CAMBIO CLAVE: Usamos el endpoint que ya filtra según el rol (Admin o Encargado)
-                // Esto garantiza que el encargado vea solo sus equipos y el admin todos.
                 const data = await apiFetch("/api/equipos/mis-equipos");
                 setEquiposBase(data || []);
             } catch (err) {
@@ -27,7 +25,6 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
         cargarEquipos();
     }, []);
 
-    // 2. Lógica de Filtrado: Se mantiene igual
     const idsEquiposInscritos = torneo?.zonas?.flatMap(z =>
         z.equipos?.map(e => e.id) || []
     ) || [];
@@ -53,7 +50,6 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
         }
     };
 
-    // Filtramos: Que coincida con la búsqueda Y que NO esté en la lista de inscritos
     const disponibles = equiposBase.filter(e =>
         e.nombre?.toLowerCase().includes(busqueda.toLowerCase()) &&
         !idsEquiposInscritos.includes(e.id)
@@ -62,35 +58,38 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
     if (!torneo || !zona) return null;
 
     return (
-        <div className="fixed inset-0 bg-[#0f172a]/90 backdrop-blur-sm flex justify-center items-center z-[250] p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-[#040714]/90 backdrop-blur-md flex justify-center items-center z-[500] p-4" onClick={onClose}>
             <div
-                className="bg-[#1e293b] w-full max-w-md rounded-[2.5rem] border border-slate-700/50 shadow-2xl overflow-hidden"
+                className="bg-[#0a0f2c] w-full max-w-md rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden relative"
                 onClick={(e) => e.stopPropagation()}
             >
+                {/* Decoración de fondo */}
+                <div className="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl"></div>
+
                 {/* Header */}
-                <div className="bg-[#111827]/50 px-8 py-6 border-b border-slate-700/50 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-emerald-500/10 rounded-lg">
-                            <FaUserPlus className="text-emerald-500" />
+                <div className="bg-[#05081c]/50 px-8 py-6 border-b border-slate-800 flex justify-between items-center relative z-10">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-cyan-500/10 rounded-2xl border border-cyan-500/20 text-cyan-500">
+                            <FaUserPlus size={20} />
                         </div>
                         <div>
-                            <h3 className="text-xs font-black uppercase italic tracking-widest text-white leading-none">Inscribir Equipo</h3>
-                            <p className="text-[10px] font-bold text-emerald-500 uppercase mt-1">Zona: {zona.nombre}</p>
+                            <h3 className="text-sm font-black uppercase tracking-widest text-white leading-none">Inscribir Equipo</h3>
+                            <p className="text-[10px] font-bold text-cyan-500 uppercase mt-1.5 tracking-tighter">Zona Destino: {zona.nombre}</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
-                        <FaTimes size={18} />
+                    <button onClick={onClose} className="bg-slate-800/50 p-2 rounded-xl text-slate-400 hover:text-white transition-all">
+                        <FaTimes size={16} />
                     </button>
                 </div>
 
                 {/* Buscador */}
-                <div className="p-6 pb-0">
+                <div className="p-6 pb-2 relative z-10">
                     <div className="relative">
-                        <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" />
+                        <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" />
                         <input
                             type="text"
-                            placeholder="Buscar entre tus equipos disponibles..."
-                            className="w-full bg-[#0f172a] border border-slate-700/50 rounded-2xl py-3.5 pl-11 pr-4 text-sm text-slate-200 outline-none focus:border-emerald-500 transition-all placeholder:text-slate-700 shadow-inner"
+                            placeholder="Buscar en mis equipos..."
+                            className="w-full bg-[#040714] border border-slate-800 rounded-2xl py-4 pl-12 pr-4 text-xs font-bold text-slate-200 outline-none focus:border-cyan-500/50 transition-all placeholder:text-slate-600 shadow-inner uppercase tracking-widest"
                             autoFocus
                             value={busqueda}
                             onChange={(e) => setBusqueda(e.target.value)}
@@ -100,47 +99,63 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
 
                 {/* Error Alert */}
                 {error && (
-                    <div className="mx-6 mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
-                        <p className="text-[10px] font-black text-red-400 uppercase text-center">{error}</p>
+                    <div className="mx-6 mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl animate-pulse">
+                        <p className="text-[9px] font-black text-red-400 uppercase text-center tracking-widest">{error}</p>
                     </div>
                 )}
 
-                {/* Lista */}
-                <div className="max-h-[350px] overflow-y-auto p-4 space-y-2 custom-scrollbar">
+                {/* Lista de Equipos */}
+                <div className="max-h-[380px] overflow-y-auto p-6 space-y-3 custom-scrollbar relative z-10">
                     {loading ? (
-                        <div className="flex flex-col items-center py-12 gap-4">
-                            <FaFutbol className="text-3xl text-emerald-600 animate-spin" />
-                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Consultando tus equipos...</p>
+                        <div className="flex flex-col items-center py-16 gap-4 opacity-50">
+                            <FaFutbol className="text-4xl text-cyan-500 animate-spin" />
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Cargando Autorizados</p>
                         </div>
                     ) : disponibles.length > 0 ? (
                         disponibles.map(equipo => (
-                            <div key={equipo.id} className="flex justify-between items-center p-4 bg-[#0f172a]/40 hover:bg-emerald-500/5 rounded-2xl border border-slate-700/30 hover:border-emerald-500/30 transition-all group">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-[#0f172a] rounded-xl flex items-center justify-center text-xs font-black text-emerald-500 border border-slate-700/50 group-hover:border-emerald-500/50 transition-all">
-                                        {equipo.nombre?.charAt(0).toUpperCase()}
+                            <div key={equipo.id} className="flex justify-between items-center p-4 bg-[#05081c] hover:bg-[#0d153a] rounded-[1.5rem] border border-slate-800 hover:border-cyan-500/30 transition-all group">
+                                <div className="flex items-center gap-4 overflow-hidden">
+                                    <div className="w-12 h-12 bg-[#0a0f2c] rounded-2xl border border-slate-800 flex items-center justify-center shrink-0 overflow-hidden shadow-inner group-hover:border-cyan-500/30 transition-all">
+                                        {equipo.escudo ? (
+                                            <img
+                                                src={equipo.escudo}
+                                                alt={equipo.nombre}
+                                                className="w-full h-full object-contain p-1.5"
+                                            />
+                                        ) : (
+                                            <FaShieldAlt className="text-slate-700 text-xl" />
+                                        )}
                                     </div>
-                                    <span className="text-sm font-bold text-slate-300 group-hover:text-white transition-colors">{equipo.nombre}</span>
+                                    <div className="truncate">
+                                        <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest group-hover:text-white transition-colors block truncate">
+                                            {equipo.nombre}
+                                        </span>
+                                        <span className="text-[8px] font-bold text-slate-600 uppercase">Disponible</span>
+                                    </div>
                                 </div>
                                 <button
                                     disabled={enviando}
                                     onClick={() => handleInscribir(equipo.id)}
-                                    className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[10px] font-black px-5 py-2.5 rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-tighter"
+                                    className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-[10px] font-black px-5 py-3 rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-widest shrink-0"
                                 >
                                     {enviando ? "..." : "Inscribir"}
                                 </button>
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-12 px-6">
-                            <p className="text-[11px] font-bold text-slate-600 uppercase tracking-widest leading-relaxed italic">
-                                {busqueda ? "No hay coincidencias en tus equipos." : "No tienes equipos disponibles para inscribir."}
+                        <div className="text-center py-16 px-6 border border-dashed border-slate-800 rounded-[2rem]">
+                            <FaLayerGroup className="mx-auto text-slate-800 mb-4" size={30} />
+                            <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest leading-relaxed italic">
+                                {busqueda ? "No hay coincidencias." : "No hay equipos disponibles."}
                             </p>
                         </div>
                     )}
                 </div>
 
-                <div className="p-5 bg-[#111827]/30 text-center border-t border-slate-700/50">
-                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Acceso restringido según privilegios</p>
+                <div className="p-5 bg-[#05081c]/50 text-center border-t border-slate-800">
+                    <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.3em]">
+                        Seguridad de la Liga • Control de Acceso
+                    </p>
                 </div>
             </div>
         </div>
