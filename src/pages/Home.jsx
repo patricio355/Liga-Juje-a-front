@@ -1,13 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import Navbar from "../components/Navbar";
-// import AdsCarousel from "../components/AdsCarousel"; // Publicidad comentada
 import SearchBar from "../components/SearchBar";
 import TorneoCard from "../components/torneo/TorneoCard.jsx";
+import AdsCarousel from "../components/AdsCarousel";
 import { apiFetch } from "../api/api";
 import { FaTrophy } from "react-icons/fa";
-
-// Importamos la imagen para los laterales (Comentado)
-// import cartelLateral from "../publicidades/cartelera/cartelera.jpg";
 
 export default function Home() {
     const [search, setSearch] = useState("");
@@ -32,59 +29,74 @@ export default function Home() {
     }, [torneos, search]);
 
     return (
-        <div className="min-h-screen bg-[#02040a] relative overflow-hidden text-slate-200 font-sans">
+        <div className="min-h-screen bg-[#05070a] relative overflow-hidden text-slate-300 font-sans">
 
-            {/* --- PUBLICIDADES LATERALES COMENTADAS --- */}
-            {/* <aside className="hidden 2xl:flex fixed left-2 top-1/2 -translate-y-1/2 w-[400px] h-[90vh] z-50 pointer-events-none">
-                <div className="w-full h-full relative group pointer-events-auto">
-                    <img
-                        src={cartelLateral}
-                        alt="Publicidad Izquierda"
-                        className="w-full h-full object-contain opacity-100 transition-transform duration-1000 group-hover:scale-105"
-                    />
-                </div>
-            </aside>
+            {/* Fondo con profundidad metálica */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_#1e293b_0%,_transparent_50%)] opacity-40"></div>
+            </div>
 
-            <aside className="hidden 2xl:flex fixed right-2 top-1/2 -translate-y-1/2 w-[400px] h-[90vh] z-50 pointer-events-none">
-                <div className="w-full h-full relative group pointer-events-auto">
-                    <img
-                        src={cartelLateral}
-                        alt="Publicidad Derecha"
-                        className="w-full h-full object-contain opacity-100 transition-transform duration-1000 group-hover:scale-105"
-                    />
-                </div>
-            </aside>
-            */}
+            {/* --- PUBLICIDADES LATERALES ELIMINADAS AQUÍ --- */}
 
-            <div className="relative z-10">
+            <div className="relative z-[100]">
                 <Navbar />
 
-                {/* Carrusel superior comentado */}
-                {/* <AdsCarousel /> */}
-
-                <main className="px-4 py-8 max-w-4xl mx-auto w-full">
-                    <div className="flex flex-col items-center mt-6 mb-10">
-                        <div className="bg-[#0e1630]/60 backdrop-blur-md p-4 rounded-2xl mb-4 border border-blue-500/30 shadow-[0_0_40px_rgba(37,99,235,0.3)]">
-                            <FaTrophy className="text-4xl text-blue-400" />
+                {/* --- PUBLICIDAD SUPERIOR (MANTENIDA) --- */}
+                <section className="max-w-5xl mx-auto mt-6 px-4">
+                    <div className="relative p-1 bg-gradient-to-b from-slate-700/30 to-transparent rounded-[2rem] shadow-2xl overflow-hidden border border-slate-800/50">
+                        <div className="rounded-[1.8rem] overflow-hidden">
+                            <AdsCarousel />
                         </div>
-                        <h1 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter text-white text-center leading-none">
-                            Torneos <span className="text-blue-500 bg-gradient-to-r from-blue-400 via-blue-200 to-indigo-300 bg-clip-text text-transparent">Activos</span>
+                        {/* Brillo metálico superior sutil */}
+                        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-400/20 to-transparent"></div>
+                    </div>
+                </section>
+
+                <main className="px-4 py-12 max-w-4xl mx-auto w-full">
+                    <div className="flex flex-col items-center mb-12">
+                        <div className="relative mb-6">
+                            <div className="absolute -inset-4 bg-slate-500/10 blur-2xl rounded-full"></div>
+                            <div className="relative bg-white/5 backdrop-blur-sm p-5 rounded-[2rem] border border-slate-700/30">
+                                <FaTrophy className="text-4xl text-slate-200" />
+                            </div>
+                        </div>
+
+                        <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white text-center leading-none">
+                            Torneos <br />
+                            <span className="bg-gradient-to-r from-slate-100 via-slate-400 to-slate-500 bg-clip-text text-transparent">
+                                Activos
+                            </span>
                         </h1>
                     </div>
 
-                    <div className="mb-10">
-                        <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar competencia..." />
+                    {/* --- BUSCADOR LIMPIO --- */}
+                    <div className="mb-14 px-2">
+                        <SearchBar
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="BUSCAR COMPETICIÓN..."
+                        />
                     </div>
 
-                    <div className="grid gap-5">
+                    {/* --- GRID DE CARDS DIRECTAS --- */}
+                    <div className="grid gap-6">
                         {loading ? (
-                            <div className="h-40 bg-white/5 animate-pulse rounded-3xl" />
+                            <div className="space-y-4">
+                                <div className="h-32 bg-white/5 animate-pulse rounded-3xl" />
+                                <div className="h-32 bg-white/5 animate-pulse rounded-3xl" />
+                            </div>
                         ) : (
                             filtrados.map(t => (
-                                <div key={t.id} className="transition-transform hover:scale-[1.01]">
+                                <div key={t.id} className="transition-transform hover:scale-[1.01] duration-300">
                                     <TorneoCard torneo={t} />
                                 </div>
                             ))
+                        )}
+
+                        {!loading && filtrados.length === 0 && (
+                            <div className="text-center py-20 bg-white/5 rounded-[3rem] border border-dashed border-slate-800">
+                                <p className="text-slate-500 font-bold uppercase tracking-widest italic">No se encontraron torneos</p>
+                            </div>
                         )}
                     </div>
                 </main>

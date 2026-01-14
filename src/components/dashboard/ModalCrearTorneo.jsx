@@ -1,21 +1,43 @@
 import { useContext, useState, useEffect } from "react";
 import { apiFetch } from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
-import { FaTrophy, FaCheckCircle, FaChartLine, FaUserAlt, FaQuestionCircle } from "react-icons/fa";
+import { FaTrophy, FaChartLine, FaUserAlt, FaPalette, FaMars, FaVenus, FaVenusMars, FaInstagram } from "react-icons/fa";
+// IMPORTANTE: Ajusta la ruta según donde guardaste tu componente ImageUpload
+import ImageUpload from "../../images/ImageUpload";
+
+// 1. Definición de Plantillas Premium
+const PLANTILLAS = {
+    NEGRO: { p: "#05070a", s: "#0a0c10", tp: "#ffffff", ts: "#94a3b8" },
+    AZUL: { p: "#050814", s: "#0d143d", tp: "#ffffff", ts: "#60a5fa" },
+    ROJO: { p: "#0a0404", s: "#1a0808", tp: "#ffffff", ts: "#f87171" },
+    VERDE: { p: "#040a05", s: "#081a0d", tp: "#ffffff", ts: "#4ade80" },
+    MORADO: { p: "#08040a", s: "#160d1f", tp: "#ffffff", ts: "#a78bfa" },
+    GRIS: { p: "#111827", s: "#1f2937", tp: "#ffffff", ts: "#d1d5db" },
+    VIOLETA: { p: "#0f0514", s: "#1e0a29", tp: "#ffffff", ts: "#c084fc" },
+    ROSADO: { p: "#0a0406", s: "#1f0d14", tp: "#ffffff", ts: "#f472b6" },
+    DORADO: { p: "#0a0904", s: "#1a1808", tp: "#ffffff", ts: "#fbbf24" },
+    ESMERALDA: { p: "#020617", s: "#0f172a", tp: "#ffffff", ts: "#10b981" }
+};
 
 export default function ModalCrearTorneo({ onClose, onCreated }) {
     const { user } = useContext(AuthContext);
+    // Verificación de rol para mostrar el campo de encargado
     const esAdmin = user?.role === "ROLE_ADMIN" || user?.role === "ADMIN";
 
+    // Estados originales
     const [nombre, setNombre] = useState("");
-    // 1. Cambiamos el estado inicial a vacío
     const [division, setDivision] = useState("");
     const [encargadoEmail, setEncargadoEmail] = useState("");
     const [estado, setEstado] = useState("activo");
     const [tipo, setTipo] = useState("CERRADO");
-
     const [puntosGanador, setPuntosGanador] = useState(3);
     const [puntosEmpate, setPuntosEmpate] = useState(1);
+    const [plantillaActiva, setPlantillaActiva] = useState("NEGRO");
+
+    // --- NUEVOS ESTADOS ---
+    const [fotoUrl, setFotoUrl] = useState("");
+    const [genero, setGenero] = useState("MASCULINO");
+    const [redSocial, setRedSocial] = useState("");
 
     const [listaEncargados, setListaEncargados] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -45,13 +67,23 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
         try {
             const payload = {
                 nombre: nombre.trim(),
-                // 2. Si es string vacío, enviamos null al backend
                 division: division || null,
                 estado,
                 tipo,
                 puntosGanador: Number(puntosGanador),
                 puntosEmpate: Number(puntosEmpate),
-                encargadoEmail: encargadoEmail || null
+                encargadoEmail: encargadoEmail || null,
+
+                // Colores de la plantilla
+                colorPrimario: PLANTILLAS[plantillaActiva].p,
+                colorSecundario: PLANTILLAS[plantillaActiva].s,
+                colorTextoPrimario: PLANTILLAS[plantillaActiva].tp,
+                colorTextoSecundario: PLANTILLAS[plantillaActiva].ts,
+
+                // --- NUEVOS CAMPOS ---
+                fotoUrl: fotoUrl || null,
+                genero: genero,
+                redSocial: redSocial || null
             };
 
             await apiFetch("/api/torneos", {
@@ -71,7 +103,8 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
     return (
         <div className="fixed inset-0 bg-[#040714]/95 backdrop-blur-md flex items-center justify-center z-[200] p-4" onClick={onClose}>
             <form
-                className="bg-[#0a0f2c] border border-cyan-500/30 rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden max-h-[95vh] overflow-y-auto"
+                // CAMBIO 1: max-w-4xl para hacerlo más ancho en PC
+                className="bg-[#0a0f2c] border border-cyan-500/30 rounded-[2.5rem] w-full max-w-4xl shadow-2xl overflow-hidden max-h-[95vh] overflow-y-auto custom-scrollbar"
                 onClick={(e) => e.stopPropagation()}
                 onSubmit={crearTorneo}
             >
@@ -80,7 +113,7 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                         <FaTrophy className="text-cyan-500" size={20} /> Crear Torneo
                     </h2>
                     <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-[0.2em] mt-1">
-                        Configuración de Nueva Competición
+                        Estilo Visual y Configuración
                     </p>
                 </div>
 
@@ -91,8 +124,25 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-5">
-                        <div className="col-span-2 space-y-1.5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        {/* --- SECCIÓN LOGO DEL TORNEO --- */}
+                        <div className="col-span-1 md:col-span-2 space-y-2 flex flex-col items-center border-b border-slate-800/50 pb-6 mb-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                Logo Principal
+                            </label>
+                            <ImageUpload
+                                currentImage={fotoUrl}
+                                onUploadStart={() => setLoading(true)}
+                                onUploadSuccess={(url) => {
+                                    setFotoUrl(url);
+                                    setLoading(false);
+                                }}
+                            />
+                        </div>
+
+                        {/* Nombre */}
+                        <div className="col-span-1 md:col-span-2 space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Nombre de la Competición</label>
                             <input
                                 placeholder="EJ. TORNEO APERTURA 2026"
@@ -102,7 +152,32 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             />
                         </div>
 
-                        {/* División (AHORA OPCIONAL) */}
+                        {/* Plantillas Visuales */}
+                        <div className="col-span-1 md:col-span-2 space-y-3 pt-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                <FaPalette className="text-cyan-500" /> Estilo de Plantilla
+                            </label>
+                            <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
+                                {Object.keys(PLANTILLAS).map((key) => (
+                                    <button
+                                        key={key}
+                                        type="button"
+                                        onClick={() => setPlantillaActiva(key)}
+                                        className={`h-14 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 group ${plantillaActiva === key ? "border-cyan-500 scale-105 shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "border-slate-800 opacity-50 hover:opacity-100"}`}
+                                        style={{ backgroundColor: PLANTILLAS[key].p }}
+                                    >
+                                        <div className="w-5 h-1 rounded-full" style={{ backgroundColor: PLANTILLAS[key].ts }}></div>
+                                        <span className="text-[6px] md:text-[7px] font-black text-white uppercase tracking-tighter">{key}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="col-span-1 md:col-span-2 py-1">
+                            <div className="h-px bg-slate-800/50 w-full"></div>
+                        </div>
+
+                        {/* División */}
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">División</label>
                             <select
@@ -110,7 +185,6 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                                 value={division}
                                 onChange={e => setDivision(e.target.value)}
                             >
-                                {/* 3. Opción de dejarlo vacío */}
                                 <option value="" className="bg-[#0a0f2c]">SIN ESPECIFICAR</option>
                                 {["A", "B", "C", "D", "E"].map(d => (
                                     <option key={d} value={d} className="bg-[#0a0f2c]">DIVISIÓN {d}</option>
@@ -118,17 +192,28 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             </select>
                         </div>
 
+                        {/* Género */}
                         <div className="space-y-1.5">
-                            <div className="flex items-center gap-2 ml-1">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Modalidad</label>
-                                <div className="group relative">
-                                    <FaQuestionCircle className="text-slate-600 hover:text-cyan-500 transition-colors cursor-help" size={12} />
-                                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 p-2 bg-slate-900 border border-slate-700 rounded-lg text-[9px] text-slate-300 font-medium leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl">
-                                        <b className="text-cyan-400">ABIERTO:</b> Los equipos pueden inscribirse libremente.<br/>
-                                        <b className="text-cyan-400">CERRADO:</b> Solo equipos seleccionados por la administración.
-                                    </div>
-                                </div>
-                            </div>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                {genero === "MASCULINO" && <FaMars className="text-cyan-500"/>}
+                                {genero === "FEMENINO" && <FaVenus className="text-pink-500"/>}
+                                {genero === "MIXTO" && <FaVenusMars className="text-purple-500"/>}
+                                Género
+                            </label>
+                            <select
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
+                                value={genero}
+                                onChange={e => setGenero(e.target.value)}
+                            >
+                                <option value="MASCULINO" className="bg-[#0a0f2c]">MASCULINO</option>
+                                <option value="FEMENINO" className="bg-[#0a0f2c]">FEMENINO</option>
+                                <option value="MIXTO" className="bg-[#0a0f2c]">MIXTO</option>
+                            </select>
+                        </div>
+
+                        {/* Modalidad */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Modalidad</label>
                             <select
                                 className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
                                 value={tipo}
@@ -139,7 +224,21 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             </select>
                         </div>
 
-                        <div className="col-span-2 flex items-center gap-3 pt-2">
+                        {/* Red Social */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1">
+                                <FaInstagram className="text-slate-500"/> Red Social
+                            </label>
+                            <input
+                                placeholder="instagram.com/tutorneo"
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-medium text-white placeholder:text-slate-800 transition-all"
+                                value={redSocial}
+                                onChange={e => setRedSocial(e.target.value)}
+                            />
+                        </div>
+
+                        {/* Sistema de Puntuación */}
+                        <div className="col-span-1 md:col-span-2 flex items-center gap-3 pt-2">
                             <FaChartLine className="text-cyan-500/50" size={12} />
                             <span className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest">Sistema de Puntuación</span>
                             <div className="h-px bg-slate-800/50 flex-1"></div>
@@ -147,9 +246,10 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
 
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Pts. Victoria</label>
+                            {/* CAMBIO 2: Texto grande (text-xl) */}
                             <input
                                 type="number"
-                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-black text-cyan-400 text-center transition-all"
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-xl font-black text-cyan-400 text-center transition-all"
                                 value={puntosGanador}
                                 onChange={e => setPuntosGanador(e.target.value)}
                             />
@@ -157,19 +257,17 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
 
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Pts. Empate</label>
+                            {/* CAMBIO 2: Texto grande (text-xl) */}
                             <input
                                 type="number"
-                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-black text-cyan-400 text-center transition-all"
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-xl font-black text-cyan-400 text-center transition-all"
                                 value={puntosEmpate}
                                 onChange={e => setPuntosEmpate(e.target.value)}
                             />
                         </div>
 
-                        <div className="col-span-2 py-1">
-                            <div className="h-px bg-slate-800/50 w-full"></div>
-                        </div>
-
-                        <div className="col-span-2 space-y-1.5">
+                        {/* Visibilidad */}
+                        <div className="col-span-1 md:col-span-2 space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Visibilidad inicial</label>
                             <select
                                 className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
@@ -181,20 +279,21 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             </select>
                         </div>
 
+                        {/* CAMBIO 3: Aquí está el encargado, se muestra solo si esAdmin es true */}
                         {esAdmin && (
-                            <div className="col-span-2 space-y-1.5">
+                            <div className="col-span-1 md:col-span-2 space-y-1.5 bg-cyan-900/10 p-4 rounded-xl border border-cyan-500/20">
                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                    <FaUserAlt size={10} className="text-cyan-500" /> Responsable del Torneo
+                                    <FaUserAlt size={10} className="text-cyan-500" /> Responsable (Solo Admin)
                                 </label>
                                 <select
                                     className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-[11px] font-bold text-cyan-400 appearance-none cursor-pointer"
                                     value={encargadoEmail}
                                     onChange={e => setEncargadoEmail(e.target.value)}
                                 >
-                                    <option value="" className="bg-[#0a0f2c]">SIN ENCARGADO ASIGNADO (VACÍO)</option>
+                                    <option value="" className="bg-[#0a0f2c]">SIN ENCARGADO</option>
                                     {listaEncargados.map(enc => (
                                         <option key={enc.id} value={enc.email} className="bg-[#0a0f2c]">
-                                            {enc.nombre.toUpperCase()} — {enc.email}
+                                            {enc.nombre.toUpperCase()}
                                         </option>
                                     ))}
                                 </select>
@@ -206,7 +305,7 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 py-4 rounded-xl text-[11px] font-bold uppercase tracking-widest text-slate-500 border border-slate-800 hover:bg-slate-800 hover:text-white transition-all"
+                            className="flex-1 py-4 rounded-xl text-[11px] font-bold uppercase tracking-widest text-slate-500 border border-slate-800 hover:bg-slate-800 transition-all"
                             disabled={loading}
                         >
                             Cancelar
@@ -217,7 +316,7 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             disabled={loading}
                             className="flex-1 py-4 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-[11px] font-bold uppercase tracking-widest text-white transition-all shadow-lg shadow-cyan-900/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                         >
-                            {loading ? "GUARDANDO..." : <><FaCheckCircle size={14} /> CREAR TORNEO</>}
+                            {loading ? "GUARDANDO..." : "CREAR TORNEO"}
                         </button>
                     </div>
                 </div>

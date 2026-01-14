@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { FaEdit, FaTrash, FaPlus, FaEye, FaTrophy, FaSearch, FaCircle, FaUserAlt, FaPhoneAlt, FaEnvelope } from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus, FaEye, FaTrophy, FaSearch, FaCircle, FaPhoneAlt, FaEnvelope, FaMars, FaVenus, FaVenusMars } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import ModalCrearTorneo from "./ModalCrearTorneo";
 import ModalEditarTorneo from "./ModalEditarTorneo";
@@ -16,7 +16,6 @@ export default function TorneosList() {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    // Actualizado para manejar los 3 estados
     const [filtro, setFiltro] = useState("activos");
     const [busqueda, setBusqueda] = useState("");
 
@@ -65,15 +64,22 @@ export default function TorneosList() {
         setModalEditar(true);
     };
 
-    // LÓGICA DE FILTRADO DE 3 ESTADOS (Mantenida de los otros componentes)
     const torneosFiltrados = torneos
         .filter((t) => {
             if (!esAdmin) return t.estado === "activo";
             if (filtro === "activos") return t.estado === "activo";
             if (filtro === "inactivos") return t.estado === "inactivo";
-            return true; // "todos"
+            return true;
         })
         .filter((t) => t.nombre.toLowerCase().includes(busqueda.toLowerCase()));
+
+    // Helper para icono de género
+    const getGeneroIcon = (genero) => {
+        if (genero === "MASCULINO") return <FaMars className="text-blue-400" />;
+        if (genero === "FEMENINO") return <FaVenus className="text-pink-400" />;
+        if (genero === "MIXTO") return <FaVenusMars className="text-purple-400" />;
+        return null;
+    };
 
     if (loading) return (
         <div className="flex flex-col items-center py-40 gap-4">
@@ -84,7 +90,7 @@ export default function TorneosList() {
 
     return (
         <div className="w-full max-w-6xl mx-auto px-4">
-            {/* HEADER PROFESIONAL */}
+            {/* HEADER */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-8">
                 <div>
                     <div className="flex items-center gap-3 mb-2">
@@ -95,7 +101,6 @@ export default function TorneosList() {
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full lg:w-auto">
-                    {/* BOTONERA DE 3 FILTROS */}
                     {esAdmin && (
                         <div className="bg-[#0a0f2c] p-1.5 rounded-xl border border-slate-800 flex gap-1 w-full md:w-auto">
                             {[
@@ -138,74 +143,98 @@ export default function TorneosList() {
                 </div>
             </div>
 
-            {/* LISTADO TIPO LISTA */}
+            {/* LISTADO */}
             <div className="grid grid-cols-1 gap-4">
                 {torneosFiltrados.map((t) => (
                     <div
                         key={t.id}
                         onClick={() => navigate(`/dashboard/torneos/${t.slug || t.id}`)}
-                        className="bg-[#0a0f2c] p-6 rounded-[1.8rem] border border-slate-800 hover:border-cyan-500/30 transition-all flex flex-col lg:flex-row justify-between items-start lg:items-center group cursor-pointer shadow-sm"
+                        className="bg-[#0a0f2c] p-5 rounded-[1.8rem] border border-slate-800 hover:border-cyan-500/30 transition-all flex flex-col lg:flex-row justify-between items-start lg:items-center group cursor-pointer shadow-sm relative overflow-hidden"
                     >
-                        <div className="flex-1 w-full text-left">
-                            <div className="flex items-center gap-4 flex-wrap mb-3">
-                                <h3 className="text-xl font-bold text-white tracking-tight">{t.nombre}</h3>
-                                <div className="flex gap-2">
-                                    <span className={`text-[10px] px-3 py-1 rounded-lg font-bold border tracking-wider uppercase ${t.tipo === 'ABIERTO' ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/20' : 'bg-red-500/5 text-red-400 border-red-500/20'}`}>
-                                        {t.tipo}
-                                    </span>
-                                    {/* Badge de Estado para diferenciar visualmente en "Todos" */}
-                                    <span className={`text-[10px] px-3 py-1 rounded-lg font-bold border tracking-wider uppercase ${t.estado === 'activo' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20'}`}>
-                                        {t.estado}
-                                    </span>
-                                </div>
+                        {/* Contenedor Principal Izquierdo: FOTO + INFO */}
+                        <div className="flex-1 w-full text-left flex gap-5 items-start">
+
+                            {/* 1. FOTO / LOGO */}
+                            <div className="shrink-0 w-16 h-16 rounded-2xl border border-slate-700 bg-[#040714] overflow-hidden flex items-center justify-center shadow-lg">
+                                {t.fotoUrl ? (
+                                    <img src={t.fotoUrl} alt={t.nombre} className="w-full h-full object-cover" />
+                                ) : (
+                                    <FaTrophy className="text-slate-700 text-2xl" />
+                                )}
                             </div>
 
-                            {/* INFORMACIÓN PRINCIPAL */}
-                            <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm font-medium text-slate-400">
-                                <span className="flex items-center gap-2">División: <span className="text-slate-200 font-bold">{t.division || "No especificada"}</span></span>
-                                <span className="flex items-center gap-2">Zonas: <span className="text-slate-200 font-bold">{t.zonas?.length || 0}</span></span>
+                            {/* 2. INFORMACIÓN */}
+                            <div className="flex-1">
+                                <div className="flex items-center gap-4 flex-wrap mb-2">
+                                    <h3 className="text-xl font-bold text-white tracking-tight leading-none">{t.nombre}</h3>
 
-                                {/* INFO ENCARGADO */}
-                                <div className="flex items-center gap-4 border-l border-slate-800 pl-6 ml-2">
-                                    <span className="flex items-center gap-2 text-[11px] uppercase tracking-tighter">
-                                        <FaEnvelope className="text-cyan-500/50" />
-                                        <span className="text-slate-300 font-bold">{t.encargadoEmail || "Sin encargado"}</span>
-                                    </span>
+                                    {/* BADGES */}
+                                    <div className="flex flex-wrap gap-2">
+                                        {/* Badge Género */}
+                                        {t.genero && (
+                                            <span className="flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-md font-bold border tracking-wider uppercase bg-slate-800/50 text-slate-300 border-slate-700">
+                                                {getGeneroIcon(t.genero)}
+                                                {t.genero}
+                                            </span>
+                                        )}
+
+                                        {/* Badge Tipo */}
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold border tracking-wider uppercase ${t.tipo === 'ABIERTO' ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/20' : 'bg-red-500/5 text-red-400 border-red-500/20'}`}>
+                                            {t.tipo}
+                                        </span>
+
+                                        {/* Badge Estado */}
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold border tracking-wider uppercase ${t.estado === 'activo' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20'}`}>
+                                            {t.estado}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="mt-4 flex items-center gap-2 pt-3 border-t border-slate-800/50">
-                                <FaCircle size={6} className={t.tipo === "ABIERTO" ? "text-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "text-slate-600"} />
-                                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
-                                    {t.tipo === "CERRADO" ? "No permite inscripciones" : "Inscripciones habilitadas"}
-                                </p>
+                                {/* DETALLES EXTRA */}
+                                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-slate-400">
+                                    <span className="flex items-center gap-2">
+                                        División: <span className="text-slate-200 font-bold">{t.division || "-"}</span>
+                                    </span>
+                                    <span className="flex items-center gap-2">
+                                        Zonas: <span className="text-slate-200 font-bold">{t.zonas?.length || 0}</span>
+                                    </span>
+
+                                    {/* Info Encargado */}
+                                    <div className="flex items-center gap-3 border-l border-slate-800 pl-4 ml-2">
+                                        <span className="flex items-center gap-2 text-[11px] uppercase tracking-tighter">
+                                            <FaEnvelope className="text-cyan-500/50" />
+                                            <span className="text-slate-300 font-bold truncate max-w-[150px]">{t.encargadoEmail || "Sin encargado"}</span>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex gap-2 mt-6 lg:mt-0 w-full lg:w-auto">
+                        {/* ACCIONES (Botones) */}
+                        <div className="flex gap-2 mt-6 lg:mt-0 w-full lg:w-auto pl-0 lg:pl-4">
                             <button
                                 title="Gestionar"
-                                className="flex-1 lg:w-12 lg:h-12 p-3 bg-[#040714] border border-slate-800 text-cyan-500 hover:bg-cyan-600 hover:text-white rounded-xl transition-all flex items-center justify-center shadow-inner"
+                                className="flex-1 lg:w-11 lg:h-11 p-2 bg-[#040714] border border-slate-800 text-cyan-500 hover:bg-cyan-600 hover:text-white rounded-xl transition-all flex items-center justify-center shadow-inner"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     navigate(`/dashboard/torneos/${t.slug || t.id}`);
                                 }}
                             >
-                                <FaEye size={18} />
+                                <FaEye size={16} />
                             </button>
                             <button
                                 title="Editar"
-                                className="flex-1 lg:w-12 lg:h-12 p-3 bg-[#040714] border border-slate-800 text-amber-500 hover:bg-amber-600 hover:text-white rounded-xl transition-all flex items-center justify-center shadow-inner"
+                                className="flex-1 lg:w-11 lg:h-11 p-2 bg-[#040714] border border-slate-800 text-amber-500 hover:bg-amber-600 hover:text-white rounded-xl transition-all flex items-center justify-center shadow-inner"
                                 onClick={(e) => abrirEdicion(e, t)}
                             >
-                                <FaEdit size={18} />
+                                <FaEdit size={16} />
                             </button>
                             <button
                                 title="Eliminar"
-                                className="flex-1 lg:w-12 lg:h-12 p-3 bg-[#040714] border border-slate-800 text-red-500 hover:bg-red-600 hover:text-white rounded-xl transition-all flex items-center justify-center shadow-inner"
+                                className="flex-1 lg:w-11 lg:h-11 p-2 bg-[#040714] border border-slate-800 text-red-500 hover:bg-red-600 hover:text-white rounded-xl transition-all flex items-center justify-center shadow-inner"
                                 onClick={(e) => eliminarTorneo(e, t.id)}
                             >
-                                <FaTrash size={18} />
+                                <FaTrash size={16} />
                             </button>
                         </div>
                     </div>
@@ -214,7 +243,7 @@ export default function TorneosList() {
                 {/* Mensaje de lista vacía */}
                 {torneosFiltrados.length === 0 && (
                     <div className="py-20 text-center border border-dashed border-slate-800 rounded-[2rem]">
-                        <p className="text-slate-600 font-bold uppercase text-xs tracking-widest">No se encontraron torneos en esta categoría</p>
+                        <p className="text-slate-600 font-bold uppercase text-xs tracking-widest">No se encontraron torneos</p>
                     </div>
                 )}
             </div>

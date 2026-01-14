@@ -1,17 +1,38 @@
 import { FaShieldAlt } from "react-icons/fa";
 
 export default function TablaPosiciones({ posiciones }) {
+    // Definimos los bordes manuales grises para mantener consistencia y limpieza
+    const borderFrame = "1px solid #334155"; // Gris visible para el marco
+    const borderRow = "1px solid #1e293b";   // Gris muy oscuro/sutil para filas
+
     return (
-        /* Eliminamos márgenes internos del contenedor padre para aprovechar todo el cuadro */
-        <div className="w-full overflow-hidden rounded-2xl border border-blue-900/40 bg-[#0e1630]/50 backdrop-blur-md shadow-2xl">
+        <div
+            className="w-full overflow-hidden rounded-2xl backdrop-blur-md shadow-2xl transition-all duration-700"
+            style={{
+                border: borderFrame, // Borde gris manual
+                backgroundColor: "var(--secondary)"
+            }}
+        >
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse table-auto">
                     <thead>
-                    <tr className="bg-[#050814]/90 text-blue-400 border-b border-blue-900/50">
-                        {/* Letras crecen en md: (PC) */}
+                    <tr
+                        style={{
+                            backgroundColor: "var(--p)",
+                            borderBottom: borderFrame, // Separación del header más definida
+                            color: "var(--ts)"
+                        }}
+                    >
                         <th className="py-4 px-2 text-[10px] md:text-sm font-black text-center w-[30px] md:w-[50px] shrink-0">#</th>
                         <th className="py-4 px-3 text-[10px] md:text-sm font-black text-left min-w-[140px] md:min-w-[300px]">EQUIPOS</th>
-                        <th className="py-4 px-2 text-[10px] md:text-sm font-black text-center w-[40px] md:w-[80px] bg-blue-900/20 shrink-0">PTS</th>
+
+                        {/* PTS sigue con fondo tintado muy suave para destacar */}
+                        <th
+                            className="py-4 px-2 text-[10px] md:text-sm font-black text-center w-[40px] md:w-[80px] shrink-0"
+                            style={{ backgroundColor: "var(--ts)11" }}
+                        >
+                            PTS
+                        </th>
                         <th className="py-4 px-1 text-[10px] md:text-sm font-black text-center w-[30px] md:w-[60px] shrink-0">J</th>
                         <th className="py-4 px-1 text-[10px] md:text-sm font-black text-center w-[30px] md:w-[60px] shrink-0">G</th>
                         <th className="py-4 px-1 text-[10px] md:text-sm font-black text-center w-[30px] md:w-[60px] shrink-0">E</th>
@@ -20,13 +41,22 @@ export default function TablaPosiciones({ posiciones }) {
                     </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-blue-900/30">
+                    <tbody>
                     {posiciones.map((p, index) => {
                         const diferenciaGoles = (p.golesAFavor || 0) - (p.golesEnContra || 0);
 
                         return (
-                            <tr key={p.id || index} className="hover:bg-blue-500/5 transition-colors border-b border-blue-900/20">
-                                <td className="py-4 px-2 text-center font-black text-[10px] md:text-base text-slate-500">
+                            <tr
+                                key={p.id || index}
+                                className="transition-colors"
+                                style={{
+                                    borderBottom: borderRow, // Borde casi imperceptible entre filas
+                                    backgroundColor: "transparent"
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.backgroundColor = "var(--ts)05"}
+                                onMouseOut={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                            >
+                                <td className="py-4 px-2 text-center font-black text-[10px] md:text-base opacity-40">
                                     {index + 1}
                                 </td>
 
@@ -37,34 +67,44 @@ export default function TablaPosiciones({ posiciones }) {
                                                 <img
                                                     src={p.escudo || p.urlEscudo}
                                                     alt={`Escudo de ${p.nombreEquipo}`}
-                                                    className="w-full h-full object-contain filter drop-shadow-2xl"
+                                                    className="w-full h-full object-contain filter drop-shadow-lg"
                                                 />
                                             ) : (
-                                                <FaShieldAlt className="text-blue-900 text-lg md:text-3xl opacity-40" />
+                                                <FaShieldAlt style={{ color: "var(--ts)" }} className="text-lg md:text-3xl opacity-20" />
                                             )}
                                         </div>
 
-                                        {/* AJUSTADO: Se quitó 'font-black' e 'italic' por 'font-bold' normal */}
-                                        <span className="text-[11px] md:text-lg font-bold text-slate-100 uppercase tracking-tighter whitespace-nowrap">
-                                            {p.nombreEquipo}
-                                        </span>
+                                        <span
+                                            className="text-[11px] md:text-lg font-bold uppercase tracking-tighter whitespace-nowrap"
+                                            style={{ color: "var(--tp)" }}
+                                        >
+                                                {p.nombreEquipo}
+                                            </span>
                                     </div>
                                 </td>
 
-                                {/* AJUSTADO: Puntos en blanco (text-white) */}
-                                <td className="py-4 px-2 text-center bg-blue-900/10 font-black text-white text-xs md:text-xl">
+                                {/* Celda de Puntos */}
+                                <td
+                                    className="py-4 px-2 text-center font-black text-xs md:text-xl"
+                                    style={{ backgroundColor: "var(--ts)10", color: "var(--tp)" }}
+                                >
                                     {p.puntos}
                                 </td>
 
-                                <td className="py-4 px-1 text-center text-[10px] md:text-base font-bold text-slate-400">{p.partidosJugados}</td>
-                                <td className="py-4 px-1 text-center text-[10px] md:text-base font-bold text-slate-400">{p.ganados}</td>
-                                <td className="py-4 px-1 text-center text-[10px] md:text-base font-bold text-slate-400">{p.empatados}</td>
-                                <td className="py-4 px-1 text-center text-[10px] md:text-base font-bold text-slate-400">{p.perdidos}</td>
+                                <td className="py-4 px-1 text-center text-[10px] md:text-base font-bold opacity-50">{p.partidosJugados}</td>
+                                <td className="py-4 px-1 text-center text-[10px] md:text-base font-bold opacity-50">{p.ganados}</td>
+                                <td className="py-4 px-1 text-center text-[10px] md:text-base font-bold opacity-50">{p.empatados}</td>
+                                <td className="py-4 px-1 text-center text-[10px] md:text-base font-bold opacity-50">{p.perdidos}</td>
 
                                 <td className="py-4 px-2 text-center">
-                                    <span className={`text-[10px] md:text-base font-black ${diferenciaGoles > 0 ? 'text-blue-400' : diferenciaGoles < 0 ? 'text-red-500' : 'text-slate-600'}`}>
-                                        {diferenciaGoles > 0 ? `+${diferenciaGoles}` : diferenciaGoles}
-                                    </span>
+                                        <span
+                                            className="text-[10px] md:text-base font-black"
+                                            style={{
+                                                color: diferenciaGoles > 0 ? "var(--ts)" : diferenciaGoles < 0 ? "#ef4444" : "var(--ts)44"
+                                            }}
+                                        >
+                                            {diferenciaGoles > 0 ? `+${diferenciaGoles}` : diferenciaGoles}
+                                        </span>
                                 </td>
                             </tr>
                         );
@@ -73,8 +113,14 @@ export default function TablaPosiciones({ posiciones }) {
                 </table>
             </div>
 
-            <div className="bg-[#050814] py-3 px-4 border-t border-blue-900/40 text-center">
-                <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] text-blue-900/60">
+            <div
+                className="py-3 px-4 text-center"
+                style={{
+                    backgroundColor: "var(--p)",
+                    borderTop: borderFrame // Borde gris superior del footer
+                }}
+            >
+                <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em]" style={{ color: "var(--ts)", opacity: 0.4 }}>
                     POSICIONES OFICIALES • TEMPORADA 2026
                 </p>
             </div>

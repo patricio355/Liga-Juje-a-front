@@ -15,6 +15,10 @@ export default function CuadroFaseFinal({ torneoId }) {
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
 
+    // --- VARIABLES DE BORDE SUTIL ---
+    const borderSutil = "1px solid var(--ts)33";
+    const borderMuySutil = "1px solid var(--ts)15";
+
     useEffect(() => {
         const cargarCuadro = async () => {
             try {
@@ -83,13 +87,20 @@ export default function CuadroFaseFinal({ torneoId }) {
 
     if (loading) return (
         <div className="flex flex-col items-center justify-center py-10 gap-2">
-            <FaSync className="text-blue-500 animate-spin text-xl" />
-            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Sincronizando Cuadro</span>
+            <FaSync className="animate-spin text-xl" style={{ color: "var(--ts)" }} />
+            <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: "var(--ts)" }}>Sincronizando Cuadro</span>
         </div>
     );
 
     return (
-        <div className="mt-2 mb-6 p-2 md:p-4 bg-[#050814]/60 border border-blue-900/30 rounded-xl backdrop-blur-sm shadow-xl overflow-hidden">
+        /* CONTENEDOR PRINCIPAL: Fondo transparente, borde sutil */
+        <div
+            className="mt-2 mb-6 p-2 md:p-4 rounded-xl backdrop-blur-sm shadow-xl overflow-hidden"
+            style={{
+                border: borderSutil,
+                backgroundColor: "var(--secondary)" // Fondo base oscuro
+            }}
+        >
             <div
                 ref={scrollRef}
                 onMouseDown={handleMouseDown}
@@ -98,7 +109,6 @@ export default function CuadroFaseFinal({ torneoId }) {
                 onMouseMove={handleMouseMove}
                 className={`w-full overflow-x-auto custom-scrollbar select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
             >
-                {/* Eliminado pt-12 y py-6 para pegar los nombres al borde superior */}
                 <div className="flex flex-row justify-start md:justify-center gap-0 min-w-max px-1 pb-16">
                     {etapasVisuales.map((etapa, idx) => {
                         if (!etapa) return null;
@@ -107,9 +117,20 @@ export default function CuadroFaseFinal({ torneoId }) {
 
                         return (
                             <div key={`${etapa.id}-${idx}`} className="flex flex-col w-[210px] relative">
-                                {/* Eliminado mb-6 para reducir espacio bajo el nombre de etapa */}
+                                {/* NOMBRE DE LA ETAPA */}
                                 <div className="text-center pt-2 mb-2">
-                                    <span className={`border px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-md ${esFinal ? 'bg-yellow-600/20 border-yellow-500 text-yellow-500' : 'bg-[#0e1630] border-blue-500/30 text-blue-400'}`}>
+                                    <span
+                                        className="border px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-md"
+                                        style={esFinal ? {
+                                            backgroundColor: "#ca8a0422", // Amarillo sutil
+                                            borderColor: "#eab308",       // Amarillo fuerte
+                                            color: "#eab308"
+                                        } : {
+                                            backgroundColor: "var(--p)",
+                                            borderColor: "var(--ts)44",
+                                            color: "var(--ts)"
+                                        }}
+                                    >
                                         {etapa.nombre}
                                     </span>
                                 </div>
@@ -125,19 +146,32 @@ export default function CuadroFaseFinal({ torneoId }) {
 
                                                 <div
                                                     onClick={(e) => !partido.placeholder && toggleDetalle(e, partido.id)}
-                                                    className={`w-full bg-[#0a0f1e] border rounded-lg overflow-hidden shadow-lg transition-all relative z-10
-                                                        ${partido.placeholder ? 'border-blue-900/20 opacity-30' : 'border-blue-500/30 cursor-pointer'}
-                                                        ${esFinal ? 'border-yellow-500/50 shadow-yellow-500/10' : ''}`}
+                                                    className={`w-full rounded-lg overflow-hidden shadow-lg transition-all relative z-10 ${!partido.placeholder ? 'cursor-pointer' : ''}`}
+                                                    style={{
+                                                        backgroundColor: "var(--p)",
+                                                        border: partido.placeholder ? "1px dashed var(--ts)22" : borderSutil,
+                                                        opacity: partido.placeholder ? 0.4 : 1,
+                                                        borderColor: esFinal && !partido.placeholder ? "#eab308" : undefined // Borde dorado si es final
+                                                    }}
                                                 >
                                                     {/* Equipo Local */}
-                                                    <div className="flex justify-between items-center p-2 border-b border-blue-900/20">
+                                                    <div
+                                                        className="flex justify-between items-center p-2"
+                                                        style={{ borderBottom: borderMuySutil }}
+                                                    >
                                                         <div className="flex items-center gap-2 overflow-hidden">
                                                             {partido.equipoLocalEscudo && <img src={partido.equipoLocalEscudo} className="w-4 h-4 object-contain" alt="" />}
-                                                            <span className={`text-[10px] font-black uppercase truncate max-w-[110px] ${localGano ? 'text-emerald-400/80' : 'text-slate-400'}`}>
+                                                            <span
+                                                                className="text-[10px] font-black uppercase truncate max-w-[110px]"
+                                                                style={{ color: localGano ? "var(--ts)" : "var(--tp)", opacity: localGano ? 1 : 0.6 }}
+                                                            >
                                                                 {partido.equipoLocal || "POR DEFINIR"}
                                                             </span>
                                                         </div>
-                                                        <span className={`text-xs font-black ${localGano ? 'text-emerald-400/80' : 'text-white'}`}>
+                                                        <span
+                                                            className="text-xs font-black"
+                                                            style={{ color: localGano ? "var(--ts)" : "var(--tp)" }}
+                                                        >
                                                             {!partido.placeholder && partido.golesLocal !== null ? partido.golesLocal : "-"}
                                                         </span>
                                                     </div>
@@ -146,44 +180,57 @@ export default function CuadroFaseFinal({ torneoId }) {
                                                     <div className="flex justify-between items-center p-2">
                                                         <div className="flex items-center gap-2 overflow-hidden">
                                                             {partido.equipoVisitanteEscudo && <img src={partido.equipoVisitanteEscudo} className="w-4 h-4 object-contain" alt="" />}
-                                                            <span className={`text-[10px] font-black uppercase truncate max-w-[110px] ${visitanteGano ? 'text-emerald-400/80' : 'text-slate-400'}`}>
+                                                            <span
+                                                                className="text-[10px] font-black uppercase truncate max-w-[110px]"
+                                                                style={{ color: visitanteGano ? "var(--ts)" : "var(--tp)", opacity: visitanteGano ? 1 : 0.6 }}
+                                                            >
                                                                 {partido.equipoVisitante || "POR DEFINIR"}
                                                             </span>
                                                         </div>
-                                                        <span className={`text-xs font-black ${visitanteGano ? 'text-emerald-400/80' : 'text-white'}`}>
+                                                        <span
+                                                            className="text-xs font-black"
+                                                            style={{ color: visitanteGano ? "var(--ts)" : "var(--tp)" }}
+                                                        >
                                                             {!partido.placeholder && partido.golesVisitante !== null ? partido.golesVisitante : "-"}
                                                         </span>
                                                     </div>
 
                                                     {!partido.placeholder && (
                                                         <div className="absolute right-0.5 top-1/2 -translate-y-1/2 flex items-center h-full pointer-events-none opacity-30">
-                                                            <FaChevronDown size={7} className={`text-blue-500 transition-transform ${detalleAbierto === partido.id ? 'rotate-180' : ''}`} />
+                                                            <FaChevronDown size={7} style={{ color: "var(--ts)" }} className={`transition-transform ${detalleAbierto === partido.id ? 'rotate-180' : ''}`} />
                                                         </div>
                                                     )}
 
+                                                    {/* DETALLES EXPANDIBLES */}
                                                     {detalleAbierto === partido.id && !partido.placeholder && (
-                                                        <div className="bg-[#050814] border-t border-blue-900/40 p-2 space-y-1.5 animate-in slide-in-from-top-1 duration-200">
-                                                            <div className="flex items-center gap-2 text-white">
-                                                                <FaCalendarAlt size={10} className="text-blue-500 shrink-0" />
+                                                        <div
+                                                            className="p-2 space-y-1.5 animate-in slide-in-from-top-1 duration-200"
+                                                            style={{
+                                                                backgroundColor: "var(--secondary)",
+                                                                borderTop: borderSutil
+                                                            }}
+                                                        >
+                                                            <div className="flex items-center gap-2" style={{ color: "var(--tp)" }}>
+                                                                <FaCalendarAlt size={10} style={{ color: "var(--ts)" }} className="shrink-0" />
                                                                 <span className="text-[9px] font-black uppercase tracking-wider">{partido.fecha || "PENDIENTE"}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-2 text-white">
-                                                                <FaClock size={10} className="text-blue-500 shrink-0" />
+                                                            <div className="flex items-center gap-2" style={{ color: "var(--tp)" }}>
+                                                                <FaClock size={10} style={{ color: "var(--ts)" }} className="shrink-0" />
                                                                 <span className="text-[9px] font-black uppercase tracking-wider">{partido.hora || "TBD"}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-2 text-white">
-                                                                <FaMapMarkerAlt size={10} className="text-blue-500 shrink-0" />
+                                                            <div className="flex items-center gap-2" style={{ color: "var(--tp)" }}>
+                                                                <FaMapMarkerAlt size={10} style={{ color: "var(--ts)" }} className="shrink-0" />
                                                                 <span className="text-[9px] font-black uppercase tracking-wider">{partido.cancha || "SIN ASIGNAR"}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-2 text-white">
-                                                                <FaUserTie size={10} className="text-blue-500 shrink-0" />
+                                                            <div className="flex items-center gap-2" style={{ color: "var(--tp)" }}>
+                                                                <FaUserTie size={10} style={{ color: "var(--ts)" }} className="shrink-0" />
                                                                 <span className="text-[9px] font-black uppercase tracking-wider">{partido.arbitro || "SIN DESIGNAR"}</span>
                                                             </div>
                                                         </div>
                                                     )}
                                                 </div>
 
-                                                {/* Copa posicionada FIJA debajo del partido final */}
+                                                {/* Copa en la final */}
                                                 {esFinal && (
                                                     <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
                                                         <div className="w-8 h-1 bg-yellow-500/20 blur-sm rounded-full mb-1"></div>

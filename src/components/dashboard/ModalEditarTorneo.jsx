@@ -1,20 +1,46 @@
 import { useState, useEffect, useContext } from "react";
 import { apiFetch } from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
-import { FaTrophy, FaCheckCircle, FaTimes, FaLock, FaLayerGroup } from "react-icons/fa";
+import { FaTrophy, FaTimes, FaPalette, FaMars, FaVenus, FaVenusMars, FaInstagram, FaChartLine, FaUserAlt, FaLock } from "react-icons/fa";
+// IMPORTANTE: Ajusta la ruta a tu componente ImageUpload
+import ImageUpload from "../../images/ImageUpload";
+
+// 1. Definición de Plantillas
+const PLANTILLAS = {
+    NEGRO: { p: "#05070a", s: "#0a0c10", tp: "#ffffff", ts: "#94a3b8" },
+    AZUL: { p: "#050814", s: "#0d143d", tp: "#ffffff", ts: "#60a5fa" },
+    ROJO: { p: "#0a0404", s: "#1a0808", tp: "#ffffff", ts: "#f87171" },
+    VERDE: { p: "#040a05", s: "#081a0d", tp: "#ffffff", ts: "#4ade80" },
+    MORADO: { p: "#08040a", s: "#160d1f", tp: "#ffffff", ts: "#a78bfa" },
+    GRIS: { p: "#111827", s: "#1f2937", tp: "#ffffff", ts: "#d1d5db" },
+    VIOLETA: { p: "#0f0514", s: "#1e0a29", tp: "#ffffff", ts: "#c084fc" },
+    ROSADO: { p: "#0a0406", s: "#1f0d14", tp: "#ffffff", ts: "#f472b6" },
+    DORADO: { p: "#0a0904", s: "#1a1808", tp: "#ffffff", ts: "#fbbf24" },
+    ESMERALDA: { p: "#020617", s: "#0f172a", tp: "#ffffff", ts: "#10b981" }
+};
 
 export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
     const { user } = useContext(AuthContext);
 
-    // Normalización de roles para control de permisos
     const miRol = user?.role?.toUpperCase().replace("ROLE_", "") || "";
     const esAdminGenuino = miRol === "ADMIN";
 
+    // Estados originales
     const [nombre, setNombre] = useState("");
     const [division, setDivision] = useState("");
     const [encargadoEmail, setEncargadoEmail] = useState("");
     const [estado, setEstado] = useState("activo");
     const [tipo, setTipo] = useState("ABIERTO");
+
+    // Estados Nuevos
+    const [fotoUrl, setFotoUrl] = useState("");
+    const [genero, setGenero] = useState("MASCULINO");
+    const [redSocial, setRedSocial] = useState("");
+    const [puntosGanador, setPuntosGanador] = useState(3);
+    const [puntosEmpate, setPuntosEmpate] = useState(1);
+
+    // Estado para la plantilla activa
+    const [plantillaActiva, setPlantillaActiva] = useState("NEGRO");
 
     const [listaEncargados, setListaEncargados] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -27,9 +53,22 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
             setEncargadoEmail(torneo.encargadoEmail || "");
             setEstado(torneo.estado?.toLowerCase() || "activo");
             setTipo(torneo.tipo || "ABIERTO");
+
+            // Cargar datos nuevos (Asegúrate de que 'torneo' traiga fotoUrl del backend)
+
+            setFotoUrl(torneo.fotoUrl || "");
+            setGenero(torneo.genero || "MASCULINO");
+            setRedSocial(torneo.redSocial || "");
+            setPuntosGanador(torneo.puntosGanador ?? 3);
+            setPuntosEmpate(torneo.puntosEmpate ?? 1);
+
+            // Buscamos qué plantilla coincide con el color actual
+            const keyCoincidente = Object.keys(PLANTILLAS).find(
+                key => PLANTILLAS[key].p === torneo.colorPrimario
+            );
+            if (keyCoincidente) setPlantillaActiva(keyCoincidente);
         }
 
-        // Solo cargamos la lista si realmente es un ADMIN el que edita
         if (esAdminGenuino) {
             const cargarEncargados = async () => {
                 try {
@@ -59,9 +98,22 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                 division: division || null,
                 estado,
                 tipo,
+                // Nuevos campos
+                fotoUrl: fotoUrl || null,
+                genero,
+                redSocial: redSocial || null,
+                // NO enviamos puntosGanador ni puntosEmpate para no permitir cambios en el backend
+                // O si tu backend lo requiere, envíalos igual pero sin modificar:
+                puntosGanador: torneo.puntosGanador,
+                puntosEmpate: torneo.puntosEmpate,
+
+                // Colores
+                colorPrimario: PLANTILLAS[plantillaActiva].p,
+                colorSecundario: PLANTILLAS[plantillaActiva].s,
+                colorTextoPrimario: PLANTILLAS[plantillaActiva].tp,
+                colorTextoSecundario: PLANTILLAS[plantillaActiva].ts
             };
 
-            // Solo enviamos el email del encargado si el admin lo cambió
             if (esAdminGenuino) {
                 payload.encargadoEmail = encargadoEmail || null;
             }
@@ -83,18 +135,17 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
     return (
         <div className="fixed inset-0 bg-[#040714]/95 backdrop-blur-md flex items-center justify-center z-[200] p-4" onClick={onClose}>
             <form
-                className="bg-[#0a0f2c] border border-cyan-500/30 rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden max-h-[95vh] overflow-y-auto"
+                className="bg-[#0a0f2c] border border-cyan-500/30 rounded-[2.5rem] w-full max-w-4xl shadow-2xl overflow-hidden max-h-[95vh] overflow-y-auto custom-scrollbar"
                 onClick={(e) => e.stopPropagation()}
                 onSubmit={actualizarTorneo}
             >
-                {/* Header Estilo Champions Admin */}
                 <div className="bg-[#0d143d] px-8 py-7 border-b border-slate-800 flex justify-between items-center">
                     <div>
                         <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
                             <FaTrophy className="text-cyan-500" size={20} /> Editar Torneo
                         </h2>
                         <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-[0.2em] mt-1">
-                            Panel de Configuración
+                            Ajustes Visuales y Técnicos
                         </p>
                     </div>
                     <button onClick={onClose} type="button" className="p-2 text-slate-500 hover:text-white transition-colors">
@@ -109,19 +160,26 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        {/* Info Bloqueada: Modalidad */}
-                        <div className="col-span-2 bg-[#040714] p-4 rounded-2xl border border-slate-800 flex items-center justify-between shadow-inner">
-                            <div>
-                                <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Modalidad (No editable)</p>
-                                <p className="text-sm font-black text-cyan-500 uppercase italic tracking-widest">{tipo}</p>
-                            </div>
-                            <FaLock className="text-slate-800" size={14} />
+                        {/* --- SECCIÓN LOGO DEL TORNEO --- */}
+                        <div className="col-span-1 md:col-span-2 space-y-2 flex flex-col items-center border-b border-slate-800/50 pb-6 mb-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                Logo Principal
+                            </label>
+                            <ImageUpload
+                                currentImage={fotoUrl} // Aquí se pasa la foto cargada en el useEffect
+                                onUploadStart={() => setLoading(true)}
+                                onUploadSuccess={(url) => {
+                                    setFotoUrl(url);
+                                    setLoading(false);
+                                }}
+                                label="Cambiar Logo"
+                            />
                         </div>
 
                         {/* Nombre */}
-                        <div className="col-span-2 space-y-1.5">
+                        <div className="col-span-1 md:col-span-2 space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Nombre de la Competición</label>
                             <input
                                 placeholder="NOMBRE DEL TORNEO"
@@ -131,27 +189,68 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             />
                         </div>
 
+                        {/* Selector de Plantillas */}
+                        <div className="col-span-1 md:col-span-2 space-y-3 pt-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                <FaPalette className="text-cyan-500" /> Cambiar Estilo Visual
+                            </label>
+                            <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
+                                {Object.keys(PLANTILLAS).map((key) => (
+                                    <button
+                                        key={key}
+                                        type="button"
+                                        onClick={() => setPlantillaActiva(key)}
+                                        className={`h-14 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 group ${plantillaActiva === key ? "border-cyan-500 scale-105 shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "border-slate-800 opacity-50 hover:opacity-100"}`}
+                                        style={{ backgroundColor: PLANTILLAS[key].p }}
+                                    >
+                                        <div className="w-5 h-1 rounded-full" style={{ backgroundColor: PLANTILLAS[key].ts }}></div>
+                                        <span className="text-[6px] md:text-[7px] font-black text-white uppercase tracking-tighter">{key}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="col-span-1 md:col-span-2 py-1">
+                            <div className="h-px bg-slate-800/50 w-full"></div>
+                        </div>
+
                         {/* División */}
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">División</label>
-                            <div className="relative">
-                                <select
-                                    className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
-                                    value={division}
-                                    onChange={e => setDivision(e.target.value)}
-                                >
-                                    <option value="" className="bg-[#0a0f2c]">SIN ESPECIFICAR</option>
-                                    {["A", "B", "C", "D", "E"].map(d => (
-                                        <option key={d} value={d} className="bg-[#0a0f2c]">DIVISIÓN {d}</option>
-                                    ))}
-                                </select>
-                                <FaLayerGroup className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-700 pointer-events-none" size={12} />
-                            </div>
+                            <select
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
+                                value={division}
+                                onChange={e => setDivision(e.target.value)}
+                            >
+                                <option value="" className="bg-[#0a0f2c]">SIN ESPECIFICAR</option>
+                                {["A", "B", "C", "D", "E"].map(d => (
+                                    <option key={d} value={d} className="bg-[#0a0f2c]">DIVISIÓN {d}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Género */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                {genero === "MASCULINO" && <FaMars className="text-cyan-500"/>}
+                                {genero === "FEMENINO" && <FaVenus className="text-pink-500"/>}
+                                {genero === "MIXTO" && <FaVenusMars className="text-purple-500"/>}
+                                Género
+                            </label>
+                            <select
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
+                                value={genero}
+                                onChange={e => setGenero(e.target.value)}
+                            >
+                                <option value="MASCULINO" className="bg-[#0a0f2c]">MASCULINO</option>
+                                <option value="FEMENINO" className="bg-[#0a0f2c]">FEMENINO</option>
+                                <option value="MIXTO" className="bg-[#0a0f2c]">MIXTO</option>
+                            </select>
                         </div>
 
                         {/* Estado */}
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Estado de Competición</label>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Estado</label>
                             <select
                                 className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
                                 value={estado}
@@ -162,33 +261,71 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             </select>
                         </div>
 
-                        {/* SECCIÓN DE ENCARGADO ELIMINADA PARA NO-ADMINS */}
-                        {esAdminGenuino && (
-                            <>
-                                <div className="col-span-2 py-2 flex items-center gap-3">
-                                    <div className="h-px bg-slate-800 flex-1"></div>
-                                    <span className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Administración Central</span>
-                                    <div className="h-px bg-slate-800 flex-1"></div>
-                                </div>
+                        {/* Red Social */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1">
+                                <FaInstagram className="text-slate-500"/> Red Social
+                            </label>
+                            <input
+                                placeholder="instagram.com/tutorneo"
+                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-medium text-white placeholder:text-slate-800 transition-all"
+                                value={redSocial}
+                                onChange={e => setRedSocial(e.target.value)}
+                            />
+                        </div>
 
-                                <div className="col-span-2 space-y-1.5">
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                        Reasignar Responsable
-                                    </label>
-                                    <select
-                                        className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-[11px] font-bold text-cyan-400 appearance-none cursor-pointer"
-                                        value={encargadoEmail}
-                                        onChange={e => setEncargadoEmail(e.target.value)}
-                                    >
-                                        <option value="" className="bg-[#0a0f2c]">SIN ENCARGADO (VACÍO)</option>
-                                        {listaEncargados.map(enc => (
-                                            <option key={enc.id || enc.email} value={enc.email} className="bg-[#0a0f2c]">
-                                                {enc.nombre.toUpperCase()} — {enc.email}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </>
+                        {/* Sistema de Puntuación (BLOQUEADO) */}
+                        <div className="col-span-1 md:col-span-2 flex items-center gap-3 pt-2">
+                            <FaChartLine className="text-cyan-500/50" size={12} />
+                            <span className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest">Sistema de Puntuación (Bloqueado)</span>
+                            <div className="h-px bg-slate-800/50 flex-1"></div>
+                        </div>
+
+                        <div className="space-y-1.5 opacity-50 relative">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                Pts. Victoria <FaLock size={8}/>
+                            </label>
+                            <input
+                                type="number"
+                                disabled // Deshabilitado
+                                className="w-full px-5 py-3.5 bg-[#02040a] border border-slate-900 rounded-xl text-xl font-black text-slate-500 text-center cursor-not-allowed"
+                                value={puntosGanador}
+                                onChange={e => setPuntosGanador(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="space-y-1.5 opacity-50 relative">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                Pts. Empate <FaLock size={8}/>
+                            </label>
+                            <input
+                                type="number"
+                                disabled // Deshabilitado
+                                className="w-full px-5 py-3.5 bg-[#02040a] border border-slate-900 rounded-xl text-xl font-black text-slate-500 text-center cursor-not-allowed"
+                                value={puntosEmpate}
+                                onChange={e => setPuntosEmpate(e.target.value)}
+                            />
+                        </div>
+
+                        {/* Encargado (Solo Admin) */}
+                        {esAdminGenuino && (
+                            <div className="col-span-1 md:col-span-2 space-y-1.5 mt-4 bg-cyan-900/10 p-4 rounded-xl border border-cyan-500/20">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    <FaUserAlt size={10} className="text-cyan-500" /> Responsable (Solo Admin)
+                                </label>
+                                <select
+                                    className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-[11px] font-bold text-cyan-400 appearance-none cursor-pointer"
+                                    value={encargadoEmail}
+                                    onChange={e => setEncargadoEmail(e.target.value)}
+                                >
+                                    <option value="" className="bg-[#0a0f2c]">SIN RESPONSABLE</option>
+                                    {listaEncargados.map(enc => (
+                                        <option key={enc.email} value={enc.email} className="bg-[#0a0f2c]">
+                                            {enc.nombre.toUpperCase()} — {enc.email}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         )}
                     </div>
 
@@ -196,7 +333,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 py-4 rounded-xl text-[11px] font-bold uppercase tracking-widest text-slate-500 border border-slate-800 hover:bg-slate-800 hover:text-white transition-all active:scale-95"
+                            className="flex-1 py-4 rounded-xl text-[11px] font-bold uppercase tracking-widest text-slate-500 border border-slate-800 hover:bg-slate-800 transition-all"
                             disabled={loading}
                         >
                             Cancelar
@@ -205,9 +342,9 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 py-4 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-[11px] font-bold uppercase tracking-widest text-white transition-all shadow-lg shadow-cyan-900/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="flex-1 py-4 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-[11px] font-bold uppercase tracking-widest text-white transition-all shadow-lg shadow-cyan-900/20 active:scale-95 flex items-center justify-center gap-2"
                         >
-                            {loading ? "ACTUALIZANDO..." : <><FaCheckCircle size={14} /> GUARDAR CAMBIOS</>}
+                            {loading ? "ACTUALIZANDO..." : "GUARDAR CAMBIOS"}
                         </button>
                     </div>
                 </div>

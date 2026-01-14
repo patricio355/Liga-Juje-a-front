@@ -4,9 +4,10 @@ import { apiFetch } from "../api/api";
 import TablaPosiciones from "../components/torneo/TablaPosiciones";
 import FixtureTorneo from "../components/torneo/FixtureTorneo";
 import ProgramacionComoFixture from "../components/torneo/ProgramacionComoFixture";
-import CuadroFaseFinal from "./CuadroFaseFinal"; // Importante
+import CuadroFaseFinal from "./CuadroFaseFinal";
 import Navbar from "../components/Navbar";
-import { FaTrophy, FaCalendarAlt, FaFutbol, FaChevronDown, FaProjectDiagram, FaLayerGroup } from "react-icons/fa";
+// ACTUALIZADO: Quitamos FaWhatsapp, Agregamos FaGlobe y FaPhone
+import { FaTrophy, FaCalendarAlt, FaFutbol, FaChevronDown, FaProjectDiagram, FaLayerGroup, FaGlobe, FaVenusMars, FaMars, FaVenus, FaPhone } from "react-icons/fa";
 
 export default function TorneoPublico() {
     const { slug } = useParams();
@@ -16,8 +17,6 @@ export default function TorneoPublico() {
     const [posiciones, setPosiciones] = useState([]);
     const [menuAbierto, setMenuAbierto] = useState(false);
     const [loadingTorneo, setLoadingTorneo] = useState(true);
-
-    // ESTADO PARA NAVEGACIÓN
     const [seccionActiva, setSeccionActiva] = useState("ZONAS");
 
     useEffect(() => {
@@ -58,71 +57,158 @@ export default function TorneoPublico() {
     }, [zonaActiva, seccionActiva]);
 
     if (loadingTorneo || !torneo) return (
-        <div className="min-h-screen bg-[#02040a] flex flex-col items-center justify-center gap-4">
-            <FaFutbol className="text-4xl text-blue-500 animate-spin" />
-            <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Cargando torneo</span>
+        <div className="min-h-screen bg-[#05070a] flex flex-col items-center justify-center gap-4">
+            <FaFutbol className="text-4xl text-slate-500 animate-spin" />
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Cargando competición</span>
         </div>
     );
 
+    // --- CONFIGURACIÓN DE COLORES DINÁMICOS ---
+    const vars = {
+        "--p": torneo.colorPrimario || "#05070a",
+        "--s": torneo.colorSecundario || "#0a0c10",
+        "--tp": torneo.colorTextoPrimario || "#ffffff",
+        "--ts": torneo.colorTextoSecundario || "#94a3b8",
+    };
+
     return (
-        <div className="min-h-screen bg-[#02040a] relative overflow-hidden text-slate-200 font-sans">
+        <div style={vars} className="min-h-screen bg-[var(--p)] relative overflow-hidden text-[var(--tp)] font-sans transition-colors duration-700">
+
+            {/* Aura de fondo dinámica */}
             <div className="absolute inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-50%] left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_rgba(37,99,235,0.12)_0%,_transparent_70%)]"></div>
+                <div
+                    className="absolute top-[-25%] left-1/2 -translate-x-1/2 w-full h-full opacity-40 blur-[120px]"
+                    style={{ background: `radial-gradient(circle, ${torneo.colorTextoSecundario}44 0%, transparent 70%)` }}
+                ></div>
             </div>
 
             <div className="relative z-10">
                 <Navbar />
+
+                {/* ESTRUCTURA CENTRADA SIN COLUMNAS LATERALES (PUBLICIDAD DESACTIVADA) */}
                 <main className="max-w-[1200px] mx-auto p-4 md:px-8 animate-in fade-in duration-500">
 
-                    <div className="text-center mt-6 mb-10">
-                        <h1 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter text-white">
-                            {torneo.nombre}
-                        </h1>
-                        {torneo.division && (
-                            <p className="text-blue-500 font-black uppercase tracking-[0.3em] text-[10px] mt-2">
-                                Divisional: {torneo.division}
-                            </p>
-                        )}
-                    </div>
+                    {/* --- HEADER DEL TORNEO --- */}
+                    <header className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 mt-8 mb-16">
 
-                    {/* SELECTOR DE SECCIÓN (ZONAS O FINAL) */}
-                    <div className="flex justify-center gap-2 mb-8 bg-[#0e1630]/60 p-1.5 rounded-2xl border border-blue-900/30 w-fit mx-auto backdrop-blur-md">
+                        {/* LOGO (Aumentado de tamaño) */}
+                        {torneo.fotoUrl && (
+                            <div
+                                // CAMBIO: Aumentado a w-32 (celular) y w-48 (PC)
+                                className="w-32 h-32 md:w-48 md:h-48 shrink-0 rounded-full p-1 shadow-[0_0_60px_-10px_var(--ts)] overflow-hidden bg-[var(--p)] animate-in zoom-in-50 duration-700"
+                                style={{ border: "2px solid var(--ts)44" }}
+                            >
+                                <img src={torneo.fotoUrl} alt="Logo Torneo" className="w-full h-full object-cover" />
+                            </div>
+                        )}
+
+                        {/* TEXTOS Y BADGES */}
+                        <div className="flex flex-col items-center md:items-start text-center md:text-left">
+
+                            {/* TÍTULO */}
+                            <h1 className="text-5xl md:text-8xl font-black italic uppercase tracking-tighter text-[var(--tp)] drop-shadow-2xl leading-[0.85]">
+                                {torneo.nombre}
+                            </h1>
+
+                            {/* SUBTÍTULO: DIVISIÓN */}
+                            {torneo.division && (
+                                <h2
+                                    className="text-xl md:text-3xl font-black uppercase tracking-[0.3em] mt-3 mb-5 drop-shadow-lg"
+                                    style={{ color: "var(--ts)" }}
+                                >
+                                    DIVISIÓN {torneo.division}
+                                </h2>
+                            )}
+
+                            {/* BADGES DE INFO EXTRA */}
+                            <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
+
+                                {/* Género */}
+                                {torneo.genero && (
+                                    <div className="px-4 py-1.5 rounded-full border border-dashed border-[var(--ts)]/30 bg-[var(--s)]/60 backdrop-blur-sm flex items-center gap-2">
+                                        {torneo.genero === "MASCULINO" && <FaMars className="text-[var(--ts)]" />}
+                                        {torneo.genero === "FEMENINO" && <FaVenus className="text-[var(--ts)]" />}
+                                        {torneo.genero === "MIXTO" && <FaVenusMars className="text-[var(--ts)]" />}
+                                        <p className="text-[var(--ts)] font-black uppercase tracking-[0.2em] text-[10px]">
+                                            {torneo.genero}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Red Social (Con Icono Mundo) */}
+                                {torneo.redSocial && (
+                                    <a
+                                        href={torneo.redSocial.startsWith('http') ? torneo.redSocial : `https://${torneo.redSocial}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="px-4 py-1.5 rounded-full border border-[var(--ts)] bg-[var(--ts)]/10 hover:bg-[var(--ts)] hover:text-[var(--p)] transition-all flex items-center gap-2 cursor-pointer group"
+                                    >
+                                        {/* CAMBIO: FaGlobe */}
+                                        <FaGlobe className="text-[var(--ts)] group-hover:text-[var(--p)] transition-colors" />
+                                        <p className="text-[var(--ts)] group-hover:text-[var(--p)] font-black uppercase tracking-[0.2em] text-[10px] transition-colors">
+                                            SEGUINOS
+                                        </p>
+                                    </a>
+                                )}
+
+                                {/* Teléfono del Encargado (Icono Telefono + Número Texto) */}
+                                {torneo.encargadoTelefono && (
+                                    <a
+                                        href={`https://wa.me/${torneo.encargadoTelefono.replace(/[^0-9]/g, '')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="px-4 py-1.5 rounded-full border border-green-500/50 bg-green-500/10 hover:bg-green-500 hover:text-white transition-all flex items-center gap-2 cursor-pointer group"
+                                    >
+                                        {/* CAMBIO: Icono FaPhone y texto del número */}
+                                        <FaPhone className="text-green-500 group-hover:text-white transition-colors" size={12} />
+                                        <p className="text-green-500 group-hover:text-white font-black uppercase tracking-[0.1em] text-[10px] transition-colors">
+                                            {torneo.encargadoTelefono}
+                                        </p>
+                                    </a>
+                                )}
+
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* SELECTOR DE SECCIÓN */}
+                    <div className="flex justify-center gap-2 mb-10 bg-[var(--s)]/80 p-1.5 rounded-2xl border border-[var(--ts)]/10 w-fit mx-auto backdrop-blur-xl shadow-2xl">
                         <button
                             onClick={() => setSeccionActiva("ZONAS")}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${seccionActiva === "ZONAS" ? "bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]" : "text-slate-400 hover:text-white"}`}
+                            className={`flex items-center gap-2 px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${seccionActiva === "ZONAS" ? "bg-[var(--tp)] text-[var(--p)] shadow-xl scale-105" : "text-[var(--ts)] hover:text-[var(--tp)]"}`}
                         >
                             <FaLayerGroup /> Fase de Grupos
                         </button>
                         <button
                             onClick={() => setSeccionActiva("FINAL")}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${seccionActiva === "FINAL" ? "bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]" : "text-slate-400 hover:text-white"}`}
+                            className={`flex items-center gap-2 px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${seccionActiva === "FINAL" ? "bg-[var(--tp)] text-[var(--p)] shadow-xl scale-105" : "text-[var(--ts)] hover:text-[var(--tp)]"}`}
                         >
                             <FaProjectDiagram /> Fase Final
                         </button>
                     </div>
 
-                    {/* RENDERIZADO CONDICIONAL SEGÚN SECCIÓN */}
+                    {/* CONTENIDO PRINCIPAL (Sin columnas laterales) */}
                     {seccionActiva === "ZONAS" ? (
                         <div className="animate-in slide-in-from-bottom-4 duration-500">
                             {/* Selector de Zona */}
-                            <div className="relative mb-8 flex justify-center z-50">
-                                <div className="relative w-fit min-w-[200px]">
+                            <div className="relative mb-10 flex justify-center z-50">
+                                <div className="relative w-fit min-w-[240px]">
                                     <div
                                         onClick={() => setMenuAbierto(!menuAbierto)}
-                                        className="flex items-center justify-between gap-4 bg-[#0e1630] px-5 py-3 rounded-xl border border-blue-900/40 cursor-pointer hover:border-blue-500 transition-all shadow-lg"
+                                        className="flex items-center justify-between gap-4 bg-[var(--s)] px-6 py-4 rounded-2xl border border-[var(--ts)]/20 cursor-pointer hover:border-[var(--ts)]/50 transition-all shadow-xl"
                                     >
-                                        <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                                        <span className="text-[11px] font-black text-[var(--tp)] uppercase tracking-widest">
                                             {zonaActiva?.nombre || "SELECCIONAR ZONA"}
                                         </span>
-                                        <FaChevronDown size={10} className={`text-blue-500 transition-transform ${menuAbierto ? "rotate-180" : ""}`} />
+                                        <FaChevronDown size={12} className={`text-[var(--ts)] transition-transform duration-300 ${menuAbierto ? "rotate-180" : ""}`} />
                                     </div>
                                     {menuAbierto && (
-                                        <div className="absolute top-full left-0 w-full mt-2 bg-[#0e1630] border border-blue-800 rounded-xl p-1 shadow-2xl z-50">
+                                        <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-[var(--s)] border border-[var(--ts)]/30 rounded-2xl p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50 overflow-hidden animate-in zoom-in-95">
                                             {zonas.map(z => (
                                                 <button
                                                     key={z.id}
                                                     onClick={() => { setZonaActiva(z); setMenuAbierto(false); }}
-                                                    className={`w-full px-4 py-3 rounded-lg text-[10px] font-black uppercase text-center mb-1 transition-colors ${zonaActiva?.id === z.id ? "bg-blue-600 text-white" : "text-slate-400 hover:bg-blue-900/40"}`}
+                                                    className={`w-full px-4 py-3.5 rounded-xl text-[10px] font-black uppercase text-center mb-1 transition-all ${zonaActiva?.id === z.id ? "bg-[var(--tp)] text-[var(--p)]" : "text-[var(--ts)] hover:bg-[var(--p)] hover:text-[var(--tp)]"}`}
                                                 >
                                                     {z.nombre}
                                                 </button>
@@ -133,21 +219,23 @@ export default function TorneoPublico() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-10">
-                                <section className="bg-[#0e1630]/40 backdrop-blur-md rounded-3xl border border-blue-900/40 overflow-hidden shadow-xl">
-                                    <div className="bg-[#050814]/80 px-6 py-4 border-b border-blue-900/40 flex items-center gap-2">
-                                        <FaTrophy size={14} className="text-blue-500" />
-                                        <h2 className="font-black uppercase italic tracking-wider text-xs text-white">Tabla de Posiciones</h2>
+                            <div className="grid grid-cols-1 gap-12">
+                                {/* Tabla de Posiciones */}
+                                <section className="bg-[var(--s)]/50 backdrop-blur-md rounded-[2.5rem] border border-[var(--ts)]/10 overflow-hidden shadow-2xl">
+                                    <div className="bg-[var(--p)]/60 px-8 py-5 border-b border-[var(--ts)]/10 flex items-center gap-3">
+                                        <FaTrophy size={16} className="text-[var(--ts)]" />
+                                        <h2 className="font-black uppercase italic tracking-widest text-[11px] text-[var(--tp)]">Tabla de Posiciones</h2>
                                     </div>
-                                    <div className="p-2 md:p-6 overflow-x-auto">
+                                    <div className="p-4 md:p-8 overflow-x-auto">
                                         <TablaPosiciones posiciones={posiciones} />
                                     </div>
                                 </section>
 
-                                <section className="bg-[#0e1630]/40 backdrop-blur-md rounded-3xl border border-blue-900/40 overflow-hidden shadow-xl">
-                                    <div className="bg-[#050814]/80 px-6 py-4 border-b border-blue-900/40 flex items-center gap-2">
-                                        <FaCalendarAlt size={14} className="text-blue-500" />
-                                        <h2 className="font-black uppercase italic tracking-wider text-xs text-white">Cronograma de Partidos</h2>
+                                {/* Cronograma */}
+                                <section className="bg-[var(--s)]/50 backdrop-blur-md rounded-[2.5rem] border border-[var(--ts)]/10 overflow-hidden shadow-2xl">
+                                    <div className="bg-[var(--p)]/60 px-8 py-5 border-b border-[var(--ts)]/10 flex items-center gap-3">
+                                        <FaCalendarAlt size={16} className="text-[var(--ts)]" />
+                                        <h2 className="font-black uppercase italic tracking-widest text-[11px] text-[var(--tp)]">Cronograma de Partidos</h2>
                                     </div>
                                     <div className="w-full">
                                         {zonaActiva && (
@@ -160,15 +248,14 @@ export default function TorneoPublico() {
                             </div>
                         </div>
                     ) : (
-                        /* SECCIÓN DE FASE FINAL */
                         <div className="animate-in slide-in-from-bottom-4 duration-500">
                             <CuadroFaseFinal torneoId={torneo.id} />
                         </div>
                     )}
 
-                    <footer className="mt-20 mb-10 text-center opacity-20">
-                        <p className="text-[8px] font-black text-blue-400 uppercase tracking-[0.8em] italic">
-                            LIGAS JUJEÑAS • PLATAFORMA OFICIAL
+                    <footer className="mt-24 mb-12 text-center opacity-40">
+                        <p className="text-[9px] font-black text-[var(--ts)] uppercase tracking-[1em] italic">
+                            LIGAS JUJEÑAS • V1.0
                         </p>
                     </footer>
                 </main>

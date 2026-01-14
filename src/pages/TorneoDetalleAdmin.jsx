@@ -4,7 +4,8 @@ import { apiFetch } from "../api/api";
 import {
     FaArrowLeft, FaPlus, FaTrophy, FaTrash,
     FaEdit, FaCalendarAlt, FaMagic, FaCogs, FaCheckCircle, FaLock, FaFutbol, FaLayerGroup, FaInfoCircle,
-    FaProjectDiagram // Icono para Fase Final
+    FaProjectDiagram, // Icono para Fase Final
+    FaMars, FaVenus, FaVenusMars // Nuevos iconos
 } from "react-icons/fa";
 
 // Modales
@@ -104,6 +105,14 @@ export default function TorneoDetalleAdmin() {
         return torneo.zonas.some(zona => zona.equipos && zona.equipos.length >= 2);
     }, [torneo?.zonas]);
 
+    // Helper para icono de género
+    const getGeneroIcon = () => {
+        if (torneo.genero === "MASCULINO") return <FaMars className="text-blue-400" />;
+        if (torneo.genero === "FEMENINO") return <FaVenus className="text-pink-400" />;
+        if (torneo.genero === "MIXTO") return <FaVenusMars className="text-purple-400" />;
+        return null;
+    };
+
     if (loading) return (
         <div className="min-h-screen bg-[#05081c] flex flex-col items-center justify-center gap-4">
             <div className="w-12 h-12 border-4 border-cyan-500/10 border-t-cyan-500 rounded-full animate-spin"></div>
@@ -133,9 +142,16 @@ export default function TorneoDetalleAdmin() {
 
                 <header className="bg-[#0a0f2c] p-8 rounded-[2rem] border border-slate-800 mb-10 shadow-2xl flex flex-col xl:flex-row justify-between items-center gap-8">
                     <div className="flex items-center gap-6">
-                        <div className="bg-[#040714] p-5 rounded-2xl border border-slate-800 text-cyan-500 shadow-inner">
-                            <FaTrophy size={32} />
+
+                        {/* --- FOTO / LOGO --- */}
+                        <div className="w-24 h-24 md:w-28 md:h-28 bg-[#040714] rounded-full border border-slate-800 flex items-center justify-center shadow-inner overflow-hidden shrink-0">
+                            {torneo.fotoUrl ? (
+                                <img src={torneo.fotoUrl} alt={torneo.nombre} className="w-full h-full object-cover" />
+                            ) : (
+                                <FaTrophy size={32} className="text-cyan-500" />
+                            )}
                         </div>
+
                         <div>
                             <div className="flex items-center gap-4">
                                 <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-tight text-white leading-none">{torneo.nombre}</h1>
@@ -143,9 +159,19 @@ export default function TorneoDetalleAdmin() {
                                     <FaEdit size={16}/>
                                 </button>
                             </div>
-                            <p className="text-cyan-500 font-bold uppercase text-[10px] tracking-[0.4em] mt-3 opacity-80">
-                                División {torneo.division} • {torneo.estado}
-                            </p>
+
+                            {/* --- INFO: GÉNERO + DIVISIÓN + ESTADO --- */}
+                            <div className="flex items-center gap-3 mt-3 flex-wrap">
+                                {torneo.genero && (
+                                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800/50 border border-slate-700 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                                        {getGeneroIcon()}
+                                        {torneo.genero}
+                                    </span>
+                                )}
+                                <p className="text-cyan-500 font-bold uppercase text-[10px] tracking-[0.4em] opacity-80">
+                                    División {torneo.division} • {torneo.estado}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
