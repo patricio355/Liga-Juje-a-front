@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { apiFetch } from "../api/api";
 import {
     FaArrowLeft, FaPlus, FaTrophy, FaTrash,
-    FaEdit, FaCalendarAlt, FaMagic, FaCogs, FaCheckCircle, FaLock, FaFutbol, FaLayerGroup, FaInfoCircle
+    FaEdit, FaCalendarAlt, FaMagic, FaCogs, FaCheckCircle, FaLock, FaFutbol, FaLayerGroup, FaInfoCircle,
+    FaProjectDiagram // Icono para Fase Final
 } from "react-icons/fa";
 
 // Modales
@@ -149,6 +150,15 @@ export default function TorneoDetalleAdmin() {
                     </div>
 
                     <div className="flex flex-wrap justify-center gap-4 w-full xl:w-auto">
+
+                        {/* BOTÓN GESTIONAR FASE FINAL */}
+                        <button
+                            onClick={() => navigate(`/dashboard/torneos/${torneo.id}/fase-final`)}
+                            className="bg-[#0e1630] hover:bg-blue-900/40 text-blue-400 px-6 py-4 rounded-2xl font-bold flex items-center gap-3 border border-blue-800/40 transition-all uppercase text-[10px] tracking-widest shadow-lg active:scale-95"
+                        >
+                            <FaProjectDiagram className="text-lg" /> Gestión Fase Final
+                        </button>
+
                         {(esAbierto || !fixtureYaGenerado) && (
                             <button
                                 onClick={() => setModalZonaCrear(true)}

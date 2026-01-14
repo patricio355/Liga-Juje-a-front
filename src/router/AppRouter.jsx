@@ -7,6 +7,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import ProgramacionFechaWrapper from "../pages/ProgramacionFechaWrapper";
 import TorneoDetalleAdmin from "../pages/TorneoDetalleAdmin.jsx";
 import GestionPartidosFixture from "../pages/GestionPartidosFixture.jsx";
+import GestionFaseFinal from "../pages/GestionFaseFinal.jsx";
 
 export default function AppRouter() {
     return (
@@ -48,7 +49,7 @@ export default function AppRouter() {
                 {/* PROGRAMACIÓN DE fixture (ADMIN) */}
                 <Route path="/dashboard/gestion-partidos/:id" element={<GestionPartidosFixture />} />
 
-
+                <Route path="/dashboard/torneos/:id/fase-final" element={<GestionFaseFinal />} />
 
                 {/* fallback */}
                 <Route path="*" element={<Navigate to="/torneos" />} />

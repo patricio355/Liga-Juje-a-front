@@ -28,7 +28,7 @@ export default function Login() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    email: email.trim(), // Limpiamos espacios accidentales
+                    email: email.trim(),
                     password: password
                 })
             });
@@ -36,8 +36,6 @@ export default function Login() {
             const data = await response.json();
 
             if (!response.ok) {
-                // Si el backend envió un mensaje en el GlobalExceptionHandler, lo usamos
-                // De lo contrario, usamos mensajes por defecto según el código de estado
                 if (response.status === 403) {
                     setError(data.message || "Tu cuenta está desactivada.");
                 } else if (response.status === 401 || response.status === 400) {
@@ -49,7 +47,6 @@ export default function Login() {
                 return;
             }
 
-            // Si todo salió bien
             login(data.token);
             window.location.replace("/dashboard");
 
@@ -90,7 +87,6 @@ export default function Login() {
                             </p>
                         </div>
 
-                        {/* Contenedor de Error mejorado */}
                         {error && (
                             <div className="mb-8 p-4 bg-red-500/10 border border-red-500/40 rounded-xl flex items-center gap-3">
                                 <FaExclamationTriangle className="text-red-500 shrink-0" />
@@ -101,12 +97,17 @@ export default function Login() {
                         )}
 
                         <form onSubmit={handleLogin} className="space-y-6 relative z-10">
+                            {/* Campo: Correo Electrónico */}
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-blue-300/40 uppercase tracking-widest ml-1">Correo Electrónico</label>
+                                <label className="text-[10px] font-black text-white uppercase tracking-widest ml-1">
+                                    Correo Electrónico
+                                </label>
                                 <div className="relative group">
                                     <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-700 group-focus-within:text-blue-400 transition-colors" />
                                     <input
                                         type="email"
+                                        name="email"
+                                        autoComplete="email"
                                         placeholder="admin@ligajujeña.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
@@ -116,12 +117,17 @@ export default function Login() {
                                 </div>
                             </div>
 
+                            {/* Campo: Clave de Acceso */}
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-blue-300/40 uppercase tracking-widest ml-1">Clave de Acceso</label>
+                                <label className="text-[10px] font-black text-white uppercase tracking-widest ml-1">
+                                    Contraseña
+                                </label>
                                 <div className="relative group">
                                     <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-700 group-focus-within:text-blue-400 transition-colors" />
                                     <input
                                         type="password"
+                                        name="password"
+                                        autoComplete="current-password"
                                         placeholder="••••••••"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
@@ -141,13 +147,13 @@ export default function Login() {
                                         <FaSpinner className="animate-spin text-lg" />
                                         Verificando...
                                     </>
-                                ) : "Entrar al Sistema"}
+                                ) : "Iniciar Sesión"}
                             </button>
                         </form>
 
                         <div className="mt-10 text-center border-t border-blue-900/30 pt-8">
                             <p className="text-blue-800 text-[10px] font-black uppercase italic tracking-[0.2em]">
-                                Terminal Oficial • v2.0.26
+                                Sistema de administración de torneos y competencias • v1.0
                             </p>
                         </div>
                     </div>
