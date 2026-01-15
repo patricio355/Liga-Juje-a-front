@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom"; // Se agregó Link para el botón de inicio
 import { apiFetch } from "../api/api";
 import TablaPosiciones from "../components/torneo/TablaPosiciones";
 import FixtureTorneo from "../components/torneo/FixtureTorneo";
 import ProgramacionComoFixture from "../components/torneo/ProgramacionComoFixture";
 import CuadroFaseFinal from "./CuadroFaseFinal";
 import Navbar from "../components/Navbar";
-import { FaTrophy, FaCalendarAlt, FaFutbol, FaChevronDown, FaProjectDiagram, FaLayerGroup, FaGlobe, FaVenusMars, FaMars, FaVenus, FaPhone } from "react-icons/fa";
+// Se agregaron FaExclamationTriangle y FaHome a la lista de iconos
+import {
+    FaTrophy, FaCalendarAlt, FaFutbol, FaChevronDown,
+    FaProjectDiagram, FaLayerGroup, FaGlobe, FaVenusMars,
+    FaMars, FaVenus, FaPhone, FaExclamationTriangle, FaHome
+} from "react-icons/fa";
 
 export default function TorneoPublico() {
     const { slug } = useParams();
@@ -23,7 +28,6 @@ export default function TorneoPublico() {
         const cargarTorneo = async () => {
             try {
                 setLoadingTorneo(true);
-                // CAMBIO: Llamamos al endpoint de detalle que trae TODO (zonas, equipos)
                 const data = await apiFetch(`/api/torneos/${slug}`);
 
                 if (data) {
@@ -33,9 +37,12 @@ export default function TorneoPublico() {
                     setTorneo(data);
                     setZonas(zonasOrdenadas);
                     setZonaActiva(zonasOrdenadas[0] ?? null);
+                } else {
+                    setTorneo(null);
                 }
             } catch (e) {
                 console.error("Error cargando detalle del torneo:", e);
+                setTorneo(null); // Esto dispara la pantalla de "No Encontrado"
             } finally {
                 setLoadingTorneo(false);
             }
@@ -57,6 +64,7 @@ export default function TorneoPublico() {
         cargarPosiciones();
     }, [zonaActiva, seccionActiva]);
 
+    // --- PANTALLA DE CARGA ---
     if (loadingTorneo) return (
         <div className="min-h-screen bg-[#05070a] flex flex-col items-center justify-center gap-4">
             <FaFutbol className="text-4xl text-slate-500 animate-spin" />
@@ -64,11 +72,40 @@ export default function TorneoPublico() {
         </div>
     );
 
-    if (!torneo) return (
-        <div className="min-h-screen bg-[#05070a] flex flex-col items-center justify-center gap-4">
-            <span className="text-white font-bold uppercase tracking-widest">Torneo no encontrado</span>
-        </div>
-    );
+    // --- PANTALLA DE ERROR: TORNEO NO ENCONTRADO ---
+    if (!torneo) {
+        return (
+            <div className="min-h-screen bg-[#05070a] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+                {/* Aura de fondo para mantener la estética */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_#1e293b_0%,_transparent_70%)] opacity-20"></div>
+
+                <div className="relative z-10 flex flex-col items-center">
+                    <div className="bg-red-500/10 p-6 rounded-[2.5rem] border border-red-500/20 mb-8">
+                        <FaExclamationTriangle className="text-6xl text-red-500 animate-pulse" />
+                    </div>
+
+                    <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white mb-4 leading-none">
+                        Torneo <br />
+                        <span className="bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">
+                            No Encontrado
+                        </span>
+                    </h1>
+
+                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] mb-10 max-w-xs leading-relaxed">
+                        La competición que buscas no existe o el enlace es incorrecto.
+                    </p>
+
+                    <Link
+                        to="/torneos"
+                        className="group relative flex items-center gap-3 bg-white text-black px-10 py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] transition-all hover:scale-105 active:scale-95 shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
+                    >
+                        <FaHome className="text-lg group-hover:-translate-y-0.5 transition-transform" />
+                        Ir al Inicio
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     const vars = {
         "--p": torneo.colorPrimario || "#05070a",
