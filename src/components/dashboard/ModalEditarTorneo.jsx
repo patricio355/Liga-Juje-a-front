@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { apiFetch } from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
-import { FaTrophy, FaTimes, FaPalette, FaMars, FaVenus, FaVenusMars, FaInstagram, FaChartLine, FaUserAlt, FaLock } from "react-icons/fa";
+import { FaTrophy, FaTimes, FaPalette, FaMars, FaVenus, FaVenusMars, FaInstagram, FaUserAlt } from "react-icons/fa";
 // IMPORTANTE: Ajusta la ruta a tu componente ImageUpload
 import ImageUpload from "../../images/ImageUpload";
 
@@ -25,27 +25,26 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
     const miRol = user?.role?.toUpperCase().replace("ROLE_", "") || "";
     const esAdminGenuino = miRol === "ADMIN";
 
-    // Estados originales
+    // Estados
     const [nombre, setNombre] = useState("");
     const [division, setDivision] = useState("");
     const [encargadoEmail, setEncargadoEmail] = useState("");
     const [estado, setEstado] = useState("activo");
     const [tipo, setTipo] = useState("ABIERTO");
-
-    // Estados Nuevos
     const [fotoUrl, setFotoUrl] = useState("");
     const [genero, setGenero] = useState("MASCULINO");
     const [redSocial, setRedSocial] = useState("");
+
+    // Puntos (Estado interno para mantener datos, oculto en UI)
     const [puntosGanador, setPuntosGanador] = useState(3);
     const [puntosEmpate, setPuntosEmpate] = useState(1);
 
-    // Estado para la plantilla activa
     const [plantillaActiva, setPlantillaActiva] = useState("NEGRO");
-
     const [listaEncargados, setListaEncargados] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // EFECTO 1: Cargar datos
     useEffect(() => {
         if (torneo) {
             setNombre(torneo.nombre || "");
@@ -53,22 +52,21 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
             setEncargadoEmail(torneo.encargadoEmail || "");
             setEstado(torneo.estado?.toLowerCase() || "activo");
             setTipo(torneo.tipo || "ABIERTO");
-
-            // Cargar datos nuevos (Asegúrate de que 'torneo' traiga fotoUrl del backend)
-
             setFotoUrl(torneo.fotoUrl || "");
             setGenero(torneo.genero || "MASCULINO");
             setRedSocial(torneo.redSocial || "");
             setPuntosGanador(torneo.puntosGanador ?? 3);
             setPuntosEmpate(torneo.puntosEmpate ?? 1);
 
-            // Buscamos qué plantilla coincide con el color actual
             const keyCoincidente = Object.keys(PLANTILLAS).find(
                 key => PLANTILLAS[key].p === torneo.colorPrimario
             );
             if (keyCoincidente) setPlantillaActiva(keyCoincidente);
         }
+    }, [torneo]);
 
+    // EFECTO 2: Cargar encargados
+    useEffect(() => {
         if (esAdminGenuino) {
             const cargarEncargados = async () => {
                 try {
@@ -80,7 +78,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
             };
             cargarEncargados();
         }
-    }, [torneo, esAdminGenuino]);
+    }, [esAdminGenuino]);
 
     const actualizarTorneo = async (e) => {
         if (e) e.preventDefault();
@@ -98,16 +96,11 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                 division: division || null,
                 estado,
                 tipo,
-                // Nuevos campos
                 fotoUrl: fotoUrl || null,
                 genero,
                 redSocial: redSocial || null,
-                // NO enviamos puntosGanador ni puntosEmpate para no permitir cambios en el backend
-                // O si tu backend lo requiere, envíalos igual pero sin modificar:
-                puntosGanador: torneo.puntosGanador,
-                puntosEmpate: torneo.puntosEmpate,
-
-                // Colores
+                puntosGanador,
+                puntosEmpate,
                 colorPrimario: PLANTILLAS[plantillaActiva].p,
                 colorSecundario: PLANTILLAS[plantillaActiva].s,
                 colorTextoPrimario: PLANTILLAS[plantillaActiva].tp,
@@ -115,7 +108,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
             };
 
             if (esAdminGenuino) {
-                payload.encargadoEmail = encargadoEmail || null;
+                payload.encargadoEmail = encargadoEmail === "" ? null : encargadoEmail;
             }
 
             await apiFetch(`/api/torneos/${torneo.id}`, {
@@ -126,6 +119,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
             if (onUpdated) await onUpdated();
             onClose();
         } catch (e) {
+            console.error(e);
             setError(e.message || "Error al actualizar torneo");
         } finally {
             setLoading(false);
@@ -139,7 +133,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                 onClick={(e) => e.stopPropagation()}
                 onSubmit={actualizarTorneo}
             >
-                <div className="bg-[#0d143d] px-8 py-7 border-b border-slate-800 flex justify-between items-center">
+                <div className="bg-[#0d143d] px-8 py-5 border-b border-slate-800 flex justify-between items-center">
                     <div>
                         <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
                             <FaTrophy className="text-cyan-500" size={20} /> Editar Torneo
@@ -153,22 +147,24 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                     </button>
                 </div>
 
-                <div className="p-8">
+                <div className="p-6">
                     {error && (
                         <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 mb-6 rounded-xl text-[11px] font-bold uppercase tracking-wider text-center">
                             {error}
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                        {/* --- SECCIÓN LOGO DEL TORNEO --- */}
-                        <div className="col-span-1 md:col-span-2 space-y-2 flex flex-col items-center border-b border-slate-800/50 pb-6 mb-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                        {/* --- FILA 1 COMPARTIDA: FOTO (Izq) y NOMBRE (Der) --- */}
+
+                        {/* Columna 1: Logo */}
+                        <div className="col-span-1 flex flex-col items-center justify-center border-b md:border-b-0 border-slate-800/50 pb-4 md:pb-0">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
                                 Logo Principal
                             </label>
                             <ImageUpload
-                                currentImage={fotoUrl} // Aquí se pasa la foto cargada en el useEffect
+                                currentImage={fotoUrl}
                                 onUploadStart={() => setLoading(true)}
                                 onUploadSuccess={(url) => {
                                     setFotoUrl(url);
@@ -178,9 +174,11 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             />
                         </div>
 
-                        {/* Nombre */}
-                        <div className="col-span-1 md:col-span-2 space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Nombre de la Competición</label>
+                        {/* Columna 2: Nombre (Centrado verticalmente con la imagen) */}
+                        <div className="col-span-1 flex flex-col justify-center space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+                                Nombre de la Competición
+                            </label>
                             <input
                                 placeholder="NOMBRE DEL TORNEO"
                                 className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-medium text-white transition-all"
@@ -189,8 +187,10 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             />
                         </div>
 
-                        {/* Selector de Plantillas */}
-                        <div className="col-span-1 md:col-span-2 space-y-3 pt-2">
+                        {/* --- RESTO DEL FORMULARIO --- */}
+
+                        {/* Plantillas */}
+                        <div className="col-span-1 md:col-span-2 space-y-3 pt-2 border-t border-slate-800/50">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
                                 <FaPalette className="text-cyan-500" /> Cambiar Estilo Visual
                             </label>
@@ -200,10 +200,10 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                                         key={key}
                                         type="button"
                                         onClick={() => setPlantillaActiva(key)}
-                                        className={`h-14 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 group ${plantillaActiva === key ? "border-cyan-500 scale-105 shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "border-slate-800 opacity-50 hover:opacity-100"}`}
+                                        className={`h-12 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 group ${plantillaActiva === key ? "border-cyan-500 scale-105 shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "border-slate-800 opacity-50 hover:opacity-100"}`}
                                         style={{ backgroundColor: PLANTILLAS[key].p }}
                                     >
-                                        <div className="w-5 h-1 rounded-full" style={{ backgroundColor: PLANTILLAS[key].ts }}></div>
+                                        <div className="w-4 h-1 rounded-full" style={{ backgroundColor: PLANTILLAS[key].ts }}></div>
                                         <span className="text-[6px] md:text-[7px] font-black text-white uppercase tracking-tighter">{key}</span>
                                     </button>
                                 ))}
@@ -274,42 +274,9 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             />
                         </div>
 
-                        {/* Sistema de Puntuación (BLOQUEADO) */}
-                        <div className="col-span-1 md:col-span-2 flex items-center gap-3 pt-2">
-                            <FaChartLine className="text-cyan-500/50" size={12} />
-                            <span className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest">Sistema de Puntuación (Bloqueado)</span>
-                            <div className="h-px bg-slate-800/50 flex-1"></div>
-                        </div>
-
-                        <div className="space-y-1.5 opacity-50 relative">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                Pts. Victoria <FaLock size={8}/>
-                            </label>
-                            <input
-                                type="number"
-                                disabled // Deshabilitado
-                                className="w-full px-5 py-3.5 bg-[#02040a] border border-slate-900 rounded-xl text-xl font-black text-slate-500 text-center cursor-not-allowed"
-                                value={puntosGanador}
-                                onChange={e => setPuntosGanador(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="space-y-1.5 opacity-50 relative">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                Pts. Empate <FaLock size={8}/>
-                            </label>
-                            <input
-                                type="number"
-                                disabled // Deshabilitado
-                                className="w-full px-5 py-3.5 bg-[#02040a] border border-slate-900 rounded-xl text-xl font-black text-slate-500 text-center cursor-not-allowed"
-                                value={puntosEmpate}
-                                onChange={e => setPuntosEmpate(e.target.value)}
-                            />
-                        </div>
-
                         {/* Encargado (Solo Admin) */}
                         {esAdminGenuino && (
-                            <div className="col-span-1 md:col-span-2 space-y-1.5 mt-4 bg-cyan-900/10 p-4 rounded-xl border border-cyan-500/20">
+                            <div className="col-span-1 md:col-span-2 space-y-1.5 mt-2 bg-cyan-900/10 p-3 rounded-xl border border-cyan-500/20">
                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
                                     <FaUserAlt size={10} className="text-cyan-500" /> Responsable (Solo Admin)
                                 </label>
@@ -329,7 +296,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                         )}
                     </div>
 
-                    <div className="flex gap-4 mt-10">
+                    <div className="flex gap-4 mt-8">
                         <button
                             type="button"
                             onClick={onClose}

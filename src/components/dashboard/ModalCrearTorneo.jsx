@@ -2,7 +2,6 @@ import { useContext, useState, useEffect } from "react";
 import { apiFetch } from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
 import { FaTrophy, FaChartLine, FaUserAlt, FaPalette, FaMars, FaVenus, FaVenusMars, FaInstagram } from "react-icons/fa";
-// IMPORTANTE: Ajusta la ruta según donde guardaste tu componente ImageUpload
 import ImageUpload from "../../images/ImageUpload";
 
 // 1. Definición de Plantillas Premium
@@ -21,20 +20,20 @@ const PLANTILLAS = {
 
 export default function ModalCrearTorneo({ onClose, onCreated }) {
     const { user } = useContext(AuthContext);
-    // Verificación de rol para mostrar el campo de encargado
     const esAdmin = user?.role === "ROLE_ADMIN" || user?.role === "ADMIN";
 
-    // Estados originales
+    // Estados
     const [nombre, setNombre] = useState("");
     const [division, setDivision] = useState("");
     const [encargadoEmail, setEncargadoEmail] = useState("");
+
+    // Estado siempre activo por defecto (se eliminó el selector visual)
     const [estado, setEstado] = useState("activo");
+
     const [tipo, setTipo] = useState("CERRADO");
     const [puntosGanador, setPuntosGanador] = useState(3);
     const [puntosEmpate, setPuntosEmpate] = useState(1);
     const [plantillaActiva, setPlantillaActiva] = useState("NEGRO");
-
-    // --- NUEVOS ESTADOS ---
     const [fotoUrl, setFotoUrl] = useState("");
     const [genero, setGenero] = useState("MASCULINO");
     const [redSocial, setRedSocial] = useState("");
@@ -73,14 +72,10 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                 puntosGanador: Number(puntosGanador),
                 puntosEmpate: Number(puntosEmpate),
                 encargadoEmail: encargadoEmail || null,
-
-                // Colores de la plantilla
                 colorPrimario: PLANTILLAS[plantillaActiva].p,
                 colorSecundario: PLANTILLAS[plantillaActiva].s,
                 colorTextoPrimario: PLANTILLAS[plantillaActiva].tp,
                 colorTextoSecundario: PLANTILLAS[plantillaActiva].ts,
-
-                // --- NUEVOS CAMPOS ---
                 fotoUrl: fotoUrl || null,
                 genero: genero,
                 redSocial: redSocial || null
@@ -103,12 +98,12 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
     return (
         <div className="fixed inset-0 bg-[#040714]/95 backdrop-blur-md flex items-center justify-center z-[200] p-4" onClick={onClose}>
             <form
-                // CAMBIO 1: max-w-4xl para hacerlo más ancho en PC
                 className="bg-[#0a0f2c] border border-cyan-500/30 rounded-[2.5rem] w-full max-w-4xl shadow-2xl overflow-hidden max-h-[95vh] overflow-y-auto custom-scrollbar"
                 onClick={(e) => e.stopPropagation()}
                 onSubmit={crearTorneo}
             >
-                <div className="bg-[#0d143d] px-8 py-7 border-b border-slate-800">
+                {/* Header */}
+                <div className="bg-[#0d143d] px-8 py-5 border-b border-slate-800">
                     <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
                         <FaTrophy className="text-cyan-500" size={20} /> Crear Torneo
                     </h2>
@@ -117,18 +112,21 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                     </p>
                 </div>
 
-                <div className="p-8">
+                {/* Body */}
+                <div className="p-6">
                     {error && (
                         <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 mb-6 rounded-xl text-[11px] font-bold uppercase tracking-wider text-center">
                             {error}
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                        {/* --- SECCIÓN LOGO DEL TORNEO --- */}
-                        <div className="col-span-1 md:col-span-2 space-y-2 flex flex-col items-center border-b border-slate-800/50 pb-6 mb-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                        {/* --- FILA 1: FOTO y NOMBRE --- */}
+
+                        {/* Columna 1: Logo */}
+                        <div className="col-span-1 flex flex-col items-center justify-center border-b md:border-b-0 border-slate-800/50 pb-4 md:pb-0">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
                                 Logo Principal
                             </label>
                             <ImageUpload
@@ -141,19 +139,29 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             />
                         </div>
 
-                        {/* Nombre */}
-                        <div className="col-span-1 md:col-span-2 space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Nombre de la Competición</label>
+                        {/* Columna 2: Nombre */}
+                        <div className="col-span-1 flex flex-col justify-center space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+                                Nombre de la Competición
+                            </label>
                             <input
                                 placeholder="EJ. TORNEO APERTURA 2026"
-                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-medium text-white placeholder:text-slate-800 transition-all"
+                                className={`w-full px-5 py-3.5 bg-[#040714] border rounded-xl outline-none focus:border-cyan-500 text-sm font-medium text-white placeholder:text-slate-800 transition-all ${
+                                    nombre.length > 0 && nombre.length < 6 ? "border-red-500/50" : "border-slate-800"
+                                }`}
                                 value={nombre}
+                                minLength={6}
                                 onChange={e => setNombre(e.target.value.toUpperCase())}
                             />
+                            {nombre.length > 0 && nombre.length < 6 && (
+                                <span className="text-[9px] text-red-500 font-bold uppercase tracking-tighter ml-1">
+            Mínimo 6 caracteres (llevas {nombre.length})
+        </span>
+                            )}
                         </div>
 
-                        {/* Plantillas Visuales */}
-                        <div className="col-span-1 md:col-span-2 space-y-3 pt-2">
+                        {/* --- PLANTILLAS --- */}
+                        <div className="col-span-1 md:col-span-2 space-y-3 pt-2 border-t border-slate-800/50">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
                                 <FaPalette className="text-cyan-500" /> Estilo de Plantilla
                             </label>
@@ -163,10 +171,10 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                                         key={key}
                                         type="button"
                                         onClick={() => setPlantillaActiva(key)}
-                                        className={`h-14 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 group ${plantillaActiva === key ? "border-cyan-500 scale-105 shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "border-slate-800 opacity-50 hover:opacity-100"}`}
+                                        className={`h-12 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 group ${plantillaActiva === key ? "border-cyan-500 scale-105 shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "border-slate-800 opacity-50 hover:opacity-100"}`}
                                         style={{ backgroundColor: PLANTILLAS[key].p }}
                                     >
-                                        <div className="w-5 h-1 rounded-full" style={{ backgroundColor: PLANTILLAS[key].ts }}></div>
+                                        <div className="w-4 h-1 rounded-full" style={{ backgroundColor: PLANTILLAS[key].ts }}></div>
                                         <span className="text-[6px] md:text-[7px] font-black text-white uppercase tracking-tighter">{key}</span>
                                     </button>
                                 ))}
@@ -237,51 +245,45 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             />
                         </div>
 
-                        {/* Sistema de Puntuación */}
-                        <div className="col-span-1 md:col-span-2 flex items-center gap-3 pt-2">
-                            <FaChartLine className="text-cyan-500/50" size={12} />
-                            <span className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest">Sistema de Puntuación</span>
-                            <div className="h-px bg-slate-800/50 flex-1"></div>
+                        {/* --- SISTEMA DE PUNTUACIÓN (COMPACTO) --- */}
+                        <div className="col-span-1 md:col-span-2 pt-2 border-t border-slate-800/50">
+                            <div className="flex flex-col md:flex-row md:items-center gap-4">
+
+                                {/* Etiqueta */}
+                                <div className="flex items-center gap-2 min-w-[150px]">
+                                    <FaChartLine className="text-cyan-500" />
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                        Sistema de Puntos
+                                    </span>
+                                </div>
+
+                                {/* Inputs Pequeños y Juntos */}
+                                <div className="flex gap-4">
+                                    <div className="flex items-center gap-2 bg-[#040714] border border-slate-800 px-3 py-2 rounded-lg">
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase">Victoria</span>
+                                        <input
+                                            type="number"
+                                            className="w-10 bg-transparent outline-none text-white font-black text-center border-l border-slate-800 pl-2"
+                                            value={puntosGanador}
+                                            onChange={e => setPuntosGanador(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2 bg-[#040714] border border-slate-800 px-3 py-2 rounded-lg">
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase">Empate</span>
+                                        <input
+                                            type="number"
+                                            className="w-10 bg-transparent outline-none text-white font-black text-center border-l border-slate-800 pl-2"
+                                            value={puntosEmpate}
+                                            onChange={e => setPuntosEmpate(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Pts. Victoria</label>
-                            {/* CAMBIO 2: Texto grande (text-xl) */}
-                            <input
-                                type="number"
-                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-xl font-black text-cyan-400 text-center transition-all"
-                                value={puntosGanador}
-                                onChange={e => setPuntosGanador(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Pts. Empate</label>
-                            {/* CAMBIO 2: Texto grande (text-xl) */}
-                            <input
-                                type="number"
-                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-xl font-black text-cyan-400 text-center transition-all"
-                                value={puntosEmpate}
-                                onChange={e => setPuntosEmpate(e.target.value)}
-                            />
-                        </div>
-
-                        {/* Visibilidad */}
-                        <div className="col-span-1 md:col-span-2 space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Visibilidad inicial</label>
-                            <select
-                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
-                                value={estado}
-                                onChange={e => setEstado(e.target.value)}
-                            >
-                                <option value="activo" className="bg-[#0a0f2c]">PUBLICADO (ACTIVO)</option>
-                                <option value="inactivo" className="bg-[#0a0f2c]">BORRADOR (INACTIVO)</option>
-                            </select>
-                        </div>
-
-                        {/* CAMBIO 3: Aquí está el encargado, se muestra solo si esAdmin es true */}
+                        {/* Encargado (Solo Admin) */}
                         {esAdmin && (
-                            <div className="col-span-1 md:col-span-2 space-y-1.5 bg-cyan-900/10 p-4 rounded-xl border border-cyan-500/20">
+                            <div className="col-span-1 md:col-span-2 space-y-1.5 bg-cyan-900/10 p-3 rounded-xl border border-cyan-500/20 mt-2">
                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
                                     <FaUserAlt size={10} className="text-cyan-500" /> Responsable (Solo Admin)
                                 </label>
@@ -301,7 +303,7 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                         )}
                     </div>
 
-                    <div className="flex gap-4 mt-10">
+                    <div className="flex gap-4 mt-8">
                         <button
                             type="button"
                             onClick={onClose}
