@@ -43,10 +43,10 @@ export default function Navbar() {
             {/* Brillo metálico sutil superior */}
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-500/50 to-transparent"></div>
 
-            {/* CAMBIO AQUÍ: Se redujo el 'gap-4' a 'gap-2' para juntar el logo y el texto */}
+            {/* Link con gap-2 */}
             <Link to="/" className="flex items-center gap-2 group">
 
-                {/* LOGO LIMPIO */}
+                {/* LOGO */}
                 <div className="relative w-14 h-14 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
                     <img
                         src={logoLigas}
@@ -55,11 +55,16 @@ export default function Navbar() {
                     />
                 </div>
 
-                <div className="text-white font-black text-xl leading-5 tracking-tighter uppercase italic">
+                {/* TEXTO CORREGIDO:
+        - pr-4 para dar mucho espacio a la itálica
+        - tracking-tight (un poco menos apretado que tighter)
+        - overflow-visible por seguridad
+    */}
+                <div className="text-white font-black text-xl leading-5 tracking-tight uppercase italic pr-4 overflow-visible">
                     Ligas <br />
                     <span className="text-slate-300 bg-gradient-to-r from-slate-100 via-slate-400 to-slate-200 bg-clip-text text-transparent">
-                        Jujeñas
-                    </span>
+            Jujeñas
+        </span>
                 </div>
             </Link>
 

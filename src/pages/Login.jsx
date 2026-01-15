@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import Navbar from "../components/Navbar.jsx";
-import { FaEnvelope, FaLock, FaFutbol, FaExclamationTriangle, FaSpinner } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaFutbol, FaExclamationTriangle, FaSpinner, FaWhatsapp } from "react-icons/fa";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -59,7 +59,6 @@ export default function Login() {
     return (
         <div className="min-h-screen bg-[#05070a] text-slate-300 font-sans selection:bg-slate-700 selection:text-white relative overflow-hidden">
 
-            {/* Fondo con profundidad idéntico al Home */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_#1e293b_0%,_transparent_50%)] opacity-40"></div>
             </div>
@@ -67,7 +66,7 @@ export default function Login() {
             <div className="relative z-10">
                 <Navbar />
 
-                <div className="flex items-center justify-center p-4 pt-16 min-h-[85vh]">
+                <div className="flex flex-col items-center justify-center p-4 pt-16 min-h-[85vh]">
                     <div className="w-full max-w-md">
 
                         {sessionExpired && (
@@ -81,15 +80,14 @@ export default function Login() {
 
                         <div className="bg-[#0a0c10] p-10 rounded-[2.5rem] shadow-[0_0_60px_rgba(0,0,0,0.8)] border border-slate-800 relative overflow-hidden group">
 
-                            {/* Efecto de luz superior */}
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-500/50 to-transparent"></div>
-                            <div className="absolute -top-24 -left-24 w-48 h-48 bg-slate-500/5 blur-[80px] rounded-full"></div>
 
                             <div className="text-center mb-10 relative z-10">
                                 <div className="inline-flex p-4 bg-[#111316] rounded-2xl mb-4 border border-slate-700 shadow-inner">
                                     <FaFutbol className="text-3xl text-slate-200" />
                                 </div>
-                                <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic leading-none">
+                                {/* CORRECCIÓN 'S': pr-4 y tracking-tight */}
+                                <h1 className="text-3xl font-black tracking-tight text-white uppercase italic leading-none pr-4">
                                     Ligas <span className="bg-gradient-to-r from-slate-200 via-slate-400 to-slate-500 bg-clip-text text-transparent">Jujeñas</span>
                                 </h1>
                                 <p className="text-slate-500 text-[9px] font-black uppercase tracking-[0.4em] mt-3">
@@ -107,7 +105,6 @@ export default function Login() {
                             )}
 
                             <form onSubmit={handleLogin} className="space-y-6 relative z-10">
-                                {/* Campo: Correo Electrónico */}
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
                                         Correo Electrónico
@@ -117,7 +114,6 @@ export default function Login() {
                                         <input
                                             type="email"
                                             name="email"
-                                            autoComplete="email"
                                             placeholder="admin@ligajujeña.com"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
@@ -127,7 +123,6 @@ export default function Login() {
                                     </div>
                                 </div>
 
-                                {/* Campo: Clave de Acceso */}
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
                                         Contraseña
@@ -137,7 +132,6 @@ export default function Login() {
                                         <input
                                             type="password"
                                             name="password"
-                                            autoComplete="current-password"
                                             placeholder="••••••••"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
@@ -150,8 +144,7 @@ export default function Login() {
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    // Botón blanco/plateado para contraste máximo sobre negro
-                                    className="w-full h-14 bg-gradient-to-r from-slate-100 to-slate-300 hover:from-white hover:to-slate-200 text-slate-900 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95 disabled:opacity-50 disabled:active:scale-100 mt-4 flex items-center justify-center gap-2 border border-white/50"
+                                    className="w-full h-14 bg-gradient-to-r from-slate-100 to-slate-300 hover:from-white hover:to-slate-200 text-slate-900 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95 disabled:opacity-50 mt-4 flex items-center justify-center gap-2 border border-white/50"
                                 >
                                     {isSubmitting ? (
                                         <>
@@ -162,9 +155,24 @@ export default function Login() {
                                 </button>
                             </form>
 
-                            <div className="mt-10 text-center border-t border-slate-800 pt-8">
-                                <p className="text-slate-600 text-[10px] font-black uppercase italic tracking-[0.2em]">
-                                    Sistema de administración • v1.0
+                            {/* SECCIÓN CONTACTO AGREGADA */}
+                            <div className="mt-10 text-center border-t border-slate-800 pt-8 space-y-4">
+                                <div className="space-y-1">
+                                    <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">
+                                        ¿Querés administrar tu liga?
+                                    </p>
+                                    <a
+                                        href="https://wa.me/543885081738"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 text-white hover:text-green-400 transition-colors group"
+                                    >
+                                        <FaWhatsapp className="text-green-500 group-hover:scale-110 transition-transform" />
+                                        <span className="text-[11px] font-black tracking-[0.1em]">3885081738</span>
+                                    </a>
+                                </div>
+                                <p className="text-slate-700 text-[8px] font-black uppercase tracking-[0.3em] italic">
+                                    LIGAS JUJEÑAS • v1.0
                                 </p>
                             </div>
                         </div>
