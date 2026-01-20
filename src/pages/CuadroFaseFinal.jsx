@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { apiFetch } from "../api/api";
 import {
     FaSync, FaCalendarAlt,
@@ -10,15 +10,9 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
     const [loading, setLoading] = useState(true);
     const [detalleAbierto, setDetalleAbierto] = useState(null);
 
-    // Referencias para el arrastre (Drag to Scroll)
-    const scrollRef = useRef(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [startX, setStartX] = useState(0);
-    const [scrollLeft, setScrollLeft] = useState(0);
-
-    // --- VARIABLES DE ESTILO ---
-    const borderCard = "1px solid var(--ts)44";
-    const borderDivider = "1px solid var(--ts)15";
+    // Borde muy sutil, casi invisible para que parezca una lista limpia
+    const borderCard = "1px solid var(--ts)33";
+    const borderDivider = "1px solid var(--ts)10";
 
     useEffect(() => {
         const cargarCuadro = async () => {
@@ -73,26 +67,7 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
 
     const etapasVisuales = organizarEtapasEspejo();
 
-    // --- LÓGICA DE ARRASTRE (DRAG) ---
-    const handleMouseDown = (e) => {
-        setIsDragging(true);
-        setStartX(e.pageX - scrollRef.current.offsetLeft);
-        setScrollLeft(scrollRef.current.scrollLeft);
-    };
-    const handleMouseLeave = () => setIsDragging(false);
-    const handleMouseUp = () => setIsDragging(false);
-    const handleMouseMove = (e) => {
-        if (!isDragging) return;
-        // IMPORTANTE: No usamos e.preventDefault() aquí para no bloquear el touch nativo
-        // en algunos navegadores híbridos, pero para mouse puro funciona perfecto.
-        const x = e.pageX - scrollRef.current.offsetLeft;
-        const walk = (x - startX) * 1.5; // Velocidad de arrastre
-        scrollRef.current.scrollLeft = scrollLeft - walk;
-    };
-
     const toggleDetalle = (e, id) => {
-        // Evitamos que se abra el detalle si se estaba arrastrando
-        if (isDragging) return;
         e.stopPropagation();
         setDetalleAbierto(detalleAbierto === id ? null : id);
     };
@@ -100,7 +75,7 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
     if (loading) return (
         <div className="flex flex-col items-center justify-center py-10 gap-2">
             <FaSync className="animate-spin text-xl" style={{ color: "var(--ts)" }} />
-            <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: "var(--ts)" }}>Sincronizando Cuadro</span>
+            <span className="text-[10px] font-medium uppercase tracking-widest" style={{ color: "var(--ts)" }}>Cargando...</span>
         </div>
     );
 
@@ -109,49 +84,39 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
     }
 
     return (
-        /* CONTENEDOR PRINCIPAL */
+        /* CONTENEDOR PRINCIPAL:
+           - overflow-auto: Permite scroll vertical y horizontal nativo.
+           - max-h-[80vh]: Limita la altura para que scrollee dentro de la pantalla si es muy alto.
+        */
         <div
-            className="mt-2 mb-6 p-2 md:p-4 rounded-xl backdrop-blur-sm shadow-xl overflow-hidden"
+            className="mt-2 mb-6 p-2 rounded-xl backdrop-blur-sm shadow-xl overflow-auto custom-scrollbar touch-pan-x touch-pan-y"
             style={{
                 border: borderCard,
-                backgroundColor: "var(--secondary)"
+                backgroundColor: "var(--secondary)",
+                maxHeight: "80vh" // Altura máxima para permitir scroll vertical
             }}
         >
-            <div
-                ref={scrollRef}
-                /* Eventos de Mouse para PC */
-                onMouseDown={handleMouseDown}
-                onMouseLeave={handleMouseLeave}
-                onMouseUp={handleMouseUp}
-                onMouseMove={handleMouseMove}
-
-                /* Clases clave para scroll:
-                   - overflow-x-auto: Scroll nativo (Celular)
-                   - cursor-grab: Icono de manito (PC)
-                   - touch-pan-x: Mejora la respuesta táctil horizontal
-                   - select-none: Evita que se seleccione texto al arrastrar
-                */
-                className={`w-full overflow-x-auto custom-scrollbar select-none touch-pan-x ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-            >
-                <div className="flex flex-row justify-start md:justify-center gap-0 min-w-max px-1 pb-16 pt-4">
+            <div className="min-w-max pb-10"> {/* min-w-max asegura que no se apriete horizontalmente */}
+                <div className="flex flex-row justify-center gap-2 px-1 pt-2">
                     {etapasVisuales.map((etapa, idx) => {
                         if (!etapa) return null;
                         const esFinal = etapa.orden === 1;
                         const partidos = esFinal ? etapa.partidos : etapa.partidosVisuales;
 
                         return (
-                            <div key={`${etapa.id}-${idx}`} className="flex flex-col w-[210px] relative">
-                                {/* NOMBRE DE LA ETAPA */}
-                                <div className="text-center mb-4 relative z-20">
+                            // Ancho reducido para que entren más columnas en pantalla (160px)
+                            <div key={`${etapa.id}-${idx}`} className="flex flex-col w-[160px] md:w-[190px] relative">
+
+                                {/* TÍTULO ETAPA COMPACTO */}
+                                <div className="text-center mb-2 sticky top-0 z-30">
                                     <span
-                                        className="border px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg"
+                                        className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide shadow-sm backdrop-blur-md"
                                         style={esFinal ? {
                                             backgroundColor: "#ca8a0422",
-                                            borderColor: "#eab308",
-                                            color: "#eab308",
-                                            boxShadow: "0 0 15px rgba(234,179,8,0.2)"
+                                            border: "1px solid #eab308",
+                                            color: "#eab308"
                                         } : {
-                                            backgroundColor: "var(--p)",
+                                            backgroundColor: "var(--secondary)", // Fondo sólido para que tape al scrollear
                                             border: borderCard,
                                             color: "var(--ts)"
                                         }}
@@ -160,125 +125,109 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
                                     </span>
                                 </div>
 
-                                <div className="flex flex-col justify-around flex-grow relative">
+                                <div className="flex flex-col justify-around flex-grow relative gap-1">
                                     {partidos.map((partido) => {
                                         const hayGanador = partido.ganadorId !== null && partido.ganadorId !== undefined;
                                         const localGano = hayGanador && Number(partido.ganadorId) === Number(partido.equipoLocalId);
                                         const visitanteGano = hayGanador && Number(partido.ganadorId) === Number(partido.equipoVisitanteId);
 
                                         return (
-                                            <div key={partido.id} className="relative py-3 px-2 flex items-center justify-center">
+                                            <div key={partido.id} className="relative py-1 px-0.5 flex items-center justify-center">
 
                                                 <div
-                                                    // Usamos onMouseUp para el click en PC para evitar conflictos con el arrastre
-                                                    onClick={(e) => {
-                                                        // Pequeña validación para diferenciar clic de arrastre
-                                                        if (!isDragging && !partido.placeholder) toggleDetalle(e, partido.id);
-                                                    }}
-                                                    className={`w-full rounded-xl overflow-hidden shadow-lg transition-all relative z-10 ${!partido.placeholder ? 'hover:scale-[1.02] active:scale-95' : ''}`}
+                                                    onClick={(e) => !partido.placeholder && toggleDetalle(e, partido.id)}
+                                                    className={`w-full rounded-[4px] overflow-hidden transition-all relative z-10 ${!partido.placeholder ? 'cursor-pointer active:opacity-80' : ''}`}
                                                     style={{
                                                         backgroundColor: "var(--p)",
+                                                        // Borde muy fino o nulo si prefieres estilo "lista"
                                                         border: partido.placeholder ? "1px dashed var(--ts)22" : borderCard,
-                                                        opacity: partido.placeholder ? 0.3 : 1,
+                                                        opacity: partido.placeholder ? 0.2 : 1,
                                                         borderColor: esFinal && !partido.placeholder ? "#eab308" : undefined,
-                                                        boxShadow: !partido.placeholder ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "none",
-                                                        cursor: !partido.placeholder ? "pointer" : "default"
                                                     }}
                                                 >
-                                                    {/* Equipo Local */}
+                                                    {/* LOCAL: Padding ultra reducido (py-1 px-1.5) */}
                                                     <div
-                                                        className="flex justify-between items-center p-2.5 transition-colors"
+                                                        className="flex justify-between items-center py-1 px-1.5"
                                                         style={{
                                                             borderBottom: borderDivider,
-                                                            backgroundColor: localGano ? "var(--ts)10" : "transparent"
+                                                            // Fondo sutil si ganó, verde si quieres estilo promiedos, o del tema
+                                                            backgroundColor: localGano ? "var(--ts)15" : "transparent"
                                                         }}
                                                     >
-                                                        <div className="flex items-center gap-2 overflow-hidden">
-                                                            {partido.equipoLocalEscudo ?
-                                                                <img src={partido.equipoLocalEscudo} className="w-5 h-5 object-contain drop-shadow-sm" alt="" /> :
-                                                                !partido.placeholder && <div className="w-5 h-5 rounded-full bg-white/5"></div>
+                                                        <div className="flex items-center gap-1.5 overflow-hidden">
+                                                            {partido.equipoLocalEscudo &&
+                                                                <img src={partido.equipoLocalEscudo} className="w-3.5 h-3.5 object-contain" alt="" />
                                                             }
+                                                            {/* NOMBRE: Sin negrita (font-medium) y texto chico */}
                                                             <span
-                                                                className="text-[10px] font-black uppercase truncate max-w-[110px]"
-                                                                style={{ color: localGano ? "var(--ts)" : "var(--tp)", opacity: localGano ? 1 : 0.7 }}
+                                                                className="text-[9px] font-medium uppercase truncate max-w-[90px]"
+                                                                style={{ color: localGano ? "var(--ts)" : "var(--tp)", opacity: localGano ? 1 : 0.8 }}
                                                             >
                                                                 {partido.equipoLocal || "A DEFINIR"}
                                                             </span>
                                                         </div>
-                                                        <span
-                                                            className="text-xs font-black ml-2"
-                                                            style={{ color: localGano ? "var(--ts)" : "var(--tp)" }}
-                                                        >
+                                                        <span className="text-[9px] font-bold ml-1" style={{ color: "var(--tp)" }}>
                                                             {!partido.placeholder && partido.golesLocal !== null ? partido.golesLocal : ""}
                                                         </span>
                                                     </div>
 
-                                                    {/* Equipo Visitante */}
+                                                    {/* VISITANTE */}
                                                     <div
-                                                        className="flex justify-between items-center p-2.5 transition-colors"
+                                                        className="flex justify-between items-center py-1 px-1.5"
                                                         style={{
-                                                            backgroundColor: visitanteGano ? "var(--ts)10" : "transparent"
+                                                            backgroundColor: visitanteGano ? "var(--ts)15" : "transparent"
                                                         }}
                                                     >
-                                                        <div className="flex items-center gap-2 overflow-hidden">
-                                                            {partido.equipoVisitanteEscudo ?
-                                                                <img src={partido.equipoVisitanteEscudo} className="w-5 h-5 object-contain drop-shadow-sm" alt="" /> :
-                                                                !partido.placeholder && <div className="w-5 h-5 rounded-full bg-white/5"></div>
+                                                        <div className="flex items-center gap-1.5 overflow-hidden">
+                                                            {partido.equipoVisitanteEscudo &&
+                                                                <img src={partido.equipoVisitanteEscudo} className="w-3.5 h-3.5 object-contain" alt="" />
                                                             }
                                                             <span
-                                                                className="text-[10px] font-black uppercase truncate max-w-[110px]"
-                                                                style={{ color: visitanteGano ? "var(--ts)" : "var(--tp)", opacity: visitanteGano ? 1 : 0.7 }}
+                                                                className="text-[9px] font-medium uppercase truncate max-w-[90px]"
+                                                                style={{ color: visitanteGano ? "var(--ts)" : "var(--tp)", opacity: visitanteGano ? 1 : 0.8 }}
                                                             >
                                                                 {partido.equipoVisitante || "A DEFINIR"}
                                                             </span>
                                                         </div>
-                                                        <span
-                                                            className="text-xs font-black ml-2"
-                                                            style={{ color: visitanteGano ? "var(--ts)" : "var(--tp)" }}
-                                                        >
+                                                        <span className="text-[9px] font-bold ml-1" style={{ color: "var(--tp)" }}>
                                                             {!partido.placeholder && partido.golesVisitante !== null ? partido.golesVisitante : ""}
                                                         </span>
                                                     </div>
 
+                                                    {/* Flechita muy sutil */}
                                                     {!partido.placeholder && (
-                                                        <div className="absolute right-0.5 top-1/2 -translate-y-1/2 flex items-center h-full pointer-events-none opacity-40">
-                                                            <FaChevronDown size={8} style={{ color: "var(--ts)" }} className={`transition-transform duration-300 ${detalleAbierto === partido.id ? 'rotate-180' : ''}`} />
+                                                        <div className="absolute right-0.5 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none">
+                                                            <FaChevronDown size={6} style={{ color: "var(--ts)" }} className={`transition-transform ${detalleAbierto === partido.id ? 'rotate-180' : ''}`} />
                                                         </div>
                                                     )}
 
-                                                    {/* DETALLES EXPANDIBLES */}
+                                                    {/* DETALLES EXPANDIBLES COMPACTOS */}
                                                     {detalleAbierto === partido.id && !partido.placeholder && (
                                                         <div
-                                                            className="p-3 space-y-2 animate-in slide-in-from-top-2 duration-200"
+                                                            className="px-2 py-1.5 space-y-1 animate-in slide-in-from-top-1 duration-150"
                                                             style={{
                                                                 backgroundColor: "var(--secondary)",
                                                                 borderTop: borderDivider
                                                             }}
                                                         >
-                                                            <div className="flex items-center gap-2" style={{ color: "var(--tp)" }}>
-                                                                <FaCalendarAlt size={10} style={{ color: "var(--ts)" }} className="shrink-0" />
-                                                                <span className="text-[9px] font-black uppercase tracking-wider opacity-80">{partido.fecha || "FECHA PENDIENTE"}</span>
+                                                            <div className="flex items-center gap-1.5 text-[8px] opacity-70" style={{ color: "var(--tp)" }}>
+                                                                <FaCalendarAlt size={8} /> <span>{partido.fecha || "A CONFIRMAR"}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-2" style={{ color: "var(--tp)" }}>
-                                                                <FaClock size={10} style={{ color: "var(--ts)" }} className="shrink-0" />
-                                                                <span className="text-[9px] font-black uppercase tracking-wider opacity-80">{partido.hora ? `${partido.hora} HS` : "HORA PENDIENTE"}</span>
+                                                            <div className="flex items-center gap-1.5 text-[8px] opacity-70" style={{ color: "var(--tp)" }}>
+                                                                <FaClock size={8} /> <span>{partido.hora ? `${partido.hora} HS` : "A CONFIRMAR"}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-2" style={{ color: "var(--tp)" }}>
-                                                                <FaMapMarkerAlt size={10} style={{ color: "var(--ts)" }} className="shrink-0" />
-                                                                <span className="text-[9px] font-black uppercase tracking-wider opacity-80 truncate">{partido.cancha || "CANCHA PENDIENTE"}</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-2" style={{ color: "var(--tp)" }}>
-                                                                <FaUserTie size={10} style={{ color: "var(--ts)" }} className="shrink-0" />
-                                                                <span className="text-[9px] font-black uppercase tracking-wider opacity-80 truncate">{partido.arbitro || "ÁRBITRO PENDIENTE"}</span>
-                                                            </div>
+                                                            {(partido.cancha) &&
+                                                                <div className="flex items-center gap-1.5 text-[8px] opacity-70 truncate" style={{ color: "var(--tp)" }}>
+                                                                    <FaMapMarkerAlt size={8} /> <span className="truncate">{partido.cancha}</span>
+                                                                </div>
+                                                            }
                                                         </div>
                                                     )}
                                                 </div>
 
                                                 {esFinal && (
-                                                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none z-0">
-                                                        <div className="w-12 h-12 rounded-full bg-yellow-500/10 blur-xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
-                                                        <FaTrophy className="text-yellow-500 text-3xl drop-shadow-[0_0_15px_rgba(234,179,8,0.6)] animate-pulse" />
+                                                    <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 pointer-events-none z-0">
+                                                        <FaTrophy className="text-yellow-500 text-xl drop-shadow-md opacity-80" />
                                                     </div>
                                                 )}
                                             </div>
