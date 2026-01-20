@@ -10,15 +10,14 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
     const [loading, setLoading] = useState(true);
     const [detalleAbierto, setDetalleAbierto] = useState(null);
 
+    // Referencias para el arrastre (Drag to Scroll)
     const scrollRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
 
     // --- VARIABLES DE ESTILO ---
-    // "var(--ts)44" crea un borde del color del tema con 25% de opacidad (suave)
     const borderCard = "1px solid var(--ts)44";
-    // Divisores internos aún más sutiles
     const borderDivider = "1px solid var(--ts)15";
 
     useEffect(() => {
@@ -26,7 +25,6 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
             try {
                 setLoading(true);
                 const data = await apiFetch(`/api/torneos/${torneoId}/cuadro-completo`);
-                // Si data es null o vacío, dejamos array vacío
                 if (!data || data.length === 0) {
                     setEtapasOriginales([]);
                 } else {
@@ -47,7 +45,6 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
         const final = etapasOriginales.find(e => e.orden === 1);
         const otrasEtapas = etapasOriginales.filter(e => e.orden !== 1);
 
-        // Si solo hay final
         if (!otrasEtapas.length && final) return [final];
 
         const etapasIzquierda = otrasEtapas.map(etapa => {
@@ -76,6 +73,7 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
 
     const etapasVisuales = organizarEtapasEspejo();
 
+    // --- LÓGICA DE ARRASTRE (DRAG) ---
     const handleMouseDown = (e) => {
         setIsDragging(true);
         setStartX(e.pageX - scrollRef.current.offsetLeft);
@@ -85,13 +83,16 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
     const handleMouseUp = () => setIsDragging(false);
     const handleMouseMove = (e) => {
         if (!isDragging) return;
-        e.preventDefault();
+        // IMPORTANTE: No usamos e.preventDefault() aquí para no bloquear el touch nativo
+        // en algunos navegadores híbridos, pero para mouse puro funciona perfecto.
         const x = e.pageX - scrollRef.current.offsetLeft;
-        const walk = (x - startX) * 2;
+        const walk = (x - startX) * 1.5; // Velocidad de arrastre
         scrollRef.current.scrollLeft = scrollLeft - walk;
     };
 
     const toggleDetalle = (e, id) => {
+        // Evitamos que se abra el detalle si se estaba arrastrando
+        if (isDragging) return;
         e.stopPropagation();
         setDetalleAbierto(detalleAbierto === id ? null : id);
     };
@@ -103,7 +104,6 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
         </div>
     );
 
-    // Si no hay etapas y se pasó un fallback (mensaje de "Sin Partidos"), mostrarlo
     if (etapasVisuales.length === 0) {
         return fallback || null;
     }
@@ -113,17 +113,25 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
         <div
             className="mt-2 mb-6 p-2 md:p-4 rounded-xl backdrop-blur-sm shadow-xl overflow-hidden"
             style={{
-                border: borderCard, // Borde suave del contenedor también
+                border: borderCard,
                 backgroundColor: "var(--secondary)"
             }}
         >
             <div
                 ref={scrollRef}
+                /* Eventos de Mouse para PC */
                 onMouseDown={handleMouseDown}
                 onMouseLeave={handleMouseLeave}
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
-                className={`w-full overflow-x-auto custom-scrollbar select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+
+                /* Clases clave para scroll:
+                   - overflow-x-auto: Scroll nativo (Celular)
+                   - cursor-grab: Icono de manito (PC)
+                   - touch-pan-x: Mejora la respuesta táctil horizontal
+                   - select-none: Evita que se seleccione texto al arrastrar
+                */
+                className={`w-full overflow-x-auto custom-scrollbar select-none touch-pan-x ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
             >
                 <div className="flex flex-row justify-start md:justify-center gap-0 min-w-max px-1 pb-16 pt-4">
                     {etapasVisuales.map((etapa, idx) => {
@@ -144,7 +152,7 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
                                             boxShadow: "0 0 15px rgba(234,179,8,0.2)"
                                         } : {
                                             backgroundColor: "var(--p)",
-                                            border: borderCard, // Usamos el borde suave del color seleccionado
+                                            border: borderCard,
                                             color: "var(--ts)"
                                         }}
                                     >
@@ -161,18 +169,20 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
                                         return (
                                             <div key={partido.id} className="relative py-3 px-2 flex items-center justify-center">
 
-                                                {/* CONECTORES VISUALES (Líneas) - Opcional, mantener simple por ahora */}
-
                                                 <div
-                                                    onClick={(e) => !partido.placeholder && toggleDetalle(e, partido.id)}
-                                                    className={`w-full rounded-xl overflow-hidden shadow-lg transition-all relative z-10 ${!partido.placeholder ? 'cursor-pointer hover:scale-[1.02] active:scale-95' : ''}`}
+                                                    // Usamos onMouseUp para el click en PC para evitar conflictos con el arrastre
+                                                    onClick={(e) => {
+                                                        // Pequeña validación para diferenciar clic de arrastre
+                                                        if (!isDragging && !partido.placeholder) toggleDetalle(e, partido.id);
+                                                    }}
+                                                    className={`w-full rounded-xl overflow-hidden shadow-lg transition-all relative z-10 ${!partido.placeholder ? 'hover:scale-[1.02] active:scale-95' : ''}`}
                                                     style={{
                                                         backgroundColor: "var(--p)",
-                                                        // AQUI: El borde suave del color seleccionado
                                                         border: partido.placeholder ? "1px dashed var(--ts)22" : borderCard,
                                                         opacity: partido.placeholder ? 0.3 : 1,
                                                         borderColor: esFinal && !partido.placeholder ? "#eab308" : undefined,
-                                                        boxShadow: !partido.placeholder ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "none"
+                                                        boxShadow: !partido.placeholder ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "none",
+                                                        cursor: !partido.placeholder ? "pointer" : "default"
                                                     }}
                                                 >
                                                     {/* Equipo Local */}
@@ -265,7 +275,6 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
                                                     )}
                                                 </div>
 
-                                                {/* Copa en la final */}
                                                 {esFinal && (
                                                     <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none z-0">
                                                         <div className="w-12 h-12 rounded-full bg-yellow-500/10 blur-xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>

@@ -144,7 +144,7 @@ export default function TorneoPublico() {
                         </div>
                     </header>
 
-                    {/* SELECTOR DE SECCIÓN SIEMPRE VISIBLE Y COMPACTO */}
+                    {/* SELECTOR DE SECCIÓN */}
                     <div className="flex justify-center gap-1 mb-8 bg-[var(--s)]/80 p-1 rounded-xl border border-[var(--ts)]/10 w-fit mx-auto backdrop-blur-xl shadow-2xl">
                         <button
                             onClick={() => setSeccionActiva("ZONAS")}
@@ -220,11 +220,12 @@ export default function TorneoPublico() {
                                     <FaProjectDiagram size={14} className="text-[var(--ts)]" />
                                     <h2 className="font-black uppercase italic tracking-widest text-[10px] md:text-[11px] text-[var(--tp)]">Cuadro de Eliminación</h2>
                                 </div>
-                                <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                                {/* AQUÍ HICE EL CAMBIO: Quite 'p-8' y 'items-center' para que el cuadro tenga más espacio */}
+                                <div className="flex-1 w-full p-2 md:p-6 text-center">
                                     <CuadroFaseFinal
                                         torneoId={torneo.id}
                                         fallback={
-                                            <div className="flex flex-col items-center gap-4 py-12">
+                                            <div className="flex flex-col items-center justify-center gap-4 py-12 h-full">
                                                 <div className="bg-[var(--p)] p-5 rounded-full border border-[var(--ts)]/20 shadow-inner">
                                                     <FaInfoCircle className="text-[var(--ts)] text-3xl opacity-40" />
                                                 </div>
