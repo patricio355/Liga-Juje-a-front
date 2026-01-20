@@ -4,6 +4,10 @@ export default function TablaPosiciones({ posiciones }) {
     const borderFrame = "1px solid var(--ts)22";
     const borderRow = "1px solid #33415588";
 
+    // Definimos anchos fijos para asegurar alineación vertical perfecta entre header y body
+    const wStat = "w-[28px] md:w-[60px]"; // Ancho para J, G, E, P
+    const wPts = "w-[40px] md:w-[80px]";  // Ancho para PTS y +/-
+
     return (
         <div
             className="w-full overflow-hidden rounded-[1.5rem] md:rounded-[2rem] backdrop-blur-md shadow-2xl transition-all duration-700"
@@ -13,29 +17,30 @@ export default function TablaPosiciones({ posiciones }) {
             }}
         >
             <div className="overflow-x-auto custom-scrollbar">
-                <table className="w-full text-left border-collapse table-auto">
+                <table className="w-full border-collapse">
                     <thead>
                     <tr
+                        className="text-[9px] md:text-sm font-black uppercase tracking-wider h-10 md:h-14"
                         style={{
                             backgroundColor: "var(--p)",
                             borderBottom: borderRow,
                             color: "var(--ts)"
                         }}
                     >
-                        <th className="py-3 pl-2 pr-0 text-[9px] md:text-sm font-black text-right w-[15px] md:w-[30px] shrink-0">#</th>
-                        <th className="py-3 px-2 text-[9px] md:text-sm font-black text-left min-w-[110px] md:min-w-[300px]">EQUIPOS</th>
+                        <th className="pl-3 pr-1 text-center w-[25px] md:w-[40px] align-middle">#</th>
+                        <th className="px-2 text-left min-w-[120px] md:min-w-[300px] align-middle">EQUIPOS</th>
 
-                        <th
-                            className="py-3 px-1 text-[9px] md:text-sm font-black text-center w-[35px] md:w-[80px] shrink-0"
-                            style={{ backgroundColor: "var(--ts)11" }}
-                        >
-                            PTS
-                        </th>
-                        <th className="py-3 px-0.5 text-[9px] md:text-sm font-black text-center w-[25px] md:w-[60px] shrink-0">J</th>
-                        <th className="py-3 px-0.5 text-[9px] md:text-sm font-black text-center w-[25px] md:w-[60px] shrink-0">G</th>
-                        <th className="py-3 px-0.5 text-[9px] md:text-sm font-black text-center w-[25px] md:w-[60px] shrink-0">E</th>
-                        <th className="py-3 px-0.5 text-[9px] md:text-sm font-black text-center w-[25px] md:w-[60px] shrink-0">P</th>
-                        <th className="py-3 px-1 text-[9px] md:text-sm font-black text-center w-[35px] md:w-[80px] shrink-0">+/-</th>
+                        {/* PUNTOS */}
+                        <th className={`text-center align-middle ${wPts}`} style={{ backgroundColor: "var(--ts)11" }}>PTS</th>
+
+                        {/* ESTADÍSTICAS */}
+                        <th className={`text-center align-middle ${wStat}`}>J</th>
+                        <th className={`text-center align-middle ${wStat}`}>G</th>
+                        <th className={`text-center align-middle ${wStat}`}>E</th>
+                        <th className={`text-center align-middle ${wStat}`}>P</th>
+
+                        {/* DIFERENCIA */}
+                        <th className={`text-center align-middle ${wPts}`}>+/-</th>
                     </tr>
                     </thead>
 
@@ -46,33 +51,33 @@ export default function TablaPosiciones({ posiciones }) {
                         return (
                             <tr
                                 key={p.id || index}
-                                className="transition-colors group"
+                                className="transition-colors group hover:bg-white/5 h-10 md:h-16" // Altura fija de fila para centrado perfecto
                                 style={{
                                     borderBottom: borderRow,
                                     backgroundColor: "transparent"
                                 }}
                             >
-                                {/* py-2 en móvil para compactar verticalmente */}
-                                <td className="py-2 md:py-4 pl-2 pr-0 text-right font-black text-[10px] md:text-base opacity-30">
+                                {/* POSICIÓN */}
+                                <td className="pl-3 pr-1 text-center align-middle font-black text-[10px] md:text-base opacity-40">
                                     {index + 1}
                                 </td>
 
-                                <td className="py-2 md:py-4 px-2">
-                                    <div className="flex items-center gap-1.5 md:gap-3">
-                                        <div className="shrink-0 w-5 h-5 md:w-11 md:h-11 flex items-center justify-center">
+                                {/* EQUIPO */}
+                                <td className="px-2 align-middle">
+                                    <div className="flex items-center gap-2 md:gap-3">
+                                        <div className="shrink-0 w-6 h-6 md:w-11 md:h-11 flex items-center justify-center">
                                             {p.escudo || p.urlEscudo ? (
                                                 <img
                                                     src={p.escudo || p.urlEscudo}
-                                                    alt={`Escudo de ${p.nombreEquipo}`}
-                                                    className="w-full h-full object-contain filter drop-shadow-2xl"
+                                                    alt={p.nombreEquipo}
+                                                    className="max-w-full max-h-full object-contain filter drop-shadow-md"
                                                 />
                                             ) : (
-                                                <FaShieldAlt style={{ color: "var(--ts)" }} className="text-[10px] md:text-3xl opacity-20" />
+                                                <FaShieldAlt style={{ color: "var(--ts)" }} className="text-xs md:text-3xl opacity-20" />
                                             )}
                                         </div>
-
                                         <span
-                                            className="text-[10px] md:text-lg font-bold uppercase tracking-tighter truncate max-w-[85px] md:max-w-none"
+                                            className="text-[10px] md:text-lg font-bold uppercase tracking-tight truncate max-w-[90px] md:max-w-none pt-0.5"
                                             style={{ color: "var(--tp)" }}
                                             title={p.nombreEquipo}
                                         >
@@ -81,27 +86,40 @@ export default function TablaPosiciones({ posiciones }) {
                                     </div>
                                 </td>
 
-                                <td
-                                    className="py-2 md:py-4 px-1 text-center font-black text-xs md:text-xl"
-                                    style={{ backgroundColor: "var(--ts)08", color: "var(--tp)" }}
-                                >
-                                    {p.puntos}
+                                {/* PUNTOS */}
+                                <td className={`text-center align-middle ${wPts}`} style={{ backgroundColor: "var(--ts)08" }}>
+                                        <span className="font-black text-xs md:text-xl block" style={{ color: "var(--tp)" }}>
+                                            {p.puntos}
+                                        </span>
                                 </td>
 
-                                <td className="py-2 md:py-4 px-0.5 text-center text-[9px] md:text-base font-bold opacity-50">{p.partidosJugados}</td>
-                                <td className="py-2 md:py-4 px-0.5 text-center text-[9px] md:text-base font-bold opacity-50">{p.ganados}</td>
-                                <td className="py-2 md:py-4 px-0.5 text-center text-[9px] md:text-base font-bold opacity-50">{p.empatados}</td>
-                                <td className="py-2 md:py-4 px-0.5 text-center text-[9px] md:text-base font-bold opacity-50">{p.perdidos}</td>
+                                {/* ESTADÍSTICAS */}
+                                <td className={`text-center align-middle ${wStat}`}>
+                                    <span className="text-[9px] md:text-base font-bold opacity-60 text-slate-300 block">{p.partidosJugados}</span>
+                                </td>
+                                <td className={`text-center align-middle ${wStat}`}>
+                                    <span className="text-[9px] md:text-base font-bold opacity-60 text-slate-300 block">{p.ganados}</span>
+                                </td>
+                                <td className={`text-center align-middle ${wStat}`}>
+                                    <span className="text-[9px] md:text-base font-bold opacity-60 text-slate-300 block">{p.empatados}</span>
+                                </td>
+                                <td className={`text-center align-middle ${wStat}`}>
+                                    <span className="text-[9px] md:text-base font-bold opacity-60 text-slate-300 block">{p.perdidos}</span>
+                                </td>
 
-                                <td className="py-2 md:py-4 px-1 text-center">
-                                        <span
-                                            className="text-[9px] md:text-base font-black"
-                                            style={{
-                                                color: diferenciaGoles > 0 ? "#10b981" : diferenciaGoles < 0 ? "#ef4444" : "var(--ts)44"
-                                            }}
-                                        >
-                                            {diferenciaGoles > 0 ? `+${diferenciaGoles}` : diferenciaGoles}
-                                        </span>
+                                {/* DIFERENCIA */}
+                                <td className={`text-center align-middle ${wPts}`}>
+                                    <div className="flex justify-center items-center">
+                                            <span
+                                                className="text-[9px] md:text-base font-black px-1.5 py-0.5 rounded min-w-[20px]"
+                                                style={{
+                                                    color: diferenciaGoles > 0 ? "#10b981" : diferenciaGoles < 0 ? "#ef4444" : "var(--ts)44",
+                                                    backgroundColor: diferenciaGoles !== 0 ? "rgba(255,255,255,0.03)" : "transparent"
+                                                }}
+                                            >
+                                                {diferenciaGoles > 0 ? `+${diferenciaGoles}` : diferenciaGoles}
+                                            </span>
+                                    </div>
                                 </td>
                             </tr>
                         );
