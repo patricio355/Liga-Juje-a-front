@@ -3,7 +3,9 @@ import { FaShieldAlt, FaMapMarkerAlt, FaClock, FaCalendarAlt, FaUserTie } from "
 
 export default function PartidoCard({ partido }) {
     const finalizado = partido.estado === "FINALIZADO";
-    const [verFechaLarga, setVerFechaLarga] = useState(false);
+
+    // Estado para expandir la tarjeta en celular
+    const [expandido, setExpandido] = useState(false);
 
     // --- FORMATEO ---
     const formatearFechaPro = (fechaStr) => {
@@ -17,50 +19,58 @@ export default function PartidoCard({ partido }) {
             const [year, month, day] = fechaStr.split('-').map(Number);
             const fecha = new Date(year, month - 1, day);
             const dias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-            const diasLargo = ["DOMINGO", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"];
-            const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
-
             return {
-                corto: `${dias[fecha.getDay()].toUpperCase()} ${day}`,
-                largo: `${diasLargo[fecha.getDay()]} ${day} DE ${meses[fecha.getMonth()]} ${year}`
+                corto: `${dias[fecha.getDay()].toUpperCase()} ${day}`
             };
-        } catch (e) {
-            return { corto: "ERROR", largo: "ERROR" };
-        }
+        } catch (e) { return { corto: "ERROR" }; }
     };
 
     const fechaInfo = formatearFechaPro(partido.fecha);
-    const formatDato = (dato) => (dato && dato !== "null" && dato !== "") ? dato : "---";
-    const formatHora = (hora) => (hora && hora !== "null" && hora !== "") ? `${hora} HS` : "---";
 
-    // --- BORDES MANUALES GRISES ---
-    // Usamos un gris "Slate 700" (#334155) para que sea sutil pero visible
-    const borderGray = "1px solid #334155";
+    const tieneDato = (d) => d && d !== "null" && d !== "";
+    const formatDato = (dato) => tieneDato(dato) ? dato : "---";
+    const formatHora = (hora) => tieneDato(hora) ? `${hora} HS` : "---";
 
-    // Para las divisiones internas usamos un gris un poco más suave
-    const dividerGray = "1px solid #334155";
+    // ¿Tiene la info básica completa?
+    const tieneInfoBasica = tieneDato(partido.fecha) && tieneDato(partido.hora) && (tieneDato(partido.cancha) || tieneDato(partido.canchaNombre));
+
+    /* LÓGICA DE VISIBILIDAD:
+       1. Si está EXPANDIDO (click del usuario) -> Mostrar SIEMPRE.
+       2. Si NO está expandido:
+          - Si está FINALIZADO -> NO mostrar (oculto por defecto).
+          - Si es PENDIENTE y tiene info -> Mostrar.
+          - Si es PENDIENTE y falta info -> NO mostrar.
+    */
+    const mostrarBarraInfo = expandido || (!finalizado && tieneInfoBasica);
+
+    const borderGray = "1px solid #33415588";
+    const dividerGray = "1px solid #33415544";
 
     return (
         <div className="w-full transition-all duration-300 my-3">
 
-            {/* --- VISTA CELULAR --- */}
+            {/* ==============================================
+                VISTA CELULAR (Lógica Personalizada)
+               ============================================== */}
             <div
-                className="md:hidden rounded-2xl overflow-hidden shadow-lg"
+                onClick={() => setExpandido(!expandido)}
+                className="md:hidden rounded-2xl overflow-hidden shadow-lg transition-all active:scale-[0.98] cursor-pointer"
                 style={{
                     border: borderGray,
                     backgroundColor: "var(--p)"
                 }}
             >
-                {/* Bloque Equipos */}
+                {/* Bloque Equipos (Siempre visible) */}
                 <div
                     className="px-4 py-5"
                     style={{ backgroundColor: "var(--secondary)" }}
                 >
                     <div className="grid grid-cols-3 items-center">
+                        {/* Local */}
                         <div className="flex flex-col items-center">
-                            <div className="w-10 h-10 mb-2">
+                            <div className="w-12 h-12 mb-2">
                                 {partido.equipoLocalEscudo ?
-                                    <img src={partido.equipoLocalEscudo} className="w-full h-full object-contain" alt="L" /> :
+                                    <img src={partido.equipoLocalEscudo} className="w-full h-full object-contain drop-shadow-md" alt="L" /> :
                                     <FaShieldAlt style={{ color: "var(--ts)" }} className="w-full h-full opacity-40" />
                                 }
                             </div>
@@ -69,23 +79,23 @@ export default function PartidoCard({ partido }) {
                             </span>
                         </div>
 
+                        {/* VS / Resultado */}
                         <div className="flex flex-col items-center justify-center">
-                            <span className="text-xl font-black" style={{ color: "var(--tp)" }}>
+                            <span className="text-2xl font-black italic tracking-tighter" style={{ color: "var(--tp)" }}>
                                 {finalizado ? `${partido.golesLocal} - ${partido.golesVisitante}` : "VS"}
                             </span>
-                            <div
-                                className="w-8 h-1 mt-1 rounded-full"
-                                style={{
-                                    backgroundColor: finalizado ? "var(--ts)" : "var(--ts)33",
-                                    boxShadow: finalizado ? "0 0 10px var(--ts)66" : "none"
-                                }}
-                            ></div>
+                            {/* Indicador visual pequeño si hay info oculta (Finalizado o Pendiente sin datos) */}
+
+                            {finalizado && (
+                                <span className="text-[8px] font-bold mt-1 px-2 py-0.5 rounded border border-white/20 text-white/50">FINAL</span>
+                            )}
                         </div>
 
+                        {/* Visitante */}
                         <div className="flex flex-col items-center">
-                            <div className="w-10 h-10 mb-2">
+                            <div className="w-12 h-12 mb-2">
                                 {partido.equipoVisitanteEscudo ?
-                                    <img src={partido.equipoVisitanteEscudo} className="w-full h-full object-contain" alt="V" /> :
+                                    <img src={partido.equipoVisitanteEscudo} className="w-full h-full object-contain drop-shadow-md" alt="V" /> :
                                     <FaShieldAlt style={{ color: "var(--ts)" }} className="w-full h-full opacity-40" />
                                 }
                             </div>
@@ -96,50 +106,70 @@ export default function PartidoCard({ partido }) {
                     </div>
                 </div>
 
-                {/* Info Bar Móvil */}
-                <div
-                    className="grid grid-cols-2"
-                    style={{
-                        borderTop: dividerGray,
-                        backgroundColor: "var(--p)"
-                    }}
-                >
-                    <div className="p-2.5 flex items-center gap-2" style={{ borderRight: dividerGray, borderBottom: dividerGray }}>
-                        <FaCalendarAlt size={10} style={{ color: "var(--ts)" }} />
-                        <span className="text-[9px] uppercase tracking-tighter truncate" style={{ color: "var(--tp)", opacity: 0.8 }}>{fechaInfo.corto}</span>
+                {/* INFO BAR MÓVIL (Condicional) */}
+                {mostrarBarraInfo && (
+                    <div
+                        className="flex flex-col animate-in slide-in-from-top-2 duration-300"
+                        style={{
+                            borderTop: dividerGray,
+                            backgroundColor: "var(--p)"
+                        }}
+                    >
+                        {/* FILA 1: Fecha - Hora - Cancha (3 Columnas) */}
+                        <div className="grid grid-cols-3">
+                            <div className="py-2.5 flex items-center justify-center gap-1.5" style={{ borderRight: dividerGray }}>
+                                <FaCalendarAlt size={10} style={{ color: "var(--ts)" }} />
+                                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-300 truncate">
+                                    {fechaInfo.corto}
+                                </span>
+                            </div>
+
+                            <div className="py-2.5 flex items-center justify-center gap-1.5" style={{ borderRight: dividerGray }}>
+                                <FaClock size={10} style={{ color: "var(--ts)" }} />
+                                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-300 truncate">
+                                    {formatHora(partido.hora)}
+                                </span>
+                            </div>
+
+                            <div className="py-2.5 flex items-center justify-center gap-1.5 px-1">
+                                <FaMapMarkerAlt size={10} style={{ color: "var(--ts)" }} />
+                                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-300 truncate max-w-[80px]">
+                                    {formatDato(partido.canchaNombre || partido.cancha)}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* FILA 2: Árbitro (Solo si está expandido, abajo de todo, ancho completo) */}
+                        {expandido && (
+                            <div
+                                className="py-2 flex items-center justify-center gap-2 animate-in fade-in zoom-in-95 duration-200"
+                                style={{
+                                    borderTop: dividerGray,
+                                    backgroundColor: "var(--ts)05" // Un fondo muy sutil para diferenciarlo
+                                }}
+                            >
+                                <FaUserTie size={10} style={{ color: "var(--ts)" }} />
+                                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-300">
+                                    Árbitro: {formatDato(partido.arbitro)}
+                                </span>
+                            </div>
+                        )}
                     </div>
-                    <div className="p-2.5 flex items-center gap-2" style={{ borderBottom: dividerGray }}>
-                        <FaClock size={10} style={{ color: "var(--ts)" }} />
-                        <span className="text-[9px] uppercase tracking-tighter" style={{ color: "var(--tp)", opacity: 0.8 }}>{formatHora(partido.hora)}</span>
-                    </div>
-                    <div className="p-2.5 flex items-center gap-2" style={{ borderRight: dividerGray }}>
-                        <FaMapMarkerAlt size={10} style={{ color: "var(--ts)" }} />
-                        <span className="text-[9px] uppercase tracking-tighter truncate" style={{ color: "var(--tp)", opacity: 0.8 }}>{formatDato(partido.canchaNombre || partido.cancha)}</span>
-                    </div>
-                    <div className="p-2.5 flex items-center gap-2">
-                        <FaUserTie size={10} style={{ color: "var(--ts)" }} />
-                        <span className="text-[9px] uppercase tracking-tighter truncate" style={{ color: "var(--tp)", opacity: 0.8 }}>{formatDato(partido.arbitro)}</span>
-                    </div>
-                </div>
+                )}
             </div>
 
-            {/* --- VISTA PC --- */}
+            {/* --- VISTA PC (Sin cambios, completa) --- */}
             <div
                 className="hidden md:flex flex-col w-full rounded-3xl overflow-hidden transition-all duration-300"
                 style={{
-                    border: borderGray, // BORDE GRIS MANUAL
+                    border: borderGray,
                     backgroundColor: "var(--secondary)",
                     boxShadow: finalizado ? "0 10px 40px -10px rgba(0,0,0,0.3)" : "none"
                 }}
             >
-                {/* Bloque Principal */}
                 <div className="flex items-center justify-between px-10 py-6">
-                    {/* Local */}
                     <div className="flex items-center gap-5 flex-1 justify-start">
-                        <div
-                            className="w-14 h-14 shrink-0 p-1 rounded-xl"
-                            style={{ backgroundColor: "var(--p)" }}
-                        >
+                        <div className="w-14 h-14 shrink-0 p-1 rounded-xl" style={{ backgroundColor: "var(--p)" }}>
                             {partido.equipoLocalEscudo ?
                                 <img src={partido.equipoLocalEscudo} className="w-full h-full object-contain" alt="L" /> :
                                 <FaShieldAlt style={{ color: "var(--ts)" }} className="w-full h-full opacity-40" />
@@ -150,14 +180,13 @@ export default function PartidoCard({ partido }) {
                         </span>
                     </div>
 
-                    {/* Centro */}
                     <div className="flex flex-col items-center px-10 w-[220px]">
                         <span
                             className="text-[9px] font-black uppercase tracking-[0.3em] mb-3 px-3 py-1 rounded-full border transition-all"
                             style={{
                                 color: finalizado ? "var(--p)" : "var(--ts)",
                                 backgroundColor: finalizado ? "var(--ts)" : "transparent",
-                                borderColor: finalizado ? "var(--ts)" : "#334155" // Gris en pendiente
+                                borderColor: finalizado ? "var(--ts)" : "#334155"
                             }}
                         >
                             {finalizado ? "FINALIZADO" : "PENDIENTE"}
@@ -167,15 +196,11 @@ export default function PartidoCard({ partido }) {
                         </span>
                     </div>
 
-                    {/* Visitante */}
                     <div className="flex items-center gap-5 flex-1 justify-end">
                         <span className="text-xl font-black uppercase tracking-tighter text-right" style={{ color: "var(--tp)" }}>
                             {formatDato(partido.equipoVisitanteNombre)}
                         </span>
-                        <div
-                            className="w-14 h-14 shrink-0 p-1 rounded-xl"
-                            style={{ backgroundColor: "var(--p)" }}
-                        >
+                        <div className="w-14 h-14 shrink-0 p-1 rounded-xl" style={{ backgroundColor: "var(--p)" }}>
                             {partido.equipoVisitanteEscudo ?
                                 <img src={partido.equipoVisitanteEscudo} className="w-full h-full object-contain" alt="V" /> :
                                 <FaShieldAlt style={{ color: "var(--ts)" }} className="w-full h-full opacity-40" />
@@ -184,45 +209,22 @@ export default function PartidoCard({ partido }) {
                     </div>
                 </div>
 
-                {/* Barra Inferior PC */}
-                <div
-                    className="flex items-center"
-                    style={{
-                        backgroundColor: "var(--p)",
-                        borderTop: dividerGray
-                    }}
-                >
-                    <div
-                        className="flex-1 flex items-center justify-center gap-3 py-3.5 cursor-pointer transition-colors"
-                        onMouseEnter={() => setVerFechaLarga(true)}
-                        onMouseLeave={() => setVerFechaLarga(false)}
-                        style={{ borderRight: dividerGray, ":hover": { backgroundColor: "var(--ts)05" } }}
-                    >
+                <div className="flex items-center" style={{ backgroundColor: "var(--p)", borderTop: dividerGray }}>
+                    <div className="flex-1 flex items-center justify-center gap-3 py-3.5" style={{ borderRight: dividerGray }}>
                         <FaCalendarAlt size={12} style={{ color: "var(--ts)" }} />
-                        <span className="text-[11px] uppercase tracking-widest" style={{ color: "var(--tp)" }}>
-                            {verFechaLarga ? fechaInfo.largo : fechaInfo.corto}
-                        </span>
+                        <span className="text-[11px] uppercase tracking-widest" style={{ color: "var(--tp)" }}>{fechaInfo.corto}</span>
                     </div>
-
                     <div className="flex-1 flex items-center justify-center gap-3 py-3.5" style={{ borderRight: dividerGray }}>
                         <FaClock size={12} style={{ color: "var(--ts)" }} />
-                        <span className="text-[11px] uppercase tracking-widest" style={{ color: "var(--tp)" }}>
-                            {formatHora(partido.hora)}
-                        </span>
+                        <span className="text-[11px] uppercase tracking-widest" style={{ color: "var(--tp)" }}>{formatHora(partido.hora)}</span>
                     </div>
-
                     <div className="flex-1 flex items-center justify-center gap-3 py-3.5 px-2" style={{ borderRight: dividerGray }}>
                         <FaMapMarkerAlt size={12} style={{ color: "var(--ts)" }} />
-                        <span className="text-[11px] uppercase tracking-widest truncate" style={{ color: "var(--tp)" }}>
-                            {formatDato(partido.canchaNombre || partido.cancha)}
-                        </span>
+                        <span className="text-[11px] uppercase tracking-widest truncate" style={{ color: "var(--tp)" }}>{formatDato(partido.canchaNombre || partido.cancha)}</span>
                     </div>
-
                     <div className="flex-1 flex items-center justify-center gap-3 py-3.5 px-2">
                         <FaUserTie size={12} style={{ color: "var(--ts)" }} />
-                        <span className="text-[11px] uppercase tracking-widest truncate" style={{ color: "var(--tp)" }}>
-                            {formatDato(partido.arbitro)}
-                        </span>
+                        <span className="text-[11px] uppercase tracking-widest truncate" style={{ color: "var(--tp)" }}>{formatDato(partido.arbitro)}</span>
                     </div>
                 </div>
             </div>

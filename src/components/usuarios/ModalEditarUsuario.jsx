@@ -80,12 +80,12 @@ export default function ModalEditarUsuario({ usuario, onClose, onUpdated }) {
                 {/* HEADER */}
                 <div className="bg-gradient-to-r from-[#0d143d] to-[#05091e] px-8 py-6 border-b border-cyan-400/10 flex justify-between items-center">
                     <p className="text-2xl font-bold text-white tracking-tighter">
-                        Editar Perfil <span className="text-cyan-500">.</span>
+                        Editar Usuario
                     </p>
 
                     {!activo && (
                         <span className="bg-red-500/20 text-red-500 text-[10px] font-black px-3 py-1 rounded-full border border-red-500/30 uppercase tracking-tighter animate-pulse">
-                            Acceso Revocado
+                            Inactivo
                         </span>
                     )}
                 </div>
@@ -104,7 +104,7 @@ export default function ModalEditarUsuario({ usuario, onClose, onUpdated }) {
                             <div className="col-span-2 bg-[#040714] p-4 rounded-2xl border border-slate-800 flex items-center justify-between mb-2">
                                 <div>
                                     <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Estado de Cuenta</p>
-                                    <p className="text-[10px] text-slate-400">Determina si el usuario puede iniciar sesión</p>
+
                                 </div>
                                 <button
                                     type="button"

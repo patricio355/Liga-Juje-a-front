@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { apiFetch } from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
-import { FaTrophy, FaTimes, FaPalette, FaMars, FaVenus, FaVenusMars, FaInstagram, FaUserAlt } from "react-icons/fa";
+import { FaTrophy, FaTimes, FaPalette, FaMars, FaVenus, FaVenusMars, FaInstagram, FaUserAlt, FaToggleOn } from "react-icons/fa";
 // IMPORTANTE: Ajusta la ruta a tu componente ImageUpload
 import ImageUpload from "../../images/ImageUpload";
 
@@ -156,9 +156,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                        {/* --- FILA 1 COMPARTIDA: FOTO (Izq) y NOMBRE (Der) --- */}
-
-                        {/* Columna 1: Logo */}
+                        {/* --- FOTO y NOMBRE --- */}
                         <div className="col-span-1 flex flex-col items-center justify-center border-b md:border-b-0 border-slate-800/50 pb-4 md:pb-0">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
                                 Logo Principal
@@ -174,7 +172,6 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             />
                         </div>
 
-                        {/* Columna 2: Nombre (Centrado verticalmente con la imagen) */}
                         <div className="col-span-1 flex flex-col justify-center space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">
                                 Nombre de la Competición
@@ -186,8 +183,6 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                                 onChange={e => setNombre(e.target.value.toUpperCase())}
                             />
                         </div>
-
-                        {/* --- RESTO DEL FORMULARIO --- */}
 
                         {/* Plantillas */}
                         <div className="col-span-1 md:col-span-2 space-y-3 pt-2 border-t border-slate-800/50">
@@ -248,19 +243,6 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             </select>
                         </div>
 
-                        {/* Estado */}
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Estado</label>
-                            <select
-                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
-                                value={estado}
-                                onChange={e => setEstado(e.target.value)}
-                            >
-                                <option value="activo" className="bg-[#0a0f2c]">ACTIVO (VISIBLE)</option>
-                                <option value="inactivo" className="bg-[#0a0f2c]">INACTIVO (BORRADOR)</option>
-                            </select>
-                        </div>
-
                         {/* Red Social */}
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1">
@@ -274,7 +256,24 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             />
                         </div>
 
-                        {/* Encargado (Solo Admin) */}
+                        {/* ESTADO (Solo Admin) */}
+                        {esAdminGenuino && (
+                            <div className="space-y-1.5 bg-cyan-900/10 p-3 rounded-xl border border-cyan-500/20">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    <FaToggleOn size={10} className="text-cyan-500" /> Estado del Torneo
+                                </label>
+                                <select
+                                    className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
+                                    value={estado}
+                                    onChange={e => setEstado(e.target.value)}
+                                >
+                                    <option value="activo" className="bg-[#0a0f2c]">ACTIVO (VISIBLE)</option>
+                                    <option value="inactivo" className="bg-[#0a0f2c]">INACTIVO (BORRADOR)</option>
+                                </select>
+                            </div>
+                        )}
+
+                        {/* Responsable (Solo Admin) */}
                         {esAdminGenuino && (
                             <div className="col-span-1 md:col-span-2 space-y-1.5 mt-2 bg-cyan-900/10 p-3 rounded-xl border border-cyan-500/20">
                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">

@@ -5,7 +5,7 @@ import {
     FaMapMarkerAlt, FaUserTie, FaChevronDown, FaClock, FaTrophy
 } from "react-icons/fa";
 
-export default function CuadroFaseFinal({ torneoId }) {
+export default function CuadroFaseFinal({ torneoId, fallback }) {
     const [etapasOriginales, setEtapasOriginales] = useState([]);
     const [loading, setLoading] = useState(true);
     const [detalleAbierto, setDetalleAbierto] = useState(null);
@@ -15,18 +15,26 @@ export default function CuadroFaseFinal({ torneoId }) {
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
 
-    // --- VARIABLES DE BORDE SUTIL ---
-    const borderSutil = "1px solid var(--ts)33";
-    const borderMuySutil = "1px solid var(--ts)15";
+    // --- VARIABLES DE ESTILO ---
+    // "var(--ts)44" crea un borde del color del tema con 25% de opacidad (suave)
+    const borderCard = "1px solid var(--ts)44";
+    // Divisores internos aún más sutiles
+    const borderDivider = "1px solid var(--ts)15";
 
     useEffect(() => {
         const cargarCuadro = async () => {
             try {
                 setLoading(true);
                 const data = await apiFetch(`/api/torneos/${torneoId}/cuadro-completo`);
-                setEtapasOriginales(data.sort((a, b) => b.orden - a.orden));
+                // Si data es null o vacío, dejamos array vacío
+                if (!data || data.length === 0) {
+                    setEtapasOriginales([]);
+                } else {
+                    setEtapasOriginales(data.sort((a, b) => b.orden - a.orden));
+                }
             } catch (error) {
                 console.error("Error al cargar cuadro final:", error);
+                setEtapasOriginales([]);
             } finally {
                 setLoading(false);
             }
@@ -38,6 +46,9 @@ export default function CuadroFaseFinal({ torneoId }) {
         if (etapasOriginales.length === 0) return [];
         const final = etapasOriginales.find(e => e.orden === 1);
         const otrasEtapas = etapasOriginales.filter(e => e.orden !== 1);
+
+        // Si solo hay final
+        if (!otrasEtapas.length && final) return [final];
 
         const etapasIzquierda = otrasEtapas.map(etapa => {
             const mitad = Math.pow(2, etapa.orden - 1) / 2;
@@ -60,7 +71,7 @@ export default function CuadroFaseFinal({ torneoId }) {
             return { ...etapa, partidosVisuales: partidos };
         });
 
-        return [...etapasIzquierda, final, ...etapasDerecha];
+        return final ? [...etapasIzquierda, final, ...etapasDerecha] : [];
     };
 
     const etapasVisuales = organizarEtapasEspejo();
@@ -92,13 +103,18 @@ export default function CuadroFaseFinal({ torneoId }) {
         </div>
     );
 
+    // Si no hay etapas y se pasó un fallback (mensaje de "Sin Partidos"), mostrarlo
+    if (etapasVisuales.length === 0) {
+        return fallback || null;
+    }
+
     return (
-        /* CONTENEDOR PRINCIPAL: Fondo transparente, borde sutil */
+        /* CONTENEDOR PRINCIPAL */
         <div
             className="mt-2 mb-6 p-2 md:p-4 rounded-xl backdrop-blur-sm shadow-xl overflow-hidden"
             style={{
-                border: borderSutil,
-                backgroundColor: "var(--secondary)" // Fondo base oscuro
+                border: borderCard, // Borde suave del contenedor también
+                backgroundColor: "var(--secondary)"
             }}
         >
             <div
@@ -109,7 +125,7 @@ export default function CuadroFaseFinal({ torneoId }) {
                 onMouseMove={handleMouseMove}
                 className={`w-full overflow-x-auto custom-scrollbar select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
             >
-                <div className="flex flex-row justify-start md:justify-center gap-0 min-w-max px-1 pb-16">
+                <div className="flex flex-row justify-start md:justify-center gap-0 min-w-max px-1 pb-16 pt-4">
                     {etapasVisuales.map((etapa, idx) => {
                         if (!etapa) return null;
                         const esFinal = etapa.orden === 1;
@@ -118,16 +134,17 @@ export default function CuadroFaseFinal({ torneoId }) {
                         return (
                             <div key={`${etapa.id}-${idx}`} className="flex flex-col w-[210px] relative">
                                 {/* NOMBRE DE LA ETAPA */}
-                                <div className="text-center pt-2 mb-2">
+                                <div className="text-center mb-4 relative z-20">
                                     <span
-                                        className="border px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-md"
+                                        className="border px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg"
                                         style={esFinal ? {
-                                            backgroundColor: "#ca8a0422", // Amarillo sutil
-                                            borderColor: "#eab308",       // Amarillo fuerte
-                                            color: "#eab308"
+                                            backgroundColor: "#ca8a0422",
+                                            borderColor: "#eab308",
+                                            color: "#eab308",
+                                            boxShadow: "0 0 15px rgba(234,179,8,0.2)"
                                         } : {
                                             backgroundColor: "var(--p)",
-                                            borderColor: "var(--ts)44",
+                                            border: borderCard, // Usamos el borde suave del color seleccionado
                                             color: "var(--ts)"
                                         }}
                                     >
@@ -142,89 +159,107 @@ export default function CuadroFaseFinal({ torneoId }) {
                                         const visitanteGano = hayGanador && Number(partido.ganadorId) === Number(partido.equipoVisitanteId);
 
                                         return (
-                                            <div key={partido.id} className="relative py-3 px-1.5 flex items-center">
+                                            <div key={partido.id} className="relative py-3 px-2 flex items-center justify-center">
+
+                                                {/* CONECTORES VISUALES (Líneas) - Opcional, mantener simple por ahora */}
 
                                                 <div
                                                     onClick={(e) => !partido.placeholder && toggleDetalle(e, partido.id)}
-                                                    className={`w-full rounded-lg overflow-hidden shadow-lg transition-all relative z-10 ${!partido.placeholder ? 'cursor-pointer' : ''}`}
+                                                    className={`w-full rounded-xl overflow-hidden shadow-lg transition-all relative z-10 ${!partido.placeholder ? 'cursor-pointer hover:scale-[1.02] active:scale-95' : ''}`}
                                                     style={{
                                                         backgroundColor: "var(--p)",
-                                                        border: partido.placeholder ? "1px dashed var(--ts)22" : borderSutil,
-                                                        opacity: partido.placeholder ? 0.4 : 1,
-                                                        borderColor: esFinal && !partido.placeholder ? "#eab308" : undefined // Borde dorado si es final
+                                                        // AQUI: El borde suave del color seleccionado
+                                                        border: partido.placeholder ? "1px dashed var(--ts)22" : borderCard,
+                                                        opacity: partido.placeholder ? 0.3 : 1,
+                                                        borderColor: esFinal && !partido.placeholder ? "#eab308" : undefined,
+                                                        boxShadow: !partido.placeholder ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "none"
                                                     }}
                                                 >
                                                     {/* Equipo Local */}
                                                     <div
-                                                        className="flex justify-between items-center p-2"
-                                                        style={{ borderBottom: borderMuySutil }}
+                                                        className="flex justify-between items-center p-2.5 transition-colors"
+                                                        style={{
+                                                            borderBottom: borderDivider,
+                                                            backgroundColor: localGano ? "var(--ts)10" : "transparent"
+                                                        }}
                                                     >
                                                         <div className="flex items-center gap-2 overflow-hidden">
-                                                            {partido.equipoLocalEscudo && <img src={partido.equipoLocalEscudo} className="w-4 h-4 object-contain" alt="" />}
+                                                            {partido.equipoLocalEscudo ?
+                                                                <img src={partido.equipoLocalEscudo} className="w-5 h-5 object-contain drop-shadow-sm" alt="" /> :
+                                                                !partido.placeholder && <div className="w-5 h-5 rounded-full bg-white/5"></div>
+                                                            }
                                                             <span
                                                                 className="text-[10px] font-black uppercase truncate max-w-[110px]"
-                                                                style={{ color: localGano ? "var(--ts)" : "var(--tp)", opacity: localGano ? 1 : 0.6 }}
+                                                                style={{ color: localGano ? "var(--ts)" : "var(--tp)", opacity: localGano ? 1 : 0.7 }}
                                                             >
-                                                                {partido.equipoLocal || "POR DEFINIR"}
+                                                                {partido.equipoLocal || "A DEFINIR"}
                                                             </span>
                                                         </div>
                                                         <span
-                                                            className="text-xs font-black"
+                                                            className="text-xs font-black ml-2"
                                                             style={{ color: localGano ? "var(--ts)" : "var(--tp)" }}
                                                         >
-                                                            {!partido.placeholder && partido.golesLocal !== null ? partido.golesLocal : "-"}
+                                                            {!partido.placeholder && partido.golesLocal !== null ? partido.golesLocal : ""}
                                                         </span>
                                                     </div>
 
                                                     {/* Equipo Visitante */}
-                                                    <div className="flex justify-between items-center p-2">
+                                                    <div
+                                                        className="flex justify-between items-center p-2.5 transition-colors"
+                                                        style={{
+                                                            backgroundColor: visitanteGano ? "var(--ts)10" : "transparent"
+                                                        }}
+                                                    >
                                                         <div className="flex items-center gap-2 overflow-hidden">
-                                                            {partido.equipoVisitanteEscudo && <img src={partido.equipoVisitanteEscudo} className="w-4 h-4 object-contain" alt="" />}
+                                                            {partido.equipoVisitanteEscudo ?
+                                                                <img src={partido.equipoVisitanteEscudo} className="w-5 h-5 object-contain drop-shadow-sm" alt="" /> :
+                                                                !partido.placeholder && <div className="w-5 h-5 rounded-full bg-white/5"></div>
+                                                            }
                                                             <span
                                                                 className="text-[10px] font-black uppercase truncate max-w-[110px]"
-                                                                style={{ color: visitanteGano ? "var(--ts)" : "var(--tp)", opacity: visitanteGano ? 1 : 0.6 }}
+                                                                style={{ color: visitanteGano ? "var(--ts)" : "var(--tp)", opacity: visitanteGano ? 1 : 0.7 }}
                                                             >
-                                                                {partido.equipoVisitante || "POR DEFINIR"}
+                                                                {partido.equipoVisitante || "A DEFINIR"}
                                                             </span>
                                                         </div>
                                                         <span
-                                                            className="text-xs font-black"
+                                                            className="text-xs font-black ml-2"
                                                             style={{ color: visitanteGano ? "var(--ts)" : "var(--tp)" }}
                                                         >
-                                                            {!partido.placeholder && partido.golesVisitante !== null ? partido.golesVisitante : "-"}
+                                                            {!partido.placeholder && partido.golesVisitante !== null ? partido.golesVisitante : ""}
                                                         </span>
                                                     </div>
 
                                                     {!partido.placeholder && (
-                                                        <div className="absolute right-0.5 top-1/2 -translate-y-1/2 flex items-center h-full pointer-events-none opacity-30">
-                                                            <FaChevronDown size={7} style={{ color: "var(--ts)" }} className={`transition-transform ${detalleAbierto === partido.id ? 'rotate-180' : ''}`} />
+                                                        <div className="absolute right-0.5 top-1/2 -translate-y-1/2 flex items-center h-full pointer-events-none opacity-40">
+                                                            <FaChevronDown size={8} style={{ color: "var(--ts)" }} className={`transition-transform duration-300 ${detalleAbierto === partido.id ? 'rotate-180' : ''}`} />
                                                         </div>
                                                     )}
 
                                                     {/* DETALLES EXPANDIBLES */}
                                                     {detalleAbierto === partido.id && !partido.placeholder && (
                                                         <div
-                                                            className="p-2 space-y-1.5 animate-in slide-in-from-top-1 duration-200"
+                                                            className="p-3 space-y-2 animate-in slide-in-from-top-2 duration-200"
                                                             style={{
                                                                 backgroundColor: "var(--secondary)",
-                                                                borderTop: borderSutil
+                                                                borderTop: borderDivider
                                                             }}
                                                         >
                                                             <div className="flex items-center gap-2" style={{ color: "var(--tp)" }}>
                                                                 <FaCalendarAlt size={10} style={{ color: "var(--ts)" }} className="shrink-0" />
-                                                                <span className="text-[9px] font-black uppercase tracking-wider">{partido.fecha || "PENDIENTE"}</span>
+                                                                <span className="text-[9px] font-black uppercase tracking-wider opacity-80">{partido.fecha || "FECHA PENDIENTE"}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2" style={{ color: "var(--tp)" }}>
                                                                 <FaClock size={10} style={{ color: "var(--ts)" }} className="shrink-0" />
-                                                                <span className="text-[9px] font-black uppercase tracking-wider">{partido.hora || "TBD"}</span>
+                                                                <span className="text-[9px] font-black uppercase tracking-wider opacity-80">{partido.hora ? `${partido.hora} HS` : "HORA PENDIENTE"}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2" style={{ color: "var(--tp)" }}>
                                                                 <FaMapMarkerAlt size={10} style={{ color: "var(--ts)" }} className="shrink-0" />
-                                                                <span className="text-[9px] font-black uppercase tracking-wider">{partido.cancha || "SIN ASIGNAR"}</span>
+                                                                <span className="text-[9px] font-black uppercase tracking-wider opacity-80 truncate">{partido.cancha || "CANCHA PENDIENTE"}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2" style={{ color: "var(--tp)" }}>
                                                                 <FaUserTie size={10} style={{ color: "var(--ts)" }} className="shrink-0" />
-                                                                <span className="text-[9px] font-black uppercase tracking-wider">{partido.arbitro || "SIN DESIGNAR"}</span>
+                                                                <span className="text-[9px] font-black uppercase tracking-wider opacity-80 truncate">{partido.arbitro || "ÁRBITRO PENDIENTE"}</span>
                                                             </div>
                                                         </div>
                                                     )}
@@ -232,9 +267,9 @@ export default function CuadroFaseFinal({ torneoId }) {
 
                                                 {/* Copa en la final */}
                                                 {esFinal && (
-                                                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                                                        <div className="w-8 h-1 bg-yellow-500/20 blur-sm rounded-full mb-1"></div>
-                                                        <FaTrophy className="text-yellow-500 text-3xl drop-shadow-[0_0_10px_rgba(234,179,8,0.5)] animate-pulse" />
+                                                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none z-0">
+                                                        <div className="w-12 h-12 rounded-full bg-yellow-500/10 blur-xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+                                                        <FaTrophy className="text-yellow-500 text-3xl drop-shadow-[0_0_15px_rgba(234,179,8,0.6)] animate-pulse" />
                                                     </div>
                                                 )}
                                             </div>

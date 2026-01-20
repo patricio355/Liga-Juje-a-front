@@ -5,17 +5,19 @@ import { AuthContext } from "../../context/AuthContext";
 export default function ModalCrearUsuario({ onClose, onCreated }) {
     const { user } = useContext(AuthContext);
     const miRol = user?.role?.toUpperCase().replace("ROLE_", "") || "";
+    const esAdminGenuino = miRol === "ADMIN";
 
     const [form, setForm] = useState({
         nombre: "",
         email: "",
-        rol: "", // 1. Cambiado a vacío para obligar a seleccionar
-        password: "",
+        rol: "",
         dni: "",
         telefono: "",
         domicilio: ""
     });
 
+    // Estado para la contraseña, por defecto "123"
+    const [password, setPassword] = useState("123");
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -26,7 +28,7 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
             { val: "VEEDOR", lab: "VEEDOR" }
         ];
 
-        if (miRol === "ADMIN") {
+        if (esAdminGenuino) {
             return [
                 { val: "ADMIN", lab: "ADMINISTRADOR" },
                 { val: "ENCARGADOTORNEO", lab: "ENCARGADO TORNEO" },
@@ -40,11 +42,16 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
         if(e) e.preventDefault();
         setError(null);
 
-        // 2. Nuevas validaciones incluyendo el Rango
+        // Validaciones esenciales
         if (!form.nombre.trim()) { setError("El nombre es obligatorio"); return; }
         if (!form.email.trim()) { setError("El email es obligatorio"); return; }
-        if (!form.rol) { setError("Debes seleccionar un rango para el miembro"); return; } // <--- Validación de rol
-        if (form.password.length < 6) { setError("Contraseña mínima 6 caracteres"); return; }
+        if (!form.rol) { setError("Debes seleccionar un rango para el miembro"); return; }
+
+        // Validación de contraseña solo si el admin intenta cambiarla
+        if (esAdminGenuino && password.length < 3) {
+            setError("La contraseña debe ser más larga");
+            return;
+        }
 
         setLoading(true);
         try {
@@ -57,12 +64,12 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                     telefono: form.telefono.trim() || null,
                     domicilio: form.domicilio.trim() || null
                 },
-                password: form.password,
+                // Si es admin envía lo ingresado, sino el "123" por defecto
+                password: esAdminGenuino ? password : "123",
             });
             onCreated();
             onClose();
         } catch (e) {
-            // El backend ahora enviará mensajes claros gracias al GlobalExceptionHandler
             setError(e.message || "Error al crear usuario");
         } finally {
             setLoading(false);
@@ -80,9 +87,7 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                     <h2 className="text-2xl font-bold text-white tracking-tight">
                         Crear Usuario
                     </h2>
-                    <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-[0.2em] mt-1">
-                        Formulario de Alta
-                    </p>
+
                 </div>
 
                 <div className="p-8">
@@ -93,7 +98,6 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                     )}
 
                     <div className="grid grid-cols-2 gap-5">
-                        {/* ... campos de nombre, email, password ... */}
                         <div className="col-span-2 space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Nombre Completo</label>
                             <input
@@ -104,8 +108,8 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                             />
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Email Acceso</label>
+                        <div className={`space-y-1.5 ${esAdminGenuino ? "col-span-1" : "col-span-2"}`}>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Email</label>
                             <input
                                 type="email"
                                 placeholder="USUARIO@EMAIL.COM"
@@ -115,20 +119,22 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                             />
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Contraseña</label>
-                            <input
-                                type="password"
-                                placeholder="••••••••"
-                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-medium text-white placeholder:text-slate-800 transition-all"
-                                value={form.password}
-                                onChange={e => setForm({ ...form, password: e.target.value })}
-                            />
-                        </div>
+                        {/* SOLO APARECE SI ES ADMIN */}
+                        {esAdminGenuino && (
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Contraseña</label>
+                                <input
+                                    type="password"
+                                    placeholder="Personalizar..."
+                                    className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-medium text-white placeholder:text-slate-800 transition-all"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                />
+                            </div>
+                        )}
 
                         <div className="col-span-2 py-1"><div className="h-px bg-slate-800/50 w-full"></div></div>
 
-                        {/* ... DNI y Teléfono ... */}
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">DNI (Opcional)</label>
                             <input
@@ -149,7 +155,6 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                             />
                         </div>
 
-                        {/* SELECT CON OPCIÓN POR DEFECTO */}
                         <div className="col-span-2 space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Rango del Miembro</label>
                             <select
@@ -159,9 +164,7 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                                 value={form.rol}
                                 onChange={e => setForm({ ...form, rol: e.target.value })}
                             >
-                                {/* 3. Opción deshabilitada para obligar a elegir */}
                                 <option value="" disabled>--- SELECCIONAR RANGO ---</option>
-
                                 {renderOptions().map(op => (
                                     <option key={op.val} value={op.val} className="bg-[#0a0f2c] text-white">
                                         {op.lab}
