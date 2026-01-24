@@ -95,7 +95,7 @@ export default function Home() {
 
                         {!loading && filtrados.length === 0 && (
                             <div className="text-center py-20 bg-white/5 rounded-[3rem] border border-dashed border-slate-800">
-                                <p className="text-slate-500 font-bold uppercase tracking-widest italic">No se encontraron torneos</p>
+                                <p className="text-slate-500 font-bold uppercase tracking-widest italic">No se encontraron torneos en curso</p>
                             </div>
                         )}
                     </div>
