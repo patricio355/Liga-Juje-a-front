@@ -64,7 +64,7 @@ export default function Home() {
                         <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white text-center leading-none">
                             Torneos <br />
                             <span className="bg-gradient-to-r from-slate-100 via-slate-400 to-slate-500 bg-clip-text text-transparent">
-                                Activos
+                                en curso
                             </span>
                         </h1>
                     </div>
