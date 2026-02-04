@@ -1,4 +1,5 @@
 import { useState, useContext, useEffect } from "react";
+import { createPortal } from "react-dom"; // Importante para el Portal
 import { apiFetch } from "../../api/api";
 import { getCanchas } from "../../api/canchas.api";
 import { AuthContext } from "../../context/AuthContext";
@@ -40,6 +41,10 @@ export default function ModalEquipoEditar({ equipo, onClose, onUpdated }) {
             }
         };
         cargarCanchas();
+
+        // Bloquear scroll del body al abrir el modal
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = 'unset'; };
     }, []);
 
     if (!equipo) return null;
@@ -72,7 +77,6 @@ export default function ModalEquipoEditar({ equipo, onClose, onUpdated }) {
                     nombre: nombre.toUpperCase(),
                     localidad,
                     escudo,
-                    // Solo el admin envía el nuevo estado, de lo contrario se mantiene el original
                     estado: esAdminGenuino ? estado : equipo.estado,
                     encargadoEmail: encargadoEmail.trim() || null,
                     camisetaTitular,
@@ -89,40 +93,43 @@ export default function ModalEquipoEditar({ equipo, onClose, onUpdated }) {
         }
     };
 
-    return (
-        <div className="fixed inset-0 bg-[#040714]/95 backdrop-blur-md flex items-center justify-center z-[300] p-4" onClick={onClose}>
+    return createPortal(
+        <div
+            className="fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-[999999] p-2 md:p-6 italic"
+            onClick={onClose}
+        >
             <form
-                className="bg-[#0a0f2c] border border-cyan-500/30 rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden max-h-[95vh] flex flex-col"
+                className="bg-[#05070a] border border-white/10 rounded-[2.5rem] w-full max-w-2xl shadow-[0_0_100px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-h-[95vh] relative animate-in fade-in zoom-in duration-200"
                 onClick={(e) => e.stopPropagation()}
                 onSubmit={guardar}
             >
-                {/* Header */}
-                <div className="bg-[#0d143d] px-10 py-8 border-b border-slate-800 flex justify-between items-center">
+                {/* Header Fijo */}
+                <div className="bg-[#0a0c10] px-8 py-6 border-b border-white/5 flex justify-between items-center shrink-0">
                     <div>
-                        <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
-                            <FaShieldAlt className="text-cyan-500" size={28} /> Editar Club
+                        <h2 className="text-2xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
+                            <FaShieldAlt className="text-slate-400" size={24} /> Editar Club
                         </h2>
-                        <p className="text-[11px] font-bold text-cyan-500 uppercase tracking-[0.2em] mt-1">
-                            Ajustes de identidad oficial
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mt-1">
+                            Ajustes de Identidad Oficial
                         </p>
                     </div>
-                    <button onClick={onClose} type="button" className="p-3 bg-[#040714] rounded-2xl text-slate-500 hover:text-white border border-slate-800 transition-all">
-                        <FaTimes size={24} />
+                    <button type="button" onClick={onClose} className="text-slate-600 hover:text-white transition-colors p-2 bg-white/5 rounded-full">
+                        <FaTimes size={18} />
                     </button>
                 </div>
 
-                <div className="p-10 overflow-y-auto custom-scrollbar">
+                <div className="p-6 md:p-10 overflow-y-auto custom-scrollbar bg-[#05070a] flex-1">
                     {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 mb-8 rounded-2xl text-[12px] font-black uppercase tracking-widest text-center animate-pulse">
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 mb-8 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center">
                             {error}
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
 
                         {/* Columna Izquierda: Escudo */}
                         <div className="md:col-span-5 flex flex-col items-center">
-                            <div className="relative w-full bg-[#040714] p-8 rounded-[3rem] border border-slate-800 shadow-inner flex flex-col items-center min-h-[250px] justify-center">
+                            <div className="relative w-full bg-black p-8 rounded-[3rem] border border-white/5 shadow-inner flex flex-col items-center min-h-[250px] justify-center">
                                 {!escudo ? (
                                     <ImageUpload
                                         onUploadStart={() => setIsUploading(true)}
@@ -131,42 +138,46 @@ export default function ModalEquipoEditar({ equipo, onClose, onUpdated }) {
                                     />
                                 ) : (
                                     <div className="relative w-full aspect-square flex items-center justify-center">
-                                        <img src={escudo} alt="Escudo" className="w-full h-full object-contain p-2 drop-shadow-[0_0_15px_rgba(6,182,212,0.3)]" />
-                                        <button type="button" onClick={quitarEscudo} className="absolute -top-2 -right-2 p-3 bg-red-600 text-white rounded-2xl hover:bg-red-500 transition-all shadow-xl z-20 active:scale-90">
-                                            <FaTrash size={16} />
+                                        <img src={escudo} alt="Escudo" className="w-full h-full object-contain p-2 opacity-90" />
+                                        <button type="button" onClick={quitarEscudo} className="absolute -top-2 -right-2 p-3 bg-red-900 text-white rounded-2xl hover:bg-red-600 transition-all shadow-xl z-20 active:scale-90">
+                                            <FaTrash size={14} />
                                         </button>
                                     </div>
                                 )}
-                                <p className="text-[10px] font-black text-slate-600 uppercase mt-6 tracking-[0.2em]">Escudo del Club</p>
+                                <p className="text-[9px] font-black text-slate-600 uppercase mt-6 tracking-[0.2em]">Escudo del Club</p>
                             </div>
                         </div>
 
                         {/* Columna Derecha: Datos principales */}
                         <div className="md:col-span-7 space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 text-cyan-500/70">Nombre Oficial</label>
-                                <input maxLength={20} value={nombre} onChange={e => setNombre(e.target.value.toUpperCase())} className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-base font-bold text-white transition-all placeholder:text-slate-800" />
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nombre Oficial</label>
+                                <input
+                                    maxLength={20}
+                                    value={nombre}
+                                    onChange={e => setNombre(e.target.value.toUpperCase())}
+                                    className="w-full px-6 py-4 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-sm font-black text-white italic transition-all placeholder:text-slate-900"
+                                />
                             </div>
 
                             <div className={`grid gap-4 ${esAdminGenuino ? "grid-cols-2" : "grid-cols-1"}`}>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1"><FaMapMarkerAlt size={10}/> Localidad</label>
-                                    <input value={localidad} onChange={e => setLocalidad(e.target.value)} className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-sm font-bold text-white transition-all" />
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1"><FaMapMarkerAlt size={10}/> Localidad</label>
+                                    <input value={localidad} onChange={e => setLocalidad(e.target.value)} className="w-full px-6 py-4 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white italic" />
                                 </div>
 
-                                {/* EL INPUT DE ESTADO SOLO APARECE SI ES ADMIN */}
                                 {esAdminGenuino && (
-                                    <div className="space-y-2 animate-in fade-in duration-500">
-                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1">
                                             <FaToggleOn size={10}/> Estado
                                         </label>
                                         <select
                                             value={estado ? "true" : "false"}
                                             onChange={e => setEstado(e.target.value === "true")}
-                                            className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
+                                            className="w-full px-6 py-4 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase italic"
                                         >
-                                            <option value="true" className="bg-[#0a0f2c]">ACTIVO</option>
-                                            <option value="false" className="bg-[#0a0f2c]">INACTIVO</option>
+                                            <option value="true" className="bg-black">ACTIVO</option>
+                                            <option value="false" className="bg-black">INACTIVO</option>
                                         </select>
                                     </div>
                                 )}
@@ -174,51 +185,61 @@ export default function ModalEquipoEditar({ equipo, onClose, onUpdated }) {
                         </div>
 
                         {/* Detalles Adicionales */}
-                        <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-slate-800/50">
+                        <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6 pt-8 border-t border-white/5">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                    <FaLayerGroup size={12} className="text-cyan-500" /> Cancha de Localía
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    <FaLayerGroup size={10} /> Sede / Cancha
                                 </label>
-                                <select value={canchaId} onChange={e => setCanchaId(e.target.value)} className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer">
-                                    <option value="">SIN CANCHA ASIGNADA</option>
+                                <select value={canchaId} onChange={e => setCanchaId(e.target.value)} className="w-full px-6 py-4 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase">
+                                    <option value="">SIN SEDE ASIGNADA</option>
                                     {canchas.map(c => <option key={c.id} value={c.id}>{c.nombre.toUpperCase()}</option>)}
                                 </select>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                    <FaEnvelope size={12} className="text-cyan-500" /> Email Responsable
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    <FaEnvelope size={10} /> Email Responsable
                                 </label>
-                                <input value={encargadoEmail} onChange={e => setEncargadoEmail(e.target.value)} className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl outline-none focus:border-cyan-500 text-sm font-medium text-white transition-all" />
+                                <input value={encargadoEmail} onChange={e => setEncargadoEmail(e.target.value)} className="w-full px-6 py-4 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-medium text-slate-300" />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                    <FaPalette size={12} className="text-cyan-500" /> Camiseta Titular
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    <FaPalette size={10} /> Camiseta Titular
                                 </label>
-                                <input value={camisetaTitular} onChange={e => setCamisetaTitular(e.target.value)} className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl text-[11px] font-bold text-white transition-all" placeholder="COLORES PRINCIPALES" />
+                                <input value={camisetaTitular} onChange={e => setCamisetaTitular(e.target.value)} className="w-full px-6 py-4 bg-black border border-white/10 rounded-2xl text-[10px] font-black text-slate-400 uppercase" placeholder="EQUIPACIÓN PRINCIPAL" />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                    <FaPalette size={12} className="text-cyan-500" /> Camiseta Suplente
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    <FaPalette size={10} /> Camiseta Suplente
                                 </label>
-                                <input value={camisetaSuplente} onChange={e => setCamisetaSuplente(e.target.value)} className="w-full px-6 py-4 bg-[#040714] border border-slate-800 rounded-2xl text-[11px] font-bold text-white transition-all" placeholder="COLORES ALTERNATIVOS" />
+                                <input value={camisetaSuplente} onChange={e => setCamisetaSuplente(e.target.value)} className="w-full px-6 py-4 bg-black border border-white/10 rounded-2xl text-[10px] font-black text-slate-400 uppercase" placeholder="EQUIPACIÓN ALTERNATIVA" />
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div className="flex gap-6 mt-12 pb-4">
-                        <button type="button" onClick={onClose} className="flex-1 py-5 rounded-[1.5rem] text-[12px] font-black uppercase tracking-[0.2em] text-slate-500 border border-slate-800 hover:bg-slate-800 hover:text-white transition-all active:scale-95 shadow-lg">
-                            Cancelar
-                        </button>
+                {/* Footer Fijo */}
+                <div className="p-8 bg-[#0a0c10] border-t border-white/5 flex gap-4 shrink-0">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex-1 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 border border-white/5 hover:bg-white/5 transition-all shadow-lg"
+                    >
+                        Cancelar
+                    </button>
 
-                        <button type="submit" disabled={loading || isUploading || !escudo || !nombre} className="flex-[2] py-5 bg-cyan-600 hover:bg-cyan-500 rounded-[1.5rem] text-[12px] font-black uppercase tracking-[0.2em] text-white transition-all shadow-[0_0_25px_-5px_rgba(6,182,212,0.4)] active:scale-95 disabled:opacity-30 flex items-center justify-center gap-3">
-                            {loading || isUploading ? "Sincronizando..." : <><FaCheckCircle size={18} /> Guardar Cambios</>}
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading || isUploading || !escudo || !nombre}
+                        className="flex-[2] py-5 bg-gradient-to-r from-slate-200 to-slate-400 hover:from-white hover:to-slate-300 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-black transition-all shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-95 disabled:opacity-20 flex items-center justify-center gap-3"
+                    >
+                        {loading || isUploading ? "Sincronizando..." : <><FaCheckCircle size={14} /> Guardar Cambios</>}
+                    </button>
                 </div>
             </form>
-        </div>
+        </div>,
+        document.body
     );
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect} from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
     FaArrowLeft, FaPlus, FaTrophy, FaSync,
@@ -27,7 +27,8 @@ export default function GestionFaseFinal() {
     const [modalCerrarOpen, setModalCerrarOpen] = useState(false);
     const [modalEditarOpen, setModalEditarOpen] = useState(false);
 
-    const nombresFases = ["Final", "Semifinales", "Cuartos de Final", "Octavos de Final", "Playoffs"];
+    // 1. Ampliamos los nombres hasta 32avos
+    const nombresFases = ["Final", "Semifinales", "Cuartos de Final", "Octavos de Final", "16avos de Final", "32avos de Final"];
 
     const cargarEtapas = async () => {
         try {
@@ -58,7 +59,9 @@ export default function GestionFaseFinal() {
 
     const gestionarNuevaEtapa = async () => {
         const profundidadActual = etapasDb.length;
-        if (profundidadActual >= 5) return;
+        // 2. Aumentamos el límite a 6 (Final + 5 fases previas hasta 32avos)
+        if (profundidadActual >= 6) return;
+
         try {
             await apiFetch(`/api/torneos/${id}/etapas`, {
                 method: "POST",
@@ -84,7 +87,6 @@ export default function GestionFaseFinal() {
         }
     };
 
-    // LÓGICA ESPEJO: Dividir partidos por orden para Izquierda y Derecha
     const generarColumnasEspejo = () => {
         if (etapasDb.length === 0) return [];
 
@@ -144,12 +146,15 @@ export default function GestionFaseFinal() {
                             Gestión <span className="text-cyan-500">Fase Final</span>
                         </h1>
                     </div>
-                    <button onClick={gestionarNuevaEtapa} className="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg font-black uppercase text-[10px] flex items-center gap-2 shadow-lg transition-all active:scale-95">
-                        <FaPlus /> {etapasDb.length === 0 ? "Crear Cuadro" : "Agregar Etapa"}
-                    </button>
+                    {/* 3. Condición para ocultar el botón al llegar a 32avos (6 etapas) */}
+                    {etapasDb.length < 6 && (
+                        <button onClick={gestionarNuevaEtapa} className="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg font-black uppercase text-[10px] flex items-center gap-2 shadow-lg transition-all active:scale-95">
+                            <FaPlus /> {etapasDb.length === 0 ? "Crear Cuadro" : "Agregar Etapa"}
+                        </button>
+                    )}
                 </header>
 
-                <div className="bg-[#0a0f2c] border border-slate-800 rounded-[2rem] p-6 overflow-x-auto shadow-2xl custom-scrollbar">
+                <div className="bg-[#0a0f2c] border border-slate-800 rounded-[2.5rem] p-6 overflow-x-auto shadow-2xl custom-scrollbar">
                     <div className="flex flex-row justify-center gap-0 min-w-max pb-10">
                         {columnas.map((col, idxCol) => (
                             <div key={`${col.id}-${idxCol}`} className="flex flex-col w-[260px] relative">
@@ -162,11 +167,10 @@ export default function GestionFaseFinal() {
                                     {col.celdas.map((celda, idxCelda) => (
                                         <div key={idxCelda} className="relative py-4 px-4 flex items-center">
                                             <div className={`w-full bg-[#040714] border rounded-xl overflow-hidden shadow-md relative z-10 ${celda.partido ? 'border-cyan-500/40' : 'border-slate-800'}`}>
-
                                                 <div
                                                     onClick={() => {
                                                         if (!celda.partido) {
-                                                            setEtapaSeleccionada({ ...col, etapaId: col.id }); // Sincronizado con Modal
+                                                            setEtapaSeleccionada({ ...col, etapaId: col.id });
                                                             setIdxPartSeleccionado(celda.ordenReal - 1);
                                                             setModalCrearOpen(true);
                                                         }
@@ -208,7 +212,7 @@ export default function GestionFaseFinal() {
                 </div>
             </main>
 
-            {/* MODALES: Referencias corregidas para usar los estados locales */}
+            {/* MODALES */}
             {modalCrearOpen && etapaSeleccionada && (
                 <ModalPartidoEliminatorio
                     torneoId={id}

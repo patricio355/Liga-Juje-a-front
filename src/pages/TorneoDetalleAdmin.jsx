@@ -4,8 +4,7 @@ import { apiFetch } from "../api/api";
 import {
     FaArrowLeft, FaPlus, FaTrophy, FaTrash,
     FaEdit, FaCalendarAlt, FaMagic, FaCogs, FaCheckCircle, FaLock, FaFutbol, FaLayerGroup, FaInfoCircle,
-    FaProjectDiagram, // Icono para Fase Final
-    FaMars, FaVenus, FaVenusMars // Nuevos iconos
+    FaProjectDiagram, FaMars, FaVenus, FaVenusMars
 } from "react-icons/fa";
 
 // Modales
@@ -33,8 +32,6 @@ export default function TorneoDetalleAdmin() {
     const [modalEquipoCrear, setModalEquipoCrear] = useState(false);
 
     const [showTooltipMobile, setShowTooltipMobile] = useState(false);
-
-    // ESTADOS PARA MODALES DE CONFIRMACIÓN
     const [modalConfirmar, setModalConfirmar] = useState({ open: false, type: null, id: null });
     const [modalConfirmarFixture, setModalConfirmarFixture] = useState(false);
     const [loadingAccion, setLoadingAccion] = useState(false);
@@ -59,7 +56,6 @@ export default function TorneoDetalleAdmin() {
         if (id) cargarDatos();
     }, [id, cargarDatos]);
 
-    // LÓGICA DE ELIMINACIÓN UNIFICADA
     const ejecutarEliminacion = async () => {
         setLoadingAccion(true);
         try {
@@ -72,13 +68,11 @@ export default function TorneoDetalleAdmin() {
             setModalConfirmar({ open: false, type: null, id: null });
         } catch (error) {
             console.error("Error al eliminar:", error);
-            alert(error.message || "Error al procesar la solicitud");
         } finally {
             setLoadingAccion(false);
         }
     };
 
-    // FUNCIÓN: Ejecutar Generación de Fixture
     const handleEjecutarGenerarFixture = async () => {
         setLoadingAccion(true);
         try {
@@ -105,90 +99,92 @@ export default function TorneoDetalleAdmin() {
         return torneo.zonas.some(zona => zona.equipos && zona.equipos.length >= 2);
     }, [torneo?.zonas]);
 
-    // Helper para icono de género
     const getGeneroIcon = () => {
-        if (torneo.genero === "MASCULINO") return <FaMars className="text-blue-400" />;
-        if (torneo.genero === "FEMENINO") return <FaVenus className="text-pink-400" />;
-        if (torneo.genero === "MIXTO") return <FaVenusMars className="text-purple-400" />;
+        if (torneo.genero === "MASCULINO") return <FaMars className="text-slate-400" />;
+        if (torneo.genero === "FEMENINO") return <FaVenus className="text-slate-400" />;
+        if (torneo.genero === "MIXTO") return <FaVenusMars className="text-slate-400" />;
         return null;
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-[#05081c] flex flex-col items-center justify-center gap-4">
-            <div className="w-12 h-12 border-4 border-cyan-500/10 border-t-cyan-500 rounded-full animate-spin"></div>
-            <span className="text-xs font-bold text-cyan-500 uppercase tracking-widest text-center">Actualizando Panel...</span>
+        <div className="min-h-screen bg-[#05070a] flex flex-col items-center justify-center gap-4">
+            <div className="w-12 h-12 border-4 border-white/5 border-t-slate-400 rounded-full animate-spin"></div>
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Sincronizando Panel...</span>
         </div>
     );
 
     if (!torneo) return null;
-
-    // VARIABLE CLAVE: Determina si el torneo es Abierto
     const esAbierto = torneo.tipo === 'ABIERTO';
 
     return (
-        <div className="min-h-screen w-full bg-[#05081c] text-slate-200" onClick={() => setShowTooltipMobile(false)}>
-            <div className="sticky top-0 z-[100] w-full border-b border-slate-800 bg-[#05081c]">
+        <div className="min-h-screen w-full bg-[#05070a] text-slate-300 font-sans" onClick={() => setShowTooltipMobile(false)}>
+            <div className="sticky top-0 z-[100] w-full border-b border-white/5 bg-[#05070a]/80 backdrop-blur-md">
                 <Navbar />
             </div>
 
             <main className="p-4 md:p-8 max-w-[1600px] mx-auto w-full">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-slate-500 hover:text-cyan-400 mb-8 transition-all group"
-                >
-                    <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-                    <span className="font-bold uppercase text-[10px] tracking-widest">Panel Principal</span>
-                </button>
+                {/* --- BOTÓN VOLVER MEJORADO --- */}
+                <div className="mb-8">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="group flex items-center gap-4 bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded-2xl border border-white/10 transition-all shadow-xl active:scale-95"
+                    >
+                        <FaArrowLeft className="group-hover:-translate-x-1 transition-transform text-slate-400" />
+                        <div className="flex flex-col items-start">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 leading-none mb-1">Volver al</span>
+                            <span className="text-xs font-black uppercase tracking-widest italic">Panel de Gestión</span>
+                        </div>
+                    </button>
+                </div>
 
-                <header className="bg-[#0a0f2c] p-8 rounded-[2rem] border border-slate-800 mb-10 shadow-2xl flex flex-col xl:flex-row justify-between items-center gap-8">
-                    <div className="flex items-center gap-6">
+                <header className="bg-[#0a0c10] p-8 rounded-[2.5rem] border border-white/5 mb-10 shadow-2xl flex flex-col xl:flex-row justify-between items-center gap-8 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-slate-400/5 blur-[100px] rounded-full -mr-32 -mt-32"></div>
 
-                        {/* --- FOTO / LOGO --- */}
-                        <div className="w-24 h-24 md:w-28 md:h-28 bg-[#040714] rounded-full border border-slate-800 flex items-center justify-center shadow-inner overflow-hidden shrink-0">
+                    <div className="flex items-center gap-6 relative z-10">
+                        <div className="w-24 h-24 md:w-32 md:h-32 bg-black rounded-3xl border border-white/10 flex items-center justify-center shadow-2xl overflow-hidden shrink-0 group">
                             {torneo.fotoUrl ? (
-                                <img src={torneo.fotoUrl} alt={torneo.nombre} className="w-full h-full object-cover" />
+                                <img src={torneo.fotoUrl} alt={torneo.nombre} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                             ) : (
-                                <FaTrophy size={32} className="text-cyan-500" />
+                                <FaTrophy size={40} className="text-slate-800" />
                             )}
                         </div>
 
                         <div>
-                            <div className="flex items-center gap-4">
-                                <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-tight text-white leading-none">{torneo.nombre}</h1>
-                                <button onClick={() => setModalTorneoEditar(true)} className="p-2.5 bg-[#040714] rounded-xl text-slate-500 hover:text-cyan-400 border border-slate-800 transition shadow-sm">
-                                    <FaEdit size={16}/>
+                            <div className="flex items-center gap-4 flex-wrap">
+                                <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white leading-none">
+                                    {torneo.nombre}
+                                </h1>
+                                <button onClick={() => setModalTorneoEditar(true)} className="p-3 bg-white/5 rounded-2xl text-slate-500 hover:text-white border border-white/10 transition shadow-sm">
+                                    <FaEdit size={18}/>
                                 </button>
                             </div>
 
-                            {/* --- INFO: GÉNERO + DIVISIÓN + ESTADO --- */}
-                            <div className="flex items-center gap-3 mt-3 flex-wrap">
+                            <div className="flex items-center gap-3 mt-4 flex-wrap">
                                 {torneo.genero && (
-                                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800/50 border border-slate-700 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                                        {getGeneroIcon()}
-                                        {torneo.genero}
+                                    <span className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                        {getGeneroIcon()} {torneo.genero}
                                     </span>
                                 )}
-                                <p className="text-cyan-500 font-bold uppercase text-[10px] tracking-[0.4em] opacity-80">
-                                    División {torneo.division} • {torneo.estado}
-                                </p>
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-slate-600 animate-pulse"></span>
+                                    División {torneo.division} <span className="text-slate-700">|</span> {torneo.estado}
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap justify-center gap-4 w-full xl:w-auto">
-
-                        {/* BOTÓN GESTIONAR FASE FINAL */}
+                    <div className="flex flex-wrap justify-center gap-3 w-full xl:w-auto relative z-10">
                         <button
                             onClick={() => navigate(`/dashboard/torneos/${torneo.id}/fase-final`)}
-                            className="bg-[#0e1630] hover:bg-blue-900/40 text-blue-400 px-6 py-4 rounded-2xl font-bold flex items-center gap-3 border border-blue-800/40 transition-all uppercase text-[10px] tracking-widest shadow-lg active:scale-95"
+                            className="bg-white/5 hover:bg-white/10 text-slate-200 px-6 py-4 rounded-2xl font-black flex items-center gap-3 border border-white/10 transition-all uppercase text-[10px] tracking-widest shadow-xl active:scale-95"
                         >
-                            <FaProjectDiagram className="text-lg" /> Gestión Fase Final
+                            <FaProjectDiagram className="text-slate-400" /> Fase Final
                         </button>
 
                         {(esAbierto || !fixtureYaGenerado) && (
                             <button
                                 onClick={() => setModalZonaCrear(true)}
-                                className="bg-cyan-600 hover:bg-cyan-500 px-6 py-4 rounded-2xl font-bold flex items-center gap-3 border border-cyan-500 text-white transition-all uppercase text-[10px] tracking-widest shadow-lg shadow-cyan-900/20 active:scale-95"
+                                className="bg-gradient-to-r from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800 px-6 py-4 rounded-2xl font-black flex items-center gap-3 border border-white/10 text-white transition-all uppercase text-[10px] tracking-widest shadow-xl active:scale-95"
                             >
                                 <FaPlus /> Nueva Zona
                             </button>
@@ -206,40 +202,25 @@ export default function TorneoDetalleAdmin() {
                                         }
                                     }}
                                     disabled={fixtureYaGenerado}
-                                    className={`px-6 py-4 rounded-2xl font-bold flex items-center gap-3 transition-all shadow-lg uppercase text-[10px] tracking-widest border ${
+                                    className={`px-6 py-4 rounded-2xl font-black flex items-center gap-3 transition-all shadow-xl uppercase text-[10px] tracking-widest border ${
                                         fixtureYaGenerado
-                                            ? "bg-[#040714] text-slate-500 border-slate-800 cursor-default"
+                                            ? "bg-black/40 text-slate-600 border-white/5 cursor-default"
                                             : !puedeGenerarFixture
-                                                ? "bg-slate-800 text-slate-600 border-slate-700 md:cursor-not-allowed opacity-60"
-                                                : "bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 shadow-emerald-900/20 active:scale-95 animate-pulse"
+                                                ? "bg-white/5 text-slate-700 border-white/5 opacity-50"
+                                                : "bg-gradient-to-r from-slate-100 to-slate-400 text-black border-white shadow-white/5 active:scale-95 animate-pulse"
                                     }`}
                                 >
-                                    {fixtureYaGenerado ? (
-                                        <><FaCheckCircle /> Fixture Generado</>
-                                    ) : (
-                                        <><FaMagic /> Generar Fixture</>
-                                    )}
+                                    {fixtureYaGenerado ? <><FaCheckCircle /> Generado</> : <><FaMagic /> Iniciar Fixture</>}
                                 </button>
-
-                                {!puedeGenerarFixture && !fixtureYaGenerado && (
-                                    <div className={`absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64 bg-slate-900 border-2 border-cyan-500 text-white p-4 rounded-2xl shadow-2xl z-[110] transition-all duration-300 ${showTooltipMobile ? 'flex' : 'hidden md:group-hover:flex'} flex-col items-center gap-2`}>
-                                        <FaInfoCircle className="text-cyan-400 text-xl" />
-                                        <p className="text-[11px] font-black uppercase tracking-tighter text-center leading-tight">
-                                            Requisito de Inicio: <br/>
-                                            <span className="text-cyan-400 text-[13px]">Mínimo 1 zona con 2 equipos</span>
-                                        </p>
-                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-cyan-500"></div>
-                                    </div>
-                                )}
                             </div>
                         )}
 
                         {fixtureYaGenerado && !esAbierto && (
                             <button
                                 onClick={() => navigate(`/dashboard/gestion-partidos/${torneo.id}`)}
-                                className="bg-indigo-600 hover:bg-indigo-500 px-6 py-4 rounded-2xl font-bold flex items-center gap-3 border border-indigo-400/50 text-white transition-all uppercase text-[10px] tracking-widest shadow-xl shadow-indigo-900/40"
+                                className="bg-white text-black hover:bg-slate-200 px-6 py-4 rounded-2xl font-black flex items-center gap-3 transition-all uppercase text-[10px] tracking-widest shadow-2xl active:scale-95"
                             >
-                                <FaCogs className="text-lg" /> Gestión de Partidos
+                                <FaCogs /> Cargar Resultados
                             </button>
                         )}
                     </div>
@@ -248,79 +229,77 @@ export default function TorneoDetalleAdmin() {
                 {torneo.zonas && torneo.zonas.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
                         {torneo.zonas?.map((zona) => (
-                            <div key={zona.id} className="bg-[#0a0f2c] p-6 rounded-[2rem] border border-slate-800 flex flex-col shadow-xl hover:border-cyan-500/30 transition-all duration-300">
+                            <div key={zona.id} className="bg-[#0a0c10] p-6 rounded-[2.5rem] border border-white/5 flex flex-col shadow-2xl hover:border-white/20 transition-all duration-500 group/card">
 
-                                <div className="bg-[#040714] border border-slate-800 p-5 rounded-2xl mb-6 flex flex-col gap-4 shadow-inner">
+                                <div className="bg-black/50 border border-white/5 p-5 rounded-3xl mb-6 flex flex-col gap-4 shadow-inner">
                                     <div className="flex justify-between items-center">
-                                        <h3 className="font-bold text-white uppercase text-xl tracking-tight">{zona.nombre}</h3>
+                                        <h3 className="font-black text-white uppercase text-xl italic tracking-tighter">{zona.nombre}</h3>
                                         <div className="flex gap-2">
-                                            <button onClick={() => { setZonaSeleccionada(zona); setModalZonaEditar(true); }} className="p-2 text-slate-500 hover:text-cyan-400 transition bg-[#0a0f2c] rounded-lg border border-slate-800">
+                                            <button onClick={() => { setZonaSeleccionada(zona); setModalZonaEditar(true); }} className="p-2.5 text-slate-600 hover:text-white transition bg-white/5 rounded-xl border border-white/5">
                                                 <FaEdit size={14}/>
                                             </button>
                                             {(!fixtureYaGenerado || esAbierto) && (
-                                                <button onClick={() => setModalConfirmar({ open: true, type: 'ZONA', id: zona.id })} className="p-2 text-slate-500 hover:text-red-500 transition bg-[#0a0f2c] rounded-lg border border-slate-800">
+                                                <button onClick={() => setModalConfirmar({ open: true, type: 'ZONA', id: zona.id })} className="p-2.5 text-slate-600 hover:text-red-500 transition bg-white/5 rounded-xl border border-white/5">
                                                     <FaTrash size={14}/>
                                                 </button>
                                             )}
                                         </div>
                                     </div>
 
-                                    {/* CORRECCIÓN: Botón Programar SÓLO si es torneo ABIERTO */}
                                     {esAbierto && (
                                         <button
                                             onClick={() => navigate(`/dashboard/programacion/zona/${zona.id}`)}
-                                            className="w-full bg-cyan-600 hover:bg-cyan-500 border border-cyan-400 py-3 rounded-xl flex items-center justify-center gap-3 transition-all shadow-lg shadow-cyan-900/20 active:scale-95"
+                                            className="w-full bg-white text-black hover:bg-slate-200 py-4 rounded-2xl flex items-center justify-center gap-3 transition-all font-black uppercase text-[10px] tracking-widest shadow-xl active:scale-95"
                                         >
-                                            <FaCalendarAlt className="text-white" size={14} />
-                                            <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">GESTIÓN DE PARTIDOS</span>
+                                            <FaCalendarAlt size={14} /> Gestión Partidos
                                         </button>
                                     )}
                                 </div>
 
-                                <div className="space-y-2.5 mb-8 flex-1">
+                                <div className="space-y-3 mb-8 flex-1">
                                     {zona.equipos?.length > 0 ? (
                                         zona.equipos.map((equipo) => (
-                                            <div key={equipo.id} className="bg-[#040714] p-3 rounded-xl border border-slate-800 flex justify-between items-center transition-all hover:border-cyan-500/20 group/item">
+                                            <div key={equipo.id} className="bg-black/20 p-4 rounded-2xl border border-white/5 flex justify-between items-center transition-all hover:bg-white/5 group/item">
                                                 <div className="flex items-center gap-3 overflow-hidden">
-                                                    <div className="w-8 h-8 rounded-full bg-[#0a0f2c] border border-slate-800 flex items-center justify-center shrink-0 overflow-hidden shadow-inner group-hover/item:border-cyan-500/30 transition-colors">
+                                                    <div className="w-10 h-10 rounded-full bg-black border border-white/10 flex items-center justify-center shrink-0 overflow-hidden shadow-2xl">
                                                         {equipo.escudo ? (
-                                                            <img src={equipo.escudo} alt={equipo.nombre} className="w-full h-full object-contain p-1" />
+                                                            <img src={equipo.escudo} alt={equipo.nombre} className="w-full h-full object-contain p-1.5 opacity-80" />
                                                         ) : (
-                                                            <FaFutbol className="text-slate-700 text-sm" />
+                                                            <FaFutbol className="text-slate-800 text-sm" />
                                                         )}
                                                     </div>
-                                                    <span className="text-slate-300 font-bold uppercase text-[10px] tracking-widest truncate">{equipo.nombre}</span>
+                                                    <span className="text-slate-400 font-black uppercase text-[10px] tracking-widest truncate group-hover/item:text-white transition-colors">{equipo.nombre}</span>
                                                 </div>
 
-                                                <div className="flex items-center gap-2">
-                                                    <button onClick={() => { setEquipoSeleccionado(equipo); setModalEquipoEditar(true); }} className="text-cyan-500 hover:text-cyan-400 transition p-1">
-                                                        <FaEdit size={12}/>
+                                                <div className="flex items-center gap-2 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                                    <button onClick={() => { setEquipoSeleccionado(equipo); setModalEquipoEditar(true); }} className="text-slate-500 hover:text-white p-2">
+                                                        <FaEdit size={14}/>
                                                     </button>
                                                     {(!fixtureYaGenerado || esAbierto) && (
-                                                        <button onClick={() => setModalConfirmar({ open: true, type: 'EQUIPO', id: equipo.equipoZonaId })} className="text-red-500 hover:text-red-400 transition p-1">
-                                                            <FaTrash size={12}/>
+                                                        <button onClick={() => setModalConfirmar({ open: true, type: 'EQUIPO', id: equipo.equipoZonaId })} className="text-slate-700 hover:text-red-500 p-2">
+                                                            <FaTrash size={14}/>
                                                         </button>
                                                     )}
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="text-center py-10 border border-dashed border-slate-800 rounded-xl">
-                                            <p className="text-slate-700 text-[9px] font-bold uppercase tracking-widest">Sin equipos registrados</p>
+                                        <div className="text-center py-12 border-2 border-dashed border-white/5 rounded-3xl">
+                                            <p className="text-slate-700 text-[10px] font-black uppercase tracking-[0.3em] italic">Sin equipos</p>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="flex gap-3 mt-auto border-t border-slate-800 pt-6">
+                                <div className="flex gap-3 mt-auto border-t border-white/5 pt-6">
                                     {(esAbierto || !fixtureYaGenerado) && (
                                         <>
-                                            <button onClick={() => { setZonaSeleccionada(zona); setModalInscribir(true); }} className="flex-1 bg-cyan-600 py-4 rounded-xl text-[10px] font-bold uppercase text-white hover:bg-cyan-500 transition-all shadow-lg shadow-cyan-900/20 active:scale-95">Inscribir</button>
-                                            <button onClick={() => { setZonaSeleccionada(zona); setModalEquipoCrear(true); }} className="flex-1 bg-[#040714] border border-slate-800 py-4 rounded-xl text-[10px] font-bold text-slate-500 uppercase hover:text-cyan-400 transition-all active:scale-95">Crear</button>
+                                            <button onClick={() => { setZonaSeleccionada(zona); setModalInscribir(true); }} className="flex-1 bg-white text-black py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all shadow-xl active:scale-95">Inscribir</button>
+                                            <button onClick={() => { setZonaSeleccionada(zona); setModalEquipoCrear(true); }} className="flex-1 bg-white/5 border border-white/10 py-4 rounded-2xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all active:scale-95">Crear</button>
                                         </>
                                     )}
                                     {fixtureYaGenerado && !esAbierto && (
-                                        <div className="w-full py-2 flex items-center justify-center gap-2 text-cyan-500/40 text-[9px] font-bold uppercase tracking-[0.4em]">
-                                            <FaLock size={10} /> Fixture Iniciado
+                                        <div className="w-full py-3 flex items-center justify-center gap-3 bg-white/5 rounded-2xl text-slate-600 text-[10px] font-black uppercase tracking-[0.3em]">
+                                            <FaLock size={12} /> Fixture en Curso
                                         </div>
                                     )}
                                 </div>
@@ -328,17 +307,18 @@ export default function TorneoDetalleAdmin() {
                         ))}
                     </div>
                 ) : (
-                    <div className="bg-[#0a0f2c] border border-dashed border-slate-800 rounded-[3rem] p-20 flex flex-col items-center justify-center text-center shadow-2xl">
-                        <div className="bg-[#040714] p-8 rounded-full border border-slate-800 text-slate-700 mb-6 shadow-inner">
-                            <FaLayerGroup size={48} />
+                    <div className="bg-[#0a0c10] border-2 border-dashed border-white/5 rounded-[4rem] p-24 flex flex-col items-center justify-center text-center shadow-inner relative overflow-hidden">
+                        <div className="absolute inset-0 bg-slate-400/5 blur-[120px] rounded-full"></div>
+                        <div className="bg-black p-10 rounded-full border border-white/10 text-slate-800 mb-8 shadow-2xl relative z-10">
+                            <FaLayerGroup size={60} />
                         </div>
-                        <h2 className="text-2xl font-bold text-white uppercase tracking-tight mb-2">No hay zonas configuradas</h2>
-                        <p className="text-slate-500 text-sm max-w-md mb-8 leading-relaxed">
-                            Aún no has creado ninguna zona para este torneo. Comienza agregando una para inscribir o crear equipos.
+                        <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic mb-4 relative z-10">Estructura Vacía</h2>
+                        <p className="text-slate-500 text-sm max-w-md mb-10 leading-relaxed font-medium relative z-10 uppercase tracking-widest text-[11px]">
+                            Comienza creando la primera zona para este torneo y asigna los equipos participantes.
                         </p>
                         <button
                             onClick={() => setModalZonaCrear(true)}
-                            className="bg-cyan-600 hover:bg-cyan-500 text-white px-10 py-4 rounded-2xl font-bold flex items-center gap-3 transition-all shadow-lg shadow-cyan-900/20 uppercase text-[10px] tracking-widest active:scale-95"
+                            className="bg-white text-black px-12 py-5 rounded-2xl font-black flex items-center gap-4 transition-all shadow-2xl uppercase text-[10px] tracking-widest active:scale-95 relative z-10"
                         >
                             <FaPlus /> Crear Primera Zona
                         </button>
@@ -346,7 +326,7 @@ export default function TorneoDetalleAdmin() {
                 )}
             </main>
 
-            {/* Modales */}
+            {/* Modales - Se mantienen igual pero heredarán los estilos plateados definidos en sus archivos */}
             {modalTorneoEditar && <ModalEditarTorneo torneo={torneo} onClose={() => setModalTorneoEditar(false)} onUpdated={cargarDatos} />}
             {modalZonaEditar && zonaSeleccionada && <ModalEditarZona zona={zonaSeleccionada} onClose={() => setModalZonaEditar(false)} onUpdated={cargarDatos} />}
             {modalEquipoEditar && equipoSeleccionado && <ModalEquipoEditar equipo={equipoSeleccionado} onClose={() => setModalEquipoEditar(false)} onUpdated={cargarDatos} />}
@@ -367,7 +347,7 @@ export default function TorneoDetalleAdmin() {
                             ? "¡ADVERTENCIA! Se borrarán permanentemente todos los partidos jugados, estadísticas y programaciones de esta zona."
                             : "Se eliminará la zona y la lista de equipos inscritos en ella.")
                         : (esAbierto
-                            ? "El equipo será removido de la zona, se actualizarán los datos de los demás equipos, se recalculará la tabla automáticamente y se eliminará cualquier registro de su existencia."
+                            ? "El equipo será removido de la zona, se actualizarán los datos de los demás equipos, se recalculará la tabla automáticamente."
                             : "El equipo será quitado de la lista de inscritos de esta zona.")
                 }
             />

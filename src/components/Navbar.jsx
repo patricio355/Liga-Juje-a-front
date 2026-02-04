@@ -55,23 +55,18 @@ export default function Navbar() {
                     />
                 </div>
 
-                {/* TEXTO CORREGIDO:
-        - pr-4 para dar mucho espacio a la itálica
-        - tracking-tight (un poco menos apretado que tighter)
-        - overflow-visible por seguridad
-    */}
                 <div className="text-white font-black text-xl leading-5 tracking-tight uppercase italic pr-4 overflow-visible">
                     Ligas <br />
                     <span className="text-slate-300 bg-gradient-to-r from-slate-100 via-slate-400 to-slate-200 bg-clip-text text-transparent">
-            Jujeñas
-        </span>
+                        Jujeñas
+                    </span>
                 </div>
             </Link>
 
             <div className="flex items-center gap-4 md:gap-8">
                 {user && (
                     <>
-                        {/* Tag de usuario "Titanio" */}
+                        {/* Tag de usuario "Titanio" (Desktop) */}
                         <div className="hidden md:flex items-center gap-3 bg-gradient-to-b from-slate-800/50 to-black/50 border border-slate-700 px-6 py-2.5 rounded-full shadow-inner hover:border-slate-500 transition-colors group/user">
                             <FaShieldAlt className="text-slate-400 text-xs" />
                             <div className="flex items-center gap-2 whitespace-nowrap">
@@ -85,21 +80,44 @@ export default function Navbar() {
                             <FaUserCircle size={22} className="text-slate-500 group-hover/user:text-slate-200 transition-colors ml-1" />
                         </div>
 
-                        <div className="relative md:hidden" ref={userDetailRef}>
+                        {/* Botón Usuario (Mobile) */}
+                        <div className="relative md:hidden">
                             <button
                                 onClick={() => setShowUserDetail(!showUserDetail)}
                                 className="w-10 h-10 bg-slate-800/80 border border-slate-600 rounded-full flex items-center justify-center text-slate-300 shadow-lg"
                             >
                                 <FaUserCircle size={24} />
                             </button>
+
+                            {/* DETALLE CENTRADO EN PANTALLA */}
                             {showUserDetail && (
-                                <div className="absolute right-0 top-[calc(100%+20px)] bg-[#0d1117] border border-slate-700 p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] w-72 animate-in slide-in-from-top-3 duration-300 z-[250]">
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1">Acceso</p>
-                                    <p className="text-lg font-black text-white uppercase italic">
-                                        <span className="bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">{userRole}</span>
-                                    </p>
-                                    <div className="h-[1px] bg-slate-800 my-2"></div>
-                                    <p className="text-sm font-bold text-slate-400 truncate">{user.sub}</p>
+                                <div className="fixed inset-0 z-[300] flex items-center justify-center p-6">
+                                    {/* Overlay oscuro de fondo */}
+                                    <div
+                                        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                                        onClick={() => setShowUserDetail(false)}
+                                    ></div>
+
+                                    {/* Tarjeta de usuario */}
+                                    <div
+                                        ref={userDetailRef}
+                                        className="relative bg-[#0d1117] border border-slate-700 p-8 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,1)] w-full max-w-xs animate-in zoom-in-95 duration-300 flex flex-col items-center text-center"
+                                    >
+                                        <FaUserCircle size={50} className="text-slate-500 mb-4" />
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1">Acceso</p>
+                                        <p className="text-xl font-black text-white uppercase italic">
+                                            <span className="bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">{userRole}</span>
+                                        </p>
+                                        <div className="h-[1px] w-full bg-slate-800 my-4"></div>
+                                        <p className="text-sm font-bold text-slate-400 break-all">{user.sub}</p>
+
+                                        <button
+                                            onClick={() => setShowUserDetail(false)}
+                                            className="mt-6 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors"
+                                        >
+                                            Cerrar
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -127,7 +145,7 @@ export default function Navbar() {
                             className="flex items-center gap-5 text-slate-400 px-6 py-5 rounded-[1.5rem] hover:bg-slate-800 hover:text-white font-black uppercase tracking-widest transition-all text-xs group"
                             onClick={() => setOpen(false)}
                         >
-                            <FaHome className="text-slate-600 group-hover:text-slate-200" size={20} /> Home
+                            <FaHome className="text-slate-600 group-hover:text-slate-200" size={20} /> Inicio
                         </Link>
 
                         {user ? (
@@ -137,7 +155,7 @@ export default function Navbar() {
                                     className="flex items-center gap-5 text-slate-400 px-6 py-5 rounded-[1.5rem] hover:bg-slate-800 hover:text-white font-black uppercase tracking-widest transition-all text-xs group"
                                     onClick={() => setOpen(false)}
                                 >
-                                    <FaThLarge className="text-slate-600 group-hover:text-slate-200" size={20} /> Dashboard
+                                    <FaThLarge className="text-slate-600 group-hover:text-slate-200" size={20} /> Gestionar
                                 </Link>
                                 <div className="h-[1px] bg-slate-800/60 my-3 mx-6"></div>
                                 <button
@@ -153,7 +171,7 @@ export default function Navbar() {
                                 className="flex items-center gap-5 bg-gradient-to-r from-slate-700 to-slate-900 text-white px-6 py-5 rounded-[1.5rem] font-black uppercase text-xs tracking-[0.2em] text-center hover:from-slate-600 hover:to-slate-800 border border-slate-600 transition-all shadow-xl"
                                 onClick={() => setOpen(false)}
                             >
-                                <FaUserEdit size={20} /> Login
+                                <FaUserEdit size={20} /> Iniciar Sesión
                             </Link>
                         )}
                     </div>

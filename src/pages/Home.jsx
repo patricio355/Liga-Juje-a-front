@@ -36,18 +36,15 @@ export default function Home() {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_#1e293b_0%,_transparent_50%)] opacity-40"></div>
             </div>
 
-            {/* --- PUBLICIDADES LATERALES ELIMINADAS AQUÍ --- */}
-
             <div className="relative z-[100]">
                 <Navbar />
 
-                {/* --- PUBLICIDAD SUPERIOR (MANTENIDA) --- */}
+                {/* --- PUBLICIDAD SUPERIOR --- */}
                 <section className="max-w-5xl mx-auto mt-6 px-4">
                     <div className="relative p-1 bg-gradient-to-b from-slate-700/30 to-transparent rounded-[2rem] shadow-2xl overflow-hidden border border-slate-800/50">
                         <div className="rounded-[1.8rem] overflow-hidden">
                             <AdsCarousel />
                         </div>
-                        {/* Brillo metálico superior sutil */}
                         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-400/20 to-transparent"></div>
                     </div>
                 </section>
@@ -61,15 +58,16 @@ export default function Home() {
                             </div>
                         </div>
 
-                        <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white text-center leading-none">
-                            Torneos <br />
-                            <span className="bg-gradient-to-r from-slate-100 via-slate-400 to-slate-500 bg-clip-text text-transparent">
+                        {/* --- TÍTULO CON PROXIMIDAD VERTICAL --- */}
+                        <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white text-center leading-[0.85] py-2">
+                            <span className="block">Torneos</span>
+                            <span className="inline-block bg-gradient-to-r from-slate-100 via-slate-400 to-slate-500 bg-clip-text text-transparent px-6 py-2">
                                 en curso
                             </span>
                         </h1>
                     </div>
 
-                    {/* --- BUSCADOR LIMPIO --- */}
+                    {/* --- BUSCADOR --- */}
                     <div className="mb-14 px-2">
                         <SearchBar
                             value={search}
@@ -78,7 +76,7 @@ export default function Home() {
                         />
                     </div>
 
-                    {/* --- GRID DE CARDS DIRECTAS --- */}
+                    {/* --- GRID DE CARDS --- */}
                     <div className="grid gap-6">
                         {loading ? (
                             <div className="space-y-4">
@@ -95,7 +93,9 @@ export default function Home() {
 
                         {!loading && filtrados.length === 0 && (
                             <div className="text-center py-20 bg-white/5 rounded-[3rem] border border-dashed border-slate-800">
-                                <p className="text-slate-500 font-bold uppercase tracking-widest italic">No se encontraron torneos en curso</p>
+                                <p className="text-slate-500 font-bold uppercase tracking-widest italic">
+                                    No se encontraron torneos en curso
+                                </p>
                             </div>
                         )}
                     </div>

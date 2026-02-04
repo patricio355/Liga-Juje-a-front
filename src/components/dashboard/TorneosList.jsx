@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { FaEdit, FaTrash, FaPlus, FaEye, FaTrophy, FaSearch, FaCircle, FaPhoneAlt, FaEnvelope, FaMars, FaVenus, FaVenusMars } from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus, FaEye, FaTrophy, FaSearch, FaEnvelope, FaMars, FaVenus, FaVenusMars } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import ModalCrearTorneo from "./ModalCrearTorneo";
 import ModalEditarTorneo from "./ModalEditarTorneo";
@@ -73,36 +73,35 @@ export default function TorneosList() {
         })
         .filter((t) => t.nombre.toLowerCase().includes(busqueda.toLowerCase()));
 
-    // Helper para icono de género
     const getGeneroIcon = (genero) => {
-        if (genero === "MASCULINO") return <FaMars className="text-blue-400" />;
-        if (genero === "FEMENINO") return <FaVenus className="text-pink-400" />;
-        if (genero === "MIXTO") return <FaVenusMars className="text-purple-400" />;
+        if (genero === "MASCULINO") return <FaMars className="text-slate-400" />;
+        if (genero === "FEMENINO") return <FaVenus className="text-slate-400" />;
+        if (genero === "MIXTO") return <FaVenusMars className="text-slate-400" />;
         return null;
     };
 
     if (loading) return (
         <div className="flex flex-col items-center py-40 gap-4">
-            <div className="w-12 h-12 border-4 border-cyan-500/10 border-t-cyan-500 rounded-full animate-spin"></div>
-            <span className="text-[11px] font-bold text-cyan-500 uppercase tracking-widest">Sincronizando Competencias...</span>
+            <div className="w-12 h-12 border-4 border-white/5 border-t-slate-400 rounded-full animate-spin"></div>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.3em]">Sincronizando...</span>
         </div>
     );
 
     return (
-        <div className="w-full max-w-6xl mx-auto px-4">
+        <div className="w-full max-w-6xl mx-auto px-4 pb-20">
             {/* HEADER */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-8">
                 <div>
                     <div className="flex items-center gap-3 mb-2">
-                        <FaTrophy className="text-cyan-500 text-2xl" />
-                        <h2 className="text-3xl font-bold text-white tracking-tight leading-none">Gestión de Torneos</h2>
+                        <FaTrophy className="text-slate-400 text-2xl" />
+                        <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none">Gestión de Torneos</h2>
                     </div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Panel de administración de ligas y divisiones</p>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Panel de administración de ligas y divisiones</p>
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full lg:w-auto">
                     {esAdmin && (
-                        <div className="bg-[#0a0f2c] p-1.5 rounded-xl border border-slate-800 flex gap-1 w-full md:w-auto">
+                        <div className="bg-white/5 p-1.5 rounded-xl border border-slate-800 flex gap-1 w-full md:w-auto">
                             {[
                                 { id: "activos", label: "Activos" },
                                 { id: "inactivos", label: "Inactivos" },
@@ -110,9 +109,9 @@ export default function TorneosList() {
                             ].map((f) => (
                                 <button
                                     key={f.id}
-                                    className={`flex-1 md:flex-none px-5 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                                    className={`flex-1 md:flex-none px-5 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
                                         filtro === f.id
-                                            ? "bg-cyan-600 text-white shadow-lg shadow-cyan-900/20"
+                                            ? "bg-slate-700 text-white shadow-lg"
                                             : "text-slate-500 hover:text-slate-300"
                                     }`}
                                     onClick={() => setFiltro(f.id)}
@@ -127,16 +126,16 @@ export default function TorneosList() {
                         <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 text-xs" />
                         <input
                             type="text"
-                            placeholder="Buscar competencia..."
+                            placeholder="BUSCAR COMPETICIÓN..."
                             value={busqueda}
                             onChange={(e) => setBusqueda(e.target.value)}
-                            className="w-full pl-10 pr-5 py-3 rounded-xl bg-[#0a0f2c] text-sm text-slate-200 border border-slate-800 focus:border-cyan-500 outline-none transition-all placeholder:text-slate-700 shadow-inner"
+                            className="w-full pl-10 pr-5 py-3 rounded-xl bg-white/5 text-sm text-slate-200 border border-slate-800 focus:border-slate-600 outline-none transition-all placeholder:text-slate-700 shadow-inner font-bold text-[10px]"
                         />
                     </div>
 
                     <button
                         onClick={() => setModalCrear(true)}
-                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg active:scale-95"
+                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-slate-100 to-slate-400 hover:from-white hover:to-slate-200 text-black px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95"
                     >
                         <FaPlus size={12} /> Nuevo Torneo
                     </button>
@@ -149,72 +148,58 @@ export default function TorneosList() {
                     <div
                         key={t.id}
                         onClick={() => navigate(`/dashboard/torneos/${t.slug || t.id}`)}
-                        className="bg-[#0a0f2c] p-5 rounded-[1.8rem] border border-slate-800 hover:border-cyan-500/30 transition-all flex flex-col lg:flex-row justify-between items-start lg:items-center group cursor-pointer shadow-sm relative overflow-hidden"
+                        className="bg-[#0a0c10] p-5 rounded-[1.8rem] border border-slate-800/50 hover:border-slate-600 transition-all flex flex-col lg:flex-row justify-between items-start lg:items-center group cursor-pointer shadow-sm relative overflow-hidden"
                     >
-                        {/* Contenedor Principal Izquierdo: FOTO + INFO */}
-                        <div className="flex-1 w-full text-left flex gap-5 items-start">
+                        <div className="flex-1 w-full text-left flex flex-col md:flex-row gap-5 items-start md:items-center">
 
-                            {/* 1. FOTO / LOGO */}
-                            <div className="shrink-0 w-16 h-16 rounded-2xl border border-slate-700 bg-[#040714] overflow-hidden flex items-center justify-center shadow-lg">
+                            {/* FOTO / LOGO */}
+                            <div className="shrink-0 w-16 h-16 rounded-2xl border border-slate-800 bg-black overflow-hidden flex items-center justify-center shadow-lg">
                                 {t.fotoUrl ? (
-                                    <img src={t.fotoUrl} alt={t.nombre} className="w-full h-full object-cover" />
+                                    <img src={t.fotoUrl} alt={t.nombre} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                                 ) : (
-                                    <FaTrophy className="text-slate-700 text-2xl" />
+                                    <FaTrophy className="text-slate-800 text-2xl" />
                                 )}
                             </div>
 
-                            {/* 2. INFORMACIÓN */}
-                            <div className="flex-1">
+                            {/* INFORMACIÓN COMPLETA REESTABLECIDA */}
+                            <div className="flex-1 w-full">
                                 <div className="flex items-center gap-4 flex-wrap mb-2">
-                                    <h3 className="text-xl font-bold text-white tracking-tight leading-none">{t.nombre}</h3>
+                                    <h3 className="text-xl font-black text-white tracking-tighter uppercase italic">{t.nombre}</h3>
 
-                                    {/* BADGES */}
                                     <div className="flex flex-wrap gap-2">
-                                        {/* Badge Género */}
                                         {t.genero && (
-                                            <span className="flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-md font-bold border tracking-wider uppercase bg-slate-800/50 text-slate-300 border-slate-700">
-                                                {getGeneroIcon(t.genero)}
-                                                {t.genero}
+                                            <span className="flex items-center gap-1.5 text-[9px] px-2 py-0.5 rounded-md font-black border tracking-tighter uppercase bg-white/5 text-slate-300 border-white/10">
+                                                {getGeneroIcon(t.genero)} {t.genero}
                                             </span>
                                         )}
-
-                                        {/* Badge Tipo */}
-                                        <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold border tracking-wider uppercase ${t.tipo === 'ABIERTO' ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/20' : 'bg-red-500/5 text-red-400 border-red-500/20'}`}>
+                                        <span className={`text-[9px] px-2 py-0.5 rounded-md font-black border tracking-tighter uppercase ${t.tipo === 'ABIERTO' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
                                             {t.tipo}
                                         </span>
-
-                                        {/* Badge Estado */}
-                                        <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold border tracking-wider uppercase ${t.estado === 'activo' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20'}`}>
+                                        <span className={`text-[9px] px-2 py-0.5 rounded-md font-black border tracking-tighter uppercase ${t.estado === 'activo' ? 'bg-slate-100 text-black border-white' : 'bg-transparent text-slate-500 border-slate-800'}`}>
                                             {t.estado}
                                         </span>
                                     </div>
                                 </div>
 
-                                {/* DETALLES EXTRA */}
-                                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-slate-400">
-                                    <span className="flex items-center gap-2">
-                                        División: <span className="text-slate-200 font-bold">{t.division || "-"}</span>
-                                    </span>
-                                    <span className="flex items-center gap-2">
-                                        Zonas: <span className="text-slate-200 font-bold">{t.zonas?.length || 0}</span>
-                                    </span>
+                                {/* DETALLES EXTRA REESTABLECIDOS */}
+                                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                                    <span>DIVISIÓN: <span className="text-slate-200">{t.division || "-"}</span></span>
+                                    <span>ZONAS: <span className="text-slate-200">{t.zonas?.length || 0}</span></span>
 
-                                    {/* Info Encargado */}
-                                    <div className="flex items-center gap-3 border-l border-slate-800 pl-4 ml-2">
-                                        <span className="flex items-center gap-2 text-[11px] uppercase tracking-tighter">
-                                            <FaEnvelope className="text-cyan-500/50" />
-                                            <span className="text-slate-300 font-bold truncate max-w-[150px]">{t.encargadoEmail || "Sin encargado"}</span>
-                                        </span>
+                                    {/* EMAIL COMPLETO (SIN TRUNCATE) */}
+                                    <div className="flex items-center gap-2 bg-white/5 px-3 py-1 rounded-lg border border-white/5 mt-1 sm:mt-0">
+                                        <FaEnvelope className="text-slate-600 shrink-0" size={10} />
+                                        <span className="lowercase font-medium tracking-normal text-slate-300 break-all">{t.encargadoEmail || "sin encargado"}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* ACCIONES (Botones) */}
-                        <div className="flex gap-2 mt-6 lg:mt-0 w-full lg:w-auto pl-0 lg:pl-4">
+                        {/* ACCIONES */}
+                        <div className="flex gap-2 mt-6 lg:mt-0 w-full lg:w-auto pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-800/50">
                             <button
                                 title="Gestionar"
-                                className="flex-1 lg:w-11 lg:h-11 p-2 bg-[#040714] border border-slate-800 text-cyan-500 hover:bg-cyan-600 hover:text-white rounded-xl transition-all flex items-center justify-center shadow-inner"
+                                className="flex-1 lg:w-11 lg:h-11 p-3 bg-black/40 border border-slate-800 text-slate-400 hover:bg-white hover:text-black rounded-xl transition-all flex items-center justify-center shadow-inner"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     navigate(`/dashboard/torneos/${t.slug || t.id}`);
@@ -224,14 +209,14 @@ export default function TorneosList() {
                             </button>
                             <button
                                 title="Editar"
-                                className="flex-1 lg:w-11 lg:h-11 p-2 bg-[#040714] border border-slate-800 text-amber-500 hover:bg-amber-600 hover:text-white rounded-xl transition-all flex items-center justify-center shadow-inner"
+                                className="flex-1 lg:w-11 lg:h-11 p-3 bg-black/40 border border-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white rounded-xl transition-all flex items-center justify-center shadow-inner"
                                 onClick={(e) => abrirEdicion(e, t)}
                             >
                                 <FaEdit size={16} />
                             </button>
                             <button
                                 title="Eliminar"
-                                className="flex-1 lg:w-11 lg:h-11 p-2 bg-[#040714] border border-slate-800 text-red-500 hover:bg-red-600 hover:text-white rounded-xl transition-all flex items-center justify-center shadow-inner"
+                                className="flex-1 lg:w-11 lg:h-11 p-3 bg-black/40 border border-slate-800 text-red-900 hover:bg-red-600 hover:text-white rounded-xl transition-all flex items-center justify-center shadow-inner"
                                 onClick={(e) => eliminarTorneo(e, t.id)}
                             >
                                 <FaTrash size={16} />
@@ -240,10 +225,9 @@ export default function TorneosList() {
                     </div>
                 ))}
 
-                {/* Mensaje de lista vacía */}
                 {torneosFiltrados.length === 0 && (
-                    <div className="py-20 text-center border border-dashed border-slate-800 rounded-[2rem]">
-                        <p className="text-slate-600 font-bold uppercase text-xs tracking-widest">No se encontraron torneos</p>
+                    <div className="py-24 text-center border border-dashed border-slate-800 rounded-[3rem]">
+                        <p className="text-slate-700 font-black uppercase text-[10px] tracking-[0.4em] italic">No hay torneos registrados</p>
                     </div>
                 )}
             </div>

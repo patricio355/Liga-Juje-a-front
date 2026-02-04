@@ -15,7 +15,7 @@ export default function EquiposList() {
     const esAdmin = userRole === "ADMIN" || userRole === "ROLE_ADMIN";
 
     const [equipos, setEquipos] = useState([]);
-    const [filtro, setFiltro] = useState("activos"); // "activos", "inactivos", "todos"
+    const [filtro, setFiltro] = useState("activos");
     const [busqueda, setBusqueda] = useState("");
     const [loading, setLoading] = useState(true);
 
@@ -40,23 +40,19 @@ export default function EquiposList() {
 
     useEffect(() => { cargar(); }, []);
 
-    // LÓGICA DE FILTRADO ACTUALIZADA
     const equiposFiltrados = equipos
         .filter((e) => {
-            // Si no es admin, el backend ya filtró lo que puede ver, pero por seguridad solo mostramos activos
             if (!esAdmin) return e.estado === true;
-
-            // Si es admin, evaluamos el botón seleccionado
             if (filtro === "activos") return e.estado === true;
             if (filtro === "inactivos") return e.estado === false;
-            return true; // "todos"
+            return true;
         })
         .filter((e) => e.nombre.toLowerCase().includes(busqueda.toLowerCase()));
 
     if (loading) return (
         <div className="flex flex-col items-center py-40 gap-4">
-            <div className="w-12 h-12 border-4 border-cyan-500/10 border-t-cyan-500 rounded-full animate-spin"></div>
-            <span className="text-xs font-bold text-cyan-500 uppercase tracking-widest text-center">
+            <div className="w-12 h-12 border-4 border-white/5 border-t-slate-400 rounded-full animate-spin"></div>
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] text-center">
                 Sincronizando Clubes...
             </span>
         </div>
@@ -64,27 +60,33 @@ export default function EquiposList() {
 
     return (
         <div className="w-full max-w-6xl mx-auto px-4">
+            {/* HEADER */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-8">
                 <div>
                     <div className="flex items-center gap-3 mb-2">
-                        <FaShieldAlt className="text-cyan-500 text-2xl" />
-                        <h2 className="text-3xl font-bold text-white tracking-tight leading-none">
-                            Gestión de Equipos
+                        <div className="p-2 bg-white/5 rounded-lg border border-white/10">
+                            <FaShieldAlt className="text-slate-400 text-xl" />
+                        </div>
+                        <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none">
+                            Equipos
                         </h2>
                     </div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                        Registro, baja y modificaciones
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
+                        Gestión de Clubes y Afiliaciones
                     </p>
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full lg:w-auto">
-                    {/* FILTROS TRIPLES PARA ADMIN */}
                     {esAdmin && (
-                        <div className="bg-[#0a0f2c] p-1.5 rounded-xl border border-slate-800 flex gap-1 w-full md:w-auto">
+                        <div className="bg-white/5 p-1 rounded-xl border border-white/10 flex gap-1 w-full md:w-auto shadow-inner">
                             {["activos", "inactivos", "todos"].map((f) => (
                                 <button
                                     key={f}
-                                    className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${filtro === f ? "bg-cyan-600 text-white shadow-lg shadow-cyan-900/20" : "text-slate-500 hover:text-slate-300"}`}
+                                    className={`px-5 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
+                                        filtro === f
+                                            ? "bg-slate-700 text-white shadow-lg"
+                                            : "text-slate-500 hover:text-slate-300"
+                                    }`}
                                     onClick={() => setFiltro(f)}
                                 >
                                     {f}
@@ -97,22 +99,23 @@ export default function EquiposList() {
                         <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 size-3" />
                         <input
                             type="text"
-                            placeholder="Buscar club..."
+                            placeholder="BUSCAR CLUB..."
                             value={busqueda}
                             onChange={(e) => setBusqueda(e.target.value)}
-                            className="w-full pl-10 pr-5 py-3 rounded-xl bg-[#0a0f2c] text-sm text-slate-200 border border-slate-800 focus:border-cyan-500 outline-none transition-all placeholder:text-slate-700"
+                            className="w-full pl-10 pr-5 py-3 rounded-xl bg-white/5 text-xs font-bold text-slate-200 border border-white/10 focus:border-slate-600 outline-none transition-all placeholder:text-slate-800"
                         />
                     </div>
 
                     <button
                         onClick={() => setModalCrearEquipo(true)}
-                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg active:scale-95"
+                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-slate-100 to-slate-400 hover:from-white hover:to-slate-300 text-black px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95"
                     >
-                        <FaPlus size={12} /> Nuevo Equipo
+                        <FaPlus size={10} /> Nuevo Equipo
                     </button>
                 </div>
             </div>
 
+            {/* LISTADO */}
             <div className="grid grid-cols-1 gap-4">
                 {equiposFiltrados.length > 0 ? (
                     equiposFiltrados.map(e => (
@@ -129,18 +132,19 @@ export default function EquiposList() {
                         />
                     ))
                 ) : (
-                    <div className="text-center py-24 bg-[#0a0f2c]/50 rounded-[2.5rem] border border-dashed border-slate-800">
-                        <p className="text-slate-600 text-sm font-semibold uppercase tracking-widest">
-                            {busqueda ? "No hay coincidencias en el registro" : `No hay equipos ${filtro} registrados`}
+                    <div className="text-center py-24 bg-white/5 rounded-[2.5rem] border border-dashed border-white/10">
+                        <p className="text-slate-700 text-[10px] font-black uppercase tracking-[0.4em] italic">
+                            {busqueda ? "Sin coincidencias" : "Registro Vacío"}
                         </p>
                     </div>
                 )}
             </div>
 
-            {/* ... modales ... */}
+            {/* MODALES */}
             {modalCrearEquipo && <ModalCrearEquipo onClose={() => setModalCrearEquipo(false)} onCreated={cargar} />}
             {equipoEditar && <ModalEditarEquipo equipo={equipoEditar} onClose={() => setEquipoEditar(null)} onUpdated={cargar} />}
             {equipoInscribir && <ModalInscribirEquipo equipo={equipoInscribir} onClose={() => setEquipoInscribir(null)} onInscripto={cargar} />}
+
             {inscripcionEliminar && (
                 <ConfirmModal
                     mensaje={`¿DESEA DESVINCULAR ESTE EQUIPO DEL TORNEO ${inscripcionEliminar.nombreTorneo.toUpperCase()}?`}

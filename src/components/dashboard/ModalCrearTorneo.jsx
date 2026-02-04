@@ -1,19 +1,19 @@
 import { useContext, useState, useEffect } from "react";
+import { createPortal } from "react-dom"; // Importante para el Portal
 import { apiFetch } from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
-import { FaTrophy, FaChartLine, FaUserAlt, FaPalette, FaMars, FaVenus, FaVenusMars, FaInstagram } from "react-icons/fa";
+import { FaTrophy, FaChartLine, FaUserAlt, FaPalette, FaMars, FaVenus, FaVenusMars, FaInstagram, FaTimes } from "react-icons/fa";
 import ImageUpload from "../../images/ImageUpload";
 
-// 1. Definición de Plantillas Premium
 const PLANTILLAS = {
     NEGRO: { p: "#05070a", s: "#0a0c10", tp: "#ffffff", ts: "#94a3b8" },
+    PLATA: { p: "#0f172a", s: "#1e293b", tp: "#ffffff", ts: "#cbd5e1" },
     AZUL: { p: "#050814", s: "#0d143d", tp: "#ffffff", ts: "#60a5fa" },
     ROJO: { p: "#0a0404", s: "#1a0808", tp: "#ffffff", ts: "#f87171" },
     VERDE: { p: "#040a05", s: "#081a0d", tp: "#ffffff", ts: "#4ade80" },
     MORADO: { p: "#08040a", s: "#160d1f", tp: "#ffffff", ts: "#a78bfa" },
     GRIS: { p: "#111827", s: "#1f2937", tp: "#ffffff", ts: "#d1d5db" },
     VIOLETA: { p: "#0f0514", s: "#1e0a29", tp: "#ffffff", ts: "#c084fc" },
-    ROSADO: { p: "#0a0406", s: "#1f0d14", tp: "#ffffff", ts: "#f472b6" },
     DORADO: { p: "#0a0904", s: "#1a1808", tp: "#ffffff", ts: "#fbbf24" },
     ESMERALDA: { p: "#020617", s: "#0f172a", tp: "#ffffff", ts: "#10b981" }
 };
@@ -22,14 +22,10 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
     const { user } = useContext(AuthContext);
     const esAdmin = user?.role === "ROLE_ADMIN" || user?.role === "ADMIN";
 
-    // Estados
     const [nombre, setNombre] = useState("");
     const [division, setDivision] = useState("");
     const [encargadoEmail, setEncargadoEmail] = useState("");
-
-    // Estado siempre activo por defecto (se eliminó el selector visual)
     const [estado, setEstado] = useState("activo");
-
     const [tipo, setTipo] = useState("CERRADO");
     const [puntosGanador, setPuntosGanador] = useState(3);
     const [puntosEmpate, setPuntosEmpate] = useState(1);
@@ -52,6 +48,10 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
             }
         };
         cargarEncargados();
+
+        // Bloquear scroll del body al abrir
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = 'unset'; };
     }, []);
 
     const crearTorneo = async (e) => {
@@ -95,38 +95,48 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
         }
     };
 
-    return (
-        <div className="fixed inset-0 bg-[#040714]/95 backdrop-blur-md flex items-center justify-center z-[200] p-4" onClick={onClose}>
+    // Renderizado con Portal
+    return createPortal(
+        <div
+            className="fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-[999999] p-2 md:p-6"
+            onClick={onClose}
+        >
             <form
-                className="bg-[#0a0f2c] border border-cyan-500/30 rounded-[2.5rem] w-full max-w-4xl shadow-2xl overflow-hidden max-h-[95vh] overflow-y-auto custom-scrollbar"
+                className="bg-[#05070a] border border-white/10 rounded-[2.5rem] w-full max-w-4xl shadow-[0_0_100px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-h-[95vh] relative animate-in fade-in zoom-in duration-200"
                 onClick={(e) => e.stopPropagation()}
                 onSubmit={crearTorneo}
             >
-                {/* Header */}
-                <div className="bg-[#0d143d] px-8 py-5 border-b border-slate-800">
-                    <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-                        <FaTrophy className="text-cyan-500" size={20} /> Crear Torneo
-                    </h2>
-                    <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-[0.2em] mt-1">
-                        Estilo Visual y Configuración
-                    </p>
+                {/* Header Fijo */}
+                <div className="bg-[#0a0c10] px-8 py-6 border-b border-white/5 flex justify-between items-center shrink-0">
+                    <div>
+                        <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic flex items-center gap-3">
+                            <FaTrophy className="text-slate-400" size={22} /> Crear Torneo
+                        </h2>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mt-1">
+                            Configuración de Competencia Profesional
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="text-slate-500 hover:text-white transition-colors p-2 bg-white/5 rounded-full"
+                    >
+                        <FaTimes size={18} />
+                    </button>
                 </div>
 
-                {/* Body */}
-                <div className="p-6">
+                {/* Body con Scroll Interno */}
+                <div className="p-6 md:p-10 overflow-y-auto custom-scrollbar bg-[#05070a] flex-1">
                     {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 mb-6 rounded-xl text-[11px] font-bold uppercase tracking-wider text-center">
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 mb-6 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center">
                             {error}
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                        {/* --- FILA 1: FOTO y NOMBRE --- */}
-
-                        {/* Columna 1: Logo */}
-                        <div className="col-span-1 flex flex-col items-center justify-center border-b md:border-b-0 border-slate-800/50 pb-4 md:pb-0">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* FOTO y NOMBRE */}
+                        <div className="col-span-1 flex flex-col items-center justify-center bg-white/5 p-8 rounded-[2rem] border border-white/5 shadow-inner">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">
                                 Logo Principal
                             </label>
                             <ImageUpload
@@ -139,140 +149,126 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             />
                         </div>
 
-                        {/* Columna 2: Nombre */}
-                        <div className="col-span-1 flex flex-col justify-center space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">
-                                Nombre de la Competición
-                            </label>
-                            <input
-                                placeholder="EJ. TORNEO APERTURA 2026"
-                                className={`w-full px-5 py-3.5 bg-[#040714] border rounded-xl outline-none focus:border-cyan-500 text-sm font-medium text-white placeholder:text-slate-800 transition-all ${
-                                    nombre.length > 0 && nombre.length < 6 ? "border-red-500/50" : "border-slate-800"
-                                }`}
-                                value={nombre}
-                                minLength={6}
-                                onChange={e => setNombre(e.target.value.toUpperCase())}
-                            />
-                            {nombre.length > 0 && nombre.length < 6 && (
-                                <span className="text-[9px] text-red-500 font-bold uppercase tracking-tighter ml-1">
-            Mínimo 6 caracteres (llevas {nombre.length})
-        </span>
-                            )}
+                        <div className="col-span-1 flex flex-col justify-center space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                                    Nombre de la Competición
+                                </label>
+                                <input
+                                    placeholder="TORNEO APERTURA..."
+                                    className={`w-full px-6 py-5 bg-black border rounded-2xl outline-none focus:border-slate-400 text-sm font-black text-white placeholder:text-slate-900 transition-all italic uppercase ${
+                                        nombre.length > 0 && nombre.length < 6 ? "border-red-500/50" : "border-white/10"
+                                    }`}
+                                    value={nombre}
+                                    minLength={6}
+                                    onChange={e => setNombre(e.target.value.toUpperCase())}
+                                />
+                                {nombre.length > 0 && nombre.length < 6 && (
+                                    <span className="text-[9px] text-red-500 font-bold uppercase tracking-tighter ml-1">
+                                        Mínimo 6 caracteres (llevas {nombre.length})
+                                    </span>
+                                )}
+                            </div>
                         </div>
 
-                        {/* --- PLANTILLAS --- */}
-                        <div className="col-span-1 md:col-span-2 space-y-3 pt-2 border-t border-slate-800/50">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                <FaPalette className="text-cyan-500" /> Estilo de Plantilla
+                        {/* PLANTILLAS */}
+                        <div className="col-span-1 md:col-span-2 space-y-4 pt-6 border-t border-white/5">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                <FaPalette className="text-slate-400" /> Estilo de Plantilla
                             </label>
-                            <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
+                            <div className="grid grid-cols-5 md:grid-cols-10 gap-3">
                                 {Object.keys(PLANTILLAS).map((key) => (
                                     <button
                                         key={key}
                                         type="button"
                                         onClick={() => setPlantillaActiva(key)}
-                                        className={`h-12 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 group ${plantillaActiva === key ? "border-cyan-500 scale-105 shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "border-slate-800 opacity-50 hover:opacity-100"}`}
+                                        className={`h-14 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 group ${plantillaActiva === key ? "border-white scale-110 shadow-[0_0_25px_rgba(255,255,255,0.15)] z-10" : "border-white/5 opacity-40 hover:opacity-100"}`}
                                         style={{ backgroundColor: PLANTILLAS[key].p }}
                                     >
                                         <div className="w-4 h-1 rounded-full" style={{ backgroundColor: PLANTILLAS[key].ts }}></div>
-                                        <span className="text-[6px] md:text-[7px] font-black text-white uppercase tracking-tighter">{key}</span>
+                                        <span className="text-[7px] font-black text-white uppercase tracking-tighter">{key}</span>
                                     </button>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="col-span-1 md:col-span-2 py-1">
-                            <div className="h-px bg-slate-800/50 w-full"></div>
-                        </div>
+                        {/* selectores */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 col-span-1 md:col-span-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">División</label>
+                                <select
+                                    className="w-full px-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase italic shadow-inner"
+                                    value={division}
+                                    onChange={e => setDivision(e.target.value)}
+                                >
+                                    <option value="" className="bg-black">SIN ESPECIFICAR</option>
+                                    {["A", "B", "C", "D", "E"].map(d => (
+                                        <option key={d} value={d} className="bg-black">DIVISIÓN {d}</option>
+                                    ))}
+                                </select>
+                            </div>
 
-                        {/* División */}
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">División</label>
-                            <select
-                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
-                                value={division}
-                                onChange={e => setDivision(e.target.value)}
-                            >
-                                <option value="" className="bg-[#0a0f2c]">SIN ESPECIFICAR</option>
-                                {["A", "B", "C", "D", "E"].map(d => (
-                                    <option key={d} value={d} className="bg-[#0a0f2c]">DIVISIÓN {d}</option>
-                                ))}
-                            </select>
-                        </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">Género</label>
+                                <select
+                                    className="w-full px-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase italic shadow-inner"
+                                    value={genero}
+                                    onChange={e => setGenero(e.target.value)}
+                                >
+                                    <option value="MASCULINO" className="bg-black">MASCULINO</option>
+                                    <option value="FEMENINO" className="bg-black">FEMENINO</option>
+                                    <option value="MIXTO" className="bg-black">MIXTO</option>
+                                </select>
+                            </div>
 
-                        {/* Género */}
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                {genero === "MASCULINO" && <FaMars className="text-cyan-500"/>}
-                                {genero === "FEMENINO" && <FaVenus className="text-pink-500"/>}
-                                {genero === "MIXTO" && <FaVenusMars className="text-purple-500"/>}
-                                Género
-                            </label>
-                            <select
-                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
-                                value={genero}
-                                onChange={e => setGenero(e.target.value)}
-                            >
-                                <option value="MASCULINO" className="bg-[#0a0f2c]">MASCULINO</option>
-                                <option value="FEMENINO" className="bg-[#0a0f2c]">FEMENINO</option>
-                                <option value="MIXTO" className="bg-[#0a0f2c]">MIXTO</option>
-                            </select>
-                        </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Modalidad</label>
+                                <select
+                                    className="w-full px-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase italic shadow-inner"
+                                    value={tipo}
+                                    onChange={e => setTipo(e.target.value)}
+                                >
+                                    <option value="CERRADO" className="bg-black">CERRADO</option>
+                                    <option value="ABIERTO" className="bg-black">ABIERTO</option>
+                                </select>
+                            </div>
 
-                        {/* Modalidad */}
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Modalidad</label>
-                            <select
-                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-bold text-white appearance-none cursor-pointer"
-                                value={tipo}
-                                onChange={e => setTipo(e.target.value)}
-                            >
-                                <option value="CERRADO" className="bg-[#0a0f2c]">CERRADO</option>
-                                <option value="ABIERTO" className="bg-[#0a0f2c]">ABIERTO</option>
-                            </select>
-                        </div>
-
-                        {/* Red Social */}
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1">
-                                <FaInstagram className="text-slate-500"/> Red Social
-                            </label>
-                            <input
-                                placeholder="instagram.com/tutorneo"
-                                className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-sm font-medium text-white placeholder:text-slate-800 transition-all"
-                                value={redSocial}
-                                onChange={e => setRedSocial(e.target.value)}
-                            />
-                        </div>
-
-                        {/* --- SISTEMA DE PUNTUACIÓN (COMPACTO) --- */}
-                        <div className="col-span-1 md:col-span-2 pt-2 border-t border-slate-800/50">
-                            <div className="flex flex-col md:flex-row md:items-center gap-4">
-
-                                {/* Etiqueta */}
-                                <div className="flex items-center gap-2 min-w-[150px]">
-                                    <FaChartLine className="text-cyan-500" />
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                        Sistema de Puntos
-                                    </span>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Instagram</label>
+                                <div className="relative">
+                                    <FaInstagram className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700" />
+                                    <input
+                                        placeholder="username"
+                                        className="w-full pl-14 pr-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-bold text-white placeholder:text-slate-900 shadow-inner"
+                                        value={redSocial}
+                                        onChange={e => setRedSocial(e.target.value)}
+                                    />
                                 </div>
+                            </div>
+                        </div>
 
-                                {/* Inputs Pequeños y Juntos */}
-                                <div className="flex gap-4">
-                                    <div className="flex items-center gap-2 bg-[#040714] border border-slate-800 px-3 py-2 rounded-lg">
-                                        <span className="text-[9px] font-bold text-slate-500 uppercase">Victoria</span>
+                        {/* Sistema de Puntuación */}
+                        <div className="col-span-1 md:col-span-2 bg-white/5 p-8 rounded-[2rem] border border-white/5 shadow-inner">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                <div className="flex items-center gap-3">
+                                    <FaChartLine className="text-slate-400" />
+                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Sistema de Puntos</span>
+                                </div>
+                                <div className="flex gap-6">
+                                    <div className="flex-1 md:flex-none flex flex-col gap-2">
+                                        <span className="text-[8px] font-black text-slate-700 uppercase ml-2 tracking-widest">Victoria</span>
                                         <input
                                             type="number"
-                                            className="w-10 bg-transparent outline-none text-white font-black text-center border-l border-slate-800 pl-2"
+                                            className="w-full md:w-28 bg-black border border-white/10 outline-none text-white font-black text-center py-4 rounded-xl focus:border-slate-400 shadow-inner"
                                             value={puntosGanador}
                                             onChange={e => setPuntosGanador(e.target.value)}
                                         />
                                     </div>
-                                    <div className="flex items-center gap-2 bg-[#040714] border border-slate-800 px-3 py-2 rounded-lg">
-                                        <span className="text-[9px] font-bold text-slate-500 uppercase">Empate</span>
+                                    <div className="flex-1 md:flex-none flex flex-col gap-2">
+                                        <span className="text-[8px] font-black text-slate-700 uppercase ml-2 tracking-widest">Empate</span>
                                         <input
                                             type="number"
-                                            className="w-10 bg-transparent outline-none text-white font-black text-center border-l border-slate-800 pl-2"
+                                            className="w-full md:w-28 bg-black border border-white/10 outline-none text-white font-black text-center py-4 rounded-xl focus:border-slate-400 shadow-inner"
                                             value={puntosEmpate}
                                             onChange={e => setPuntosEmpate(e.target.value)}
                                         />
@@ -281,20 +277,20 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             </div>
                         </div>
 
-                        {/* Encargado (Solo Admin) */}
+                        {/* Encargado */}
                         {esAdmin && (
-                            <div className="col-span-1 md:col-span-2 space-y-1.5 bg-cyan-900/10 p-3 rounded-xl border border-cyan-500/20 mt-2">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                    <FaUserAlt size={10} className="text-cyan-500" /> Responsable (Solo Admin)
+                            <div className="col-span-1 md:col-span-2 space-y-2 bg-slate-400/5 p-8 rounded-[2rem] border border-white/5 shadow-inner">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    <FaUserAlt size={10} /> Responsable Técnico
                                 </label>
                                 <select
-                                    className="w-full px-5 py-3.5 bg-[#040714] border border-slate-800 rounded-xl outline-none focus:border-cyan-500 text-[11px] font-bold text-cyan-400 appearance-none cursor-pointer"
+                                    className="w-full px-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-slate-400 appearance-none cursor-pointer italic"
                                     value={encargadoEmail}
                                     onChange={e => setEncargadoEmail(e.target.value)}
                                 >
-                                    <option value="" className="bg-[#0a0f2c]">SIN ENCARGADO</option>
+                                    <option value="" className="bg-black">SIN ENCARGADO</option>
                                     {listaEncargados.map(enc => (
-                                        <option key={enc.id} value={enc.email} className="bg-[#0a0f2c]">
+                                        <option key={enc.id} value={enc.email} className="bg-black">
                                             {enc.nombre.toUpperCase()}
                                         </option>
                                     ))}
@@ -302,27 +298,29 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             </div>
                         )}
                     </div>
+                </div>
 
-                    <div className="flex gap-4 mt-8">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 py-4 rounded-xl text-[11px] font-bold uppercase tracking-widest text-slate-500 border border-slate-800 hover:bg-slate-800 transition-all"
-                            disabled={loading}
-                        >
-                            Cancelar
-                        </button>
+                {/* Footer Fijo */}
+                <div className="p-8 bg-[#0a0c10] border-t border-white/5 flex gap-4 shrink-0">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex-1 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 border border-white/5 hover:bg-white/5 transition-all"
+                        disabled={loading}
+                    >
+                        Cancelar
+                    </button>
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="flex-1 py-4 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-[11px] font-bold uppercase tracking-widest text-white transition-all shadow-lg shadow-cyan-900/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
-                        >
-                            {loading ? "GUARDANDO..." : "CREAR TORNEO"}
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="flex-1 py-5 bg-gradient-to-r from-slate-200 to-slate-400 hover:from-white hover:to-slate-300 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-black transition-all shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-95 disabled:opacity-50"
+                    >
+                        {loading ? "PROCESANDO..." : "CREAR TORNEO"}
+                    </button>
                 </div>
             </form>
-        </div>
+        </div>,
+        document.body // Esto inyecta el modal al final de la página, por encima de TODO.
     );
 }
