@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useContext, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
     FaTrophy, FaTimes, FaCheck,
     FaCalendarAlt, FaMapMarkerAlt, FaClock, FaEdit
@@ -6,11 +7,11 @@ import {
 import EditarInfoModal from "./EditarInfoModal";
 
 export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }) {
-    // Log de seguimiento para depuración en consola
-    console.log("Estado del Modal Cerrar:", { open, partido });
-
     const [golesLocal, setGolesLocal] = useState("");
     const [golesVisitante, setGolesVisitante] = useState("");
+    const [golesLocalPenales, setGolesLocalPenales] = useState("");
+    const [golesVisitantePenales, setGolesVisitantePenales] = useState("");
+
     const [loading, setLoading] = useState(false);
     const [modalEditarInfo, setModalEditarInfo] = useState(false);
 
@@ -20,6 +21,8 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
         if (partido) {
             setGolesLocal(partido.golesLocal?.toString() || "");
             setGolesVisitante(partido.golesVisitante?.toString() || "");
+            setGolesLocalPenales(partido.golesLocalPenales?.toString() || "");
+            setGolesVisitantePenales(partido.golesVisitantePenales?.toString() || "");
         }
     }, [partido]);
 
@@ -29,8 +32,20 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
         if (valor === "" || (parseInt(valor) >= 0)) setter(valor);
     };
 
+    // VALIDACIONES DE ESTADO
+    const camposGolesVacios = golesLocal === "" || golesVisitante === "";
+
+    const esEmpateFaseFinal = partido.esFaseFinal &&
+        !camposGolesVacios &&
+        Number(golesLocal) === Number(golesVisitante);
+
+    const penalesInvalidos = esEmpateFaseFinal && (
+        golesLocalPenales === "" ||
+        golesVisitantePenales === "" ||
+        Number(golesLocalPenales) === Number(golesVisitantePenales)
+    );
+
     const cerrar = async () => {
-        // CORRECCIÓN CRÍTICA: Se define el path y SE USA en el fetch
         const path = partido.esFaseFinal
             ? `/api/partidos/${partido.partidoId || partido.id}/cerrar-fase-final`
             : `/api/partidos/${partido.partidoId || partido.id}/cerrar`;
@@ -46,12 +61,13 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
                 body: JSON.stringify({
                     golesLocal: Number(golesLocal) || 0,
                     golesVisitante: Number(golesVisitante) || 0,
+                    golesLocalPenales: esEmpateFaseFinal ? Number(golesLocalPenales) : 0,
+                    golesVisitantePenales: esEmpateFaseFinal ? Number(golesVisitantePenales) : 0,
                 }),
             });
 
             if (!res.ok) {
                 const errorData = await res.text();
-                // Si el backend lanza el NullPointerException, lo capturamos aquí
                 throw new Error(errorData || "Error en el servidor al cerrar partido");
             }
 
@@ -111,7 +127,7 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
 
                     {/* Marcador */}
                     <div className="p-10">
-                        <div className="flex justify-between items-center gap-6 mb-10">
+                        <div className="flex justify-between items-center gap-6 mb-6">
                             <div className="flex-1 flex flex-col items-center">
                                 <p className="text-white font-black text-[11px] uppercase text-center mb-4 italic leading-tight h-8 flex items-center">
                                     {partido.equipoLocalNombre || partido.local}
@@ -139,17 +155,44 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
                             </div>
                         </div>
 
-                        {/* BLOQUEO DE EMPATE PARA FASE FINAL */}
-                        {partido.esFaseFinal && golesLocal !== "" && golesVisitante !== "" && Number(golesLocal) === Number(golesVisitante) && (
-                            <div className="bg-red-500/10 p-4 rounded-xl border border-red-500/50 mb-4 animate-pulse">
-                                <p className="text-[9px] text-red-500 text-center uppercase font-black tracking-widest">
-                                    ⚠️ No se permiten empates en llaves eliminatorias.
+                        {/* SECCIÓN DE PENALES */}
+                        {esEmpateFaseFinal && (
+                            <div className="mb-6 animate-in slide-in-from-top duration-300">
+                                <p className="text-[10px] text-center font-black text-cyan-500 uppercase tracking-[0.3em] mb-4">
+                                    Definición por Penales
                                 </p>
+                                <div className="flex justify-center items-center gap-8">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase">Local</span>
+                                        <input
+                                            type="number"
+                                            className="w-14 h-14 bg-cyan-500/10 border-2 border-cyan-500/30 rounded-2xl text-center text-xl font-black text-white focus:border-cyan-500 outline-none"
+                                            value={golesLocalPenales}
+                                            onChange={(e) => handleGolesChange(e.target.value, setGolesLocalPenales)}
+                                        />
+                                    </div>
+                                    <div className="flex flex-col items-center gap-2">
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase">Visitante</span>
+                                        <input
+                                            type="number"
+                                            className="w-14 h-14 bg-cyan-500/10 border-2 border-cyan-500/30 rounded-2xl text-center text-xl font-black text-white focus:border-cyan-500 outline-none"
+                                            value={golesVisitantePenales}
+                                            onChange={(e) => handleGolesChange(e.target.value, setGolesVisitantePenales)}
+                                        />
+                                    </div>
+                                </div>
+                                {Number(golesLocalPenales) === Number(golesVisitantePenales) && golesLocalPenales !== "" && (
+                                    <p className="text-[8px] text-red-500 text-center mt-3 font-bold uppercase">
+                                        * Los penales no pueden terminar en empate
+                                    </p>
+                                )}
                             </div>
                         )}
 
-                        <div className="bg-[#040714] p-5 rounded-2xl border border-slate-800 border-dashed">
-                            <p className="text-[9px] text-cyan-500/50 text-center uppercase font-black tracking-[0.2em]">⚠️ Verifique los datos antes de finalizar.</p>
+                        <div className="bg-[#040714] p-5 rounded-2xl border border-slate-800 border-dashed text-center">
+                            <p className="text-[9px] text-cyan-500/50 uppercase font-black tracking-[0.2em]">
+                                {camposGolesVacios ? "⚠️ Ingrese el resultado para continuar." : "⚠️ Verifique los datos antes de finalizar."}
+                            </p>
                         </div>
                     </div>
 
@@ -160,8 +203,8 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
                         </button>
                         <button
                             onClick={cerrar}
-                            disabled={loading || (partido.esFaseFinal && Number(golesLocal) === Number(golesVisitante))}
-                            className="flex-[1.8] py-4 bg-cyan-600 hover:bg-cyan-500 rounded-[1.5rem] text-[10px] font-black uppercase text-white shadow-lg disabled:opacity-30 flex items-center justify-center gap-3 transition-all"
+                            disabled={loading || camposGolesVacios || penalesInvalidos}
+                            className="flex-[1.8] py-4 bg-cyan-600 hover:bg-cyan-500 rounded-[1.5rem] text-[10px] font-black uppercase text-white shadow-lg disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-3 transition-all"
                         >
                             {loading ? "Cerrando..." : <><FaCheck size={14} /> Finalizar</>}
                         </button>

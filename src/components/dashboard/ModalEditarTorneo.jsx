@@ -2,16 +2,25 @@ import { useContext, useState, useEffect } from "react";
 import { createPortal } from "react-dom"; //
 import { apiFetch } from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
-import { FaTrophy, FaTimes, FaPalette, FaMars, FaVenus, FaVenusMars, FaInstagram, FaUserAlt, FaToggleOn } from "react-icons/fa";
+import {
+    FaTrophy,
+    FaTimes,
+    FaPalette,
+    FaMars,
+    FaVenus,
+    FaVenusMars,
+    FaUserAlt,
+    FaToggleOn,
+    FaGlobe
+} from "react-icons/fa";
 import ImageUpload from "../../images/ImageUpload";
 
 const PLANTILLAS = {
     NEGRO: { p: "#05070a", s: "#0a0c10", tp: "#ffffff", ts: "#94a3b8" },
-    PLATA: { p: "#0f172a", s: "#1e293b", tp: "#ffffff", ts: "#cbd5e1" },
+    BLANCO: { p: "#ffffff", s: "#f8fafc", tp: "#000000", ts: "#64748b" },
     AZUL: { p: "#050814", s: "#0d143d", tp: "#ffffff", ts: "#60a5fa" },
     ROJO: { p: "#0a0404", s: "#1a0808", tp: "#ffffff", ts: "#f87171" },
     VERDE: { p: "#040a05", s: "#081a0d", tp: "#ffffff", ts: "#4ade80" },
-    MORADO: { p: "#08040a", s: "#160d1f", tp: "#ffffff", ts: "#a78bfa" },
     GRIS: { p: "#111827", s: "#1f2937", tp: "#ffffff", ts: "#d1d5db" },
     VIOLETA: { p: "#0f0514", s: "#1e0a29", tp: "#ffffff", ts: "#c084fc" },
     DORADO: { p: "#0a0904", s: "#1a1808", tp: "#ffffff", ts: "#fbbf24" },
@@ -97,12 +106,12 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                 fotoUrl: fotoUrl || null,
                 genero,
                 redSocial: redSocial || null,
-                puntosGanador,
-                puntosEmpate,
+                puntosGanador: Number(puntosGanador),
+                puntosEmpate: Number(puntosEmpate),
                 colorPrimario: PLANTILLAS[plantillaActiva].p,
                 colorSecundario: PLANTILLAS[plantillaActiva].s,
                 colorTextoPrimario: PLANTILLAS[plantillaActiva].tp,
-                colorTextoSecondary: PLANTILLAS[plantillaActiva].ts
+                colorTextoSecundario: PLANTILLAS[plantillaActiva].ts
             };
 
             if (esAdminGenuino) {
@@ -196,7 +205,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                                         style={{ backgroundColor: PLANTILLAS[key].p }}
                                     >
                                         <div className="w-4 h-1 rounded-full" style={{ backgroundColor: PLANTILLAS[key].ts }}></div>
-                                        <span className="text-[7px] font-black text-white uppercase tracking-tighter">{key}</span>
+                                        <span className={`text-[7px] font-black uppercase tracking-tighter ${PLANTILLAS[key].p === "#ffffff" ? "text-black" : "text-white"}`}>{key}</span>
                                     </button>
                                 ))}
                             </div>
@@ -207,7 +216,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">División</label>
                                 <select
-                                    className="w-full px-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase italic"
+                                    className="w-full px-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase italic shadow-inner"
                                     value={division}
                                     onChange={e => setDivision(e.target.value)}
                                 >
@@ -221,7 +230,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">Género</label>
                                 <select
-                                    className="w-full px-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase italic"
+                                    className="w-full px-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase italic shadow-inner"
                                     value={genero}
                                     onChange={e => setGenero(e.target.value)}
                                 >
@@ -232,11 +241,11 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Instagram</label>
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Red Social</label>
                                 <div className="relative">
-                                    <FaInstagram className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700" />
+                                    <FaGlobe className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700" />
                                     <input
-                                        placeholder="username"
+                                        placeholder="URL o Usuario"
                                         className="w-full pl-14 pr-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-bold text-white placeholder:text-slate-900 shadow-inner"
                                         value={redSocial}
                                         onChange={e => setRedSocial(e.target.value)}
@@ -247,7 +256,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             {esAdminGenuino && (
                                 <div className="space-y-2 bg-white/5 p-4 rounded-2xl border border-white/5 shadow-inner">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                        <FaToggleOn size={10} /> Estado
+                                        <FaToggleOn size={10} /> Estado del Torneo
                                     </label>
                                     <select
                                         className="w-full bg-transparent outline-none text-xs font-black text-white uppercase italic cursor-pointer"
@@ -305,6 +314,6 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                 </div>
             </form>
         </div>,
-        document.body //
+        document.body
     );
 }

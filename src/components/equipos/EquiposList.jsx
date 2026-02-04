@@ -23,8 +23,6 @@ export default function EquiposList() {
     const [equipoEditar, setEquipoEditar] = useState(null);
     const [equipoInscribir, setEquipoInscribir] = useState(null);
     const [inscripcionEliminar, setInscripcionEliminar] = useState(null);
-    const [idEliminarEquipo, setIdEliminarEquipo] = useState(null);
-    const [confirmEliminarEquipo, setConfirmEliminarEquipo] = useState(false);
 
     const cargar = async () => {
         setLoading(true);
@@ -40,6 +38,7 @@ export default function EquiposList() {
 
     useEffect(() => { cargar(); }, []);
 
+    // LÓGICA DE FILTRADO Y ORDENAMIENTO ALFABÉTICO
     const equiposFiltrados = equipos
         .filter((e) => {
             if (!esAdmin) return e.estado === true;
@@ -47,7 +46,18 @@ export default function EquiposList() {
             if (filtro === "inactivos") return e.estado === false;
             return true;
         })
-        .filter((e) => e.nombre.toLowerCase().includes(busqueda.toLowerCase()));
+        .filter((e) => e.nombre.toLowerCase().includes(busqueda.toLowerCase()))
+        // ORDEN ALFABÉTICO: (a, b) => comparamos nombres
+        .sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+    const handleEliminarEquipo = async (id) => {
+        try {
+            await eliminarEquipo(id);
+            cargar(); // Recargar lista tras eliminar
+        } catch (error) {
+            console.error("Error al eliminar equipo:", error);
+        }
+    };
 
     if (loading) return (
         <div className="flex flex-col items-center py-40 gap-4">
@@ -123,10 +133,7 @@ export default function EquiposList() {
                             key={e.id}
                             equipo={e}
                             onEdit={(equipo) => setEquipoEditar(equipo)}
-                            onDelete={(id) => {
-                                setIdEliminarEquipo(id);
-                                setConfirmEliminarEquipo(true);
-                            }}
+                            onDelete={handleEliminarEquipo} // La confirmación ocurre dentro de EquipoCard
                             onInscribir={(equipo) => setEquipoInscribir(equipo)}
                             onEliminarInscripcion={(insc) => setInscripcionEliminar(insc)}
                         />
@@ -147,22 +154,11 @@ export default function EquiposList() {
 
             {inscripcionEliminar && (
                 <ConfirmModal
-                    mensaje={`¿DESEA DESVINCULAR ESTE EQUIPO DEL TORNEO ${inscripcionEliminar.nombreTorneo.toUpperCase()}?`}
+                    mensaje={`¿DESEA DESVINCULAR ESTE EQUIPO DEL TORNEO ${inscripcionEliminar.nombreTorneo?.toUpperCase() || 'SELECCIONADO'}?`}
                     onCancel={() => setInscripcionEliminar(null)}
                     onConfirm={async () => {
                         await apiFetch(`/api/equipos-zona/${inscripcionEliminar.id}`, { method: "DELETE" });
                         setInscripcionEliminar(null);
-                        cargar();
-                    }}
-                />
-            )}
-            {confirmEliminarEquipo && (
-                <ConfirmModal
-                    mensaje="¿ESTÁ SEGURO DE ELIMINAR ESTE EQUIPO DEL SISTEMA?"
-                    onCancel={() => setConfirmEliminarEquipo(false)}
-                    onConfirm={async () => {
-                        await eliminarEquipo(idEliminarEquipo);
-                        setConfirmEliminarEquipo(false);
                         cargar();
                     }}
                 />
