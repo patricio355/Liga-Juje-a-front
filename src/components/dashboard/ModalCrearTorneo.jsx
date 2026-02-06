@@ -11,7 +11,11 @@ import {
     FaVenus,
     FaVenusMars,
     FaTimes,
-    FaGlobe
+    FaGlobe,
+    FaLayerGroup,
+    FaSitemap,
+    FaCogs,
+    FaInfoCircle
 } from "react-icons/fa";
 import ImageUpload from "../../images/ImageUpload";
 
@@ -35,13 +39,17 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
     const [division, setDivision] = useState("");
     const [encargadoEmail, setEncargadoEmail] = useState("");
     const [estado, setEstado] = useState("activo");
-    const [tipo, setTipo] = useState("CERRADO");
+    const [tipo, setTipo] = useState("CERRADO"); // Modalidad: ABIERTO o CERRADO
     const [puntosGanador, setPuntosGanador] = useState(3);
     const [puntosEmpate, setPuntosEmpate] = useState(1);
     const [plantillaActiva, setPlantillaActiva] = useState("NEGRO");
     const [fotoUrl, setFotoUrl] = useState("");
     const [genero, setGenero] = useState("MASCULINO");
     const [redSocial, setRedSocial] = useState("");
+
+    // Nuevos atributos de visibilidad inicial
+    const [mostrarGrupos, setMostrarGrupos] = useState(true);
+    const [mostrarFinal, setMostrarFinal] = useState(true);
 
     const [listaEncargados, setListaEncargados] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -87,7 +95,9 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                 colorTextoSecundario: PLANTILLAS[plantillaActiva].ts,
                 fotoUrl: fotoUrl || null,
                 genero: genero,
-                redSocial: redSocial || null
+                redSocial: redSocial || null,
+                faseGrupos: mostrarGrupos,
+                faseFinal: mostrarFinal
             };
 
             await apiFetch("/api/torneos", {
@@ -104,7 +114,6 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
         }
     };
 
-    // Renderizado con Portal
     return createPortal(
         <div
             className="fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-[999999] p-2 md:p-6"
@@ -201,8 +210,57 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             </div>
                         </div>
 
-                        {/* selectores */}
+                        {/* SELECTORES DE MODALIDAD Y REDES */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 col-span-1 md:col-span-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    <FaCogs size={10} /> Modalidad de Gestión
+                                </label>
+                                <select
+                                    className="w-full px-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase italic shadow-inner"
+                                    value={tipo}
+                                    onChange={e => setTipo(e.target.value)}
+                                >
+                                    <option value="CERRADO">MODALIDAD CERRADA (AUTOMÁTICA)</option>
+                                    <option value="ABIERTO">MODALIDAD ABIERTA (MANUAL)</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    <FaGlobe size={10} /> Red Social
+                                </label>
+                                <div className="relative">
+                                    <FaGlobe className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700" />
+                                    <input
+                                        placeholder="URL o Usuario"
+                                        className="w-full pl-14 pr-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-bold text-white placeholder:text-slate-900 shadow-inner"
+                                        value={redSocial}
+                                        onChange={e => setRedSocial(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* LEYENDA EXPLICATIVA DE MODALIDAD */}
+                            <div className="col-span-1 md:col-span-2 bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                                <div className="flex items-center gap-2 text-slate-400">
+                                    <FaInfoCircle size={12} />
+                                    <span className="text-[9px] font-black uppercase tracking-widest">Información de Modalidad</span>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className={`p-4 rounded-2xl border transition-all ${tipo === 'CERRADO' ? 'bg-slate-400/10 border-slate-400/30' : 'opacity-30 border-transparent'}`}>
+                                        <p className="text-[10px] leading-relaxed text-slate-200">
+                                            <span className="font-black text-slate-400 uppercase">* CERRADO:</span> Ya tengo mis equipos y quiero fixture automático para solo cerrar partidos con el resultado (ideal para torneos profesionales).
+                                        </p>
+                                    </div>
+                                    <div className={`p-4 rounded-2xl border transition-all ${tipo === 'ABIERTO' ? 'bg-slate-400/10 border-slate-400/30' : 'opacity-30 border-transparent'}`}>
+                                        <p className="text-[10px] leading-relaxed text-slate-200">
+                                            <span className="font-black text-slate-400 uppercase">* ABIERTO:</span> Voy a permitir añadir equipos a mitad del torneo y voy a gestionar el fixture manualmente (ideal para torneos barriales).
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">División</label>
                                 <select
@@ -229,30 +287,39 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                                     <option value="MIXTO" className="bg-black">MIXTO</option>
                                 </select>
                             </div>
+                        </div>
 
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Modalidad</label>
-                                <select
-                                    className="w-full px-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase italic shadow-inner"
-                                    value={tipo}
-                                    onChange={e => setTipo(e.target.value)}
+                        {/* ESTRUCTURA DE FASES */}
+                        <div className="col-span-1 md:col-span-2 space-y-4 pt-6 border-t border-white/5">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estructura de Fases Iniciales</label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setMostrarGrupos(!mostrarGrupos)}
+                                    className={`flex items-center justify-between p-5 rounded-2xl border transition-all ${mostrarGrupos ? 'bg-white/10 border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.05)]' : 'bg-black border-white/5 opacity-50'}`}
                                 >
-                                    <option value="CERRADO" className="bg-black">CERRADO</option>
-                                    <option value="ABIERTO" className="bg-black">ABIERTO</option>
-                                </select>
-                            </div>
+                                    <div className="flex items-center gap-3">
+                                        <FaLayerGroup className={mostrarGrupos ? "text-white" : "text-slate-600"} />
+                                        <span className="text-[10px] font-black text-white uppercase tracking-widest">Fase de Grupos</span>
+                                    </div>
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${mostrarGrupos ? 'border-white bg-white' : 'border-white/20'}`}>
+                                        {mostrarGrupos && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
+                                    </div>
+                                </button>
 
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Red Social</label>
-                                <div className="relative">
-                                    <FaGlobe className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700" />
-                                    <input
-                                        placeholder="URL o Usuario"
-                                        className="w-full pl-14 pr-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-bold text-white placeholder:text-slate-900 shadow-inner"
-                                        value={redSocial}
-                                        onChange={e => setRedSocial(e.target.value)}
-                                    />
-                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setMostrarFinal(!mostrarFinal)}
+                                    className={`flex items-center justify-between p-5 rounded-2xl border transition-all ${mostrarFinal ? 'bg-white/10 border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.05)]' : 'bg-black border-white/5 opacity-50'}`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <FaSitemap className={mostrarFinal ? "text-white" : "text-slate-600"} />
+                                        <span className="text-[10px] font-black text-white uppercase tracking-widest">Fase Final</span>
+                                    </div>
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${mostrarFinal ? 'border-white bg-white' : 'border-white/20'}`}>
+                                        {mostrarFinal && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
+                                    </div>
+                                </button>
                             </div>
                         </div>
 

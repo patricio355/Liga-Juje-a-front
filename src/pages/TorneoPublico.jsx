@@ -36,6 +36,12 @@ export default function TorneoPublico() {
                     setTorneo(data);
                     setZonas(zonasOrdenadas);
                     setZonaActiva(zonasOrdenadas[0] ?? null);
+
+                    // LÓGICA DE VISUALIZACIÓN INICIAL:
+                    // Si no tiene fase de grupos pero sí fase final, activamos FINAL por defecto
+                    if (data.faseGrupos === false && data.faseFinal === true) {
+                        setSeccionActiva("FINAL");
+                    }
                 } else {
                     setTorneo(null);
                 }
@@ -144,25 +150,28 @@ export default function TorneoPublico() {
                         </div>
                     </header>
 
-                    {/* SELECTOR DE SECCIÓN */}
-                    <div className="flex justify-center gap-1 mb-8 bg-[var(--s)]/80 p-1 rounded-xl border border-[var(--ts)]/10 w-fit mx-auto backdrop-blur-xl shadow-2xl">
-                        <button
-                            onClick={() => setSeccionActiva("ZONAS")}
-                            className={`flex items-center gap-2 px-6 md:px-8 py-2 md:py-3 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${seccionActiva === "ZONAS" ? "bg-[var(--tp)] text-[var(--p)] shadow-lg" : "text-[var(--ts)] hover:text-[var(--tp)]"}`}
-                        >
-                            <FaLayerGroup /> GRUPOS
-                        </button>
-                        <button
-                            onClick={() => setSeccionActiva("FINAL")}
-                            className={`flex items-center gap-2 px-6 md:px-8 py-2 md:py-3 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${seccionActiva === "FINAL" ? "bg-[var(--tp)] text-[var(--p)] shadow-lg" : "text-[var(--ts)] hover:text-[var(--tp)]"}`}
-                        >
-                            <FaProjectDiagram /> FASE FINAL
-                        </button>
-                    </div>
+                    {/* SELECTOR DE SECCIÓN CONDICIONAL */}
+                    {(torneo.faseGrupos && torneo.faseFinal) && (
+                        <div className="flex justify-center gap-1 mb-8 bg-[var(--s)]/80 p-1 rounded-xl border border-[var(--ts)]/10 w-fit mx-auto backdrop-blur-xl shadow-2xl">
+                            <button
+                                onClick={() => setSeccionActiva("ZONAS")}
+                                className={`flex items-center gap-2 px-6 md:px-8 py-2 md:py-3 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${seccionActiva === "ZONAS" ? "bg-[var(--tp)] text-[var(--p)] shadow-lg" : "text-[var(--ts)] hover:text-[var(--tp)]"}`}
+                            >
+                                <FaLayerGroup /> GRUPOS
+                            </button>
+                            <button
+                                onClick={() => setSeccionActiva("FINAL")}
+                                className={`flex items-center gap-2 px-6 md:px-8 py-2 md:py-3 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${seccionActiva === "FINAL" ? "bg-[var(--tp)] text-[var(--p)] shadow-lg" : "text-[var(--ts)] hover:text-[var(--tp)]"}`}
+                            >
+                                <FaProjectDiagram /> FASE FINAL
+                            </button>
+                        </div>
+                    )}
 
-                    {seccionActiva === "ZONAS" ? (
+                    {/* MOSTRAR CONTENIDO SEGÚN SECCIÓN ACTIVA Y PERMISOS DEL ATRIBUTO */}
+                    {seccionActiva === "ZONAS" && torneo.faseGrupos !== false ? (
                         <div className="animate-in slide-in-from-bottom-4 duration-500">
-                            {/* SELECTOR DE ZONA: AJUSTADO AL CONTENIDO */}
+                            {/* SELECTOR DE ZONA */}
                             <div className="relative mb-6 flex justify-center z-50">
                                 <div className="relative w-fit">
                                     <div
@@ -214,29 +223,31 @@ export default function TorneoPublico() {
                             </div>
                         </div>
                     ) : (
-                        <div className="animate-in slide-in-from-bottom-4 duration-500">
-                            <div className="bg-[var(--s)]/50 backdrop-blur-md rounded-[2rem] border border-[var(--ts)]/10 overflow-hidden shadow-2xl min-h-[300px] flex flex-col">
-                                <div className="bg-[var(--p)]/60 px-6 py-4 border-b border-[var(--ts)]/10 flex items-center gap-3">
-                                    <FaProjectDiagram size={14} className="text-[var(--ts)]" />
-                                    <h2 className="font-black uppercase italic tracking-widest text-[10px] md:text-[11px] text-[var(--tp)]">Cuadro de Eliminación</h2>
-                                </div>
-                                {/* AQUÍ HICE EL CAMBIO: Quite 'p-8' y 'items-center' para que el cuadro tenga más espacio */}
-                                <div className="flex-1 w-full p-2 md:p-6 text-center">
-                                    <CuadroFaseFinal
-                                        torneoId={torneo.id}
-                                        fallback={
-                                            <div className="flex flex-col items-center justify-center gap-4 py-12 h-full">
-                                                <div className="bg-[var(--p)] p-5 rounded-full border border-[var(--ts)]/20 shadow-inner">
-                                                    <FaInfoCircle className="text-[var(--ts)] text-3xl opacity-40" />
+                        /* ESTA PARTE SE MUESTRA SI SECCION === "FINAL" O SI FASE GRUPOS ES FALSE */
+                        torneo.faseFinal !== false && (
+                            <div className="animate-in slide-in-from-bottom-4 duration-500">
+                                <div className="bg-[var(--s)]/50 backdrop-blur-md rounded-[2rem] border border-[var(--ts)]/10 overflow-hidden shadow-2xl min-h-[300px] flex flex-col">
+                                    <div className="bg-[var(--p)]/60 px-6 py-4 border-b border-[var(--ts)]/10 flex items-center gap-3">
+                                        <FaProjectDiagram size={14} className="text-[var(--ts)]" />
+                                        <h2 className="font-black uppercase italic tracking-widest text-[10px] md:text-[11px] text-[var(--tp)]">Cuadro de Eliminación</h2>
+                                    </div>
+                                    <div className="flex-1 w-full p-2 md:p-6 text-center">
+                                        <CuadroFaseFinal
+                                            torneoId={torneo.id}
+                                            fallback={
+                                                <div className="flex flex-col items-center justify-center gap-4 py-12 h-full">
+                                                    <div className="bg-[var(--p)] p-5 rounded-full border border-[var(--ts)]/20 shadow-inner">
+                                                        <FaInfoCircle className="text-[var(--ts)] text-3xl opacity-40" />
+                                                    </div>
+                                                    <h3 className="text-sm md:text-base font-black uppercase tracking-widest text-[var(--tp)]">Sin partidos programados</h3>
+                                                    <p className="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--ts)] max-w-[250px]">La fase de eliminación aún no ha sido generada para esta competición.</p>
                                                 </div>
-                                                <h3 className="text-sm md:text-base font-black uppercase tracking-widest text-[var(--tp)]">Sin partidos programados</h3>
-                                                <p className="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--ts)] max-w-[250px]">La fase de eliminación aún no ha sido generada para esta competición.</p>
-                                            </div>
-                                        }
-                                    />
+                                            }
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )
                     )}
 
                     <footer className="mt-16 mb-12 text-center opacity-40">

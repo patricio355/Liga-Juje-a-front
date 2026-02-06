@@ -4,7 +4,8 @@ import { apiFetch } from "../api/api";
 import {
     FaArrowLeft, FaPlus, FaTrophy, FaTrash,
     FaEdit, FaCalendarAlt, FaMagic, FaCogs, FaCheckCircle, FaLock, FaFutbol, FaLayerGroup, FaInfoCircle,
-    FaProjectDiagram, FaMars, FaVenus, FaVenusMars
+    FaProjectDiagram, FaMars, FaVenus, FaVenusMars,
+    FaEye, FaEyeSlash
 } from "react-icons/fa";
 
 // Modales
@@ -17,8 +18,34 @@ import ModalCrearEquipo from "../components/equipos/ModalCrearEquipo";
 import ConfirmarEliminacionModal from "../components/modal/ConfirmarEliminacionModal";
 import Navbar from "../components/Navbar.jsx";
 
+// --- COMPONENTE INTERRUPTOR DESLIZABLE CORREGIDO ---
+const CustomSwitch = ({ label, isActive, onToggle, disabled }) => {
+    return (
+        <div className="flex flex-col items-center gap-2 bg-black/20 p-4 rounded-[2rem] border border-white/5 min-w-[150px] w-full md:w-auto">
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">{label}</span>
+            <div className="flex items-center gap-3">
+                <span className={`text-[8px] font-black uppercase transition-all duration-300 ${isActive ? "text-green-500" : "text-slate-700 opacity-40"}`}>Mostrar</span>
+
+                <div
+                    onClick={!disabled ? onToggle : null}
+                    className={`relative w-14 h-7 rounded-full transition-all duration-300 border-2 flex items-center p-1 ${
+                        isActive ? "bg-green-500/20 border-green-500" : "bg-red-500/20 border-red-500"
+                    } ${disabled ? "opacity-50 cursor-wait" : "cursor-pointer"}`}
+                >
+                    {/* Círculo deslizable: isActive (true) -> Izquierda (0), !isActive (false) -> Derecha (7) */}
+                    <div className={`w-4 h-4 rounded-full transition-all duration-300 shadow-lg transform ${
+                        isActive ? "translate-x-0 bg-green-500" : "translate-x-7 bg-red-500"
+                    }`} />
+                </div>
+
+                <span className={`text-[8px] font-black uppercase transition-all duration-300 ${!isActive ? "text-red-500" : "text-slate-700 opacity-40"}`}>Ocultar</span>
+            </div>
+        </div>
+    );
+};
+
 export default function TorneoDetalleAdmin() {
-    const { id } = useParams();
+    const { id: slug } = useParams();
     const navigate = useNavigate();
 
     const [torneo, setTorneo] = useState(null);
@@ -41,7 +68,8 @@ export default function TorneoDetalleAdmin() {
 
     const cargarDatos = useCallback(async () => {
         try {
-            const data = await apiFetch(`/api/torneos/${id}?t=${new Date().getTime()}`);
+            const timestamp = new Date().getTime();
+            const data = await apiFetch(`/api/torneos/${slug}?t=${timestamp}`);
             setTorneo(data);
         } catch (error) {
             if (!loadingAccion && (error.status === 403 || error.status === 401)) {
@@ -50,11 +78,27 @@ export default function TorneoDetalleAdmin() {
         } finally {
             setLoading(false);
         }
-    }, [id, navigate, loadingAccion]);
+    }, [slug, navigate, loadingAccion]);
 
     useEffect(() => {
-        if (id) cargarDatos();
-    }, [id, cargarDatos]);
+        if (slug) cargarDatos();
+    }, [slug, cargarDatos]);
+
+    const handleToggleEstado = async (tipoFase, valorActual) => {
+        if (loadingAccion || !slug) return;
+        setLoadingAccion(true);
+        try {
+            await apiFetch(`/api/torneos/${slug}/${tipoFase}?estado=${!valorActual}`, {
+                method: "PATCH"
+            });
+            await cargarDatos();
+        } catch (error) {
+            console.error("Error al cambiar estado:", error);
+            alert("No se pudo actualizar. Intente refrescar la página.");
+        } finally {
+            setLoadingAccion(false);
+        }
+    };
 
     const ejecutarEliminacion = async () => {
         setLoadingAccion(true);
@@ -123,7 +167,6 @@ export default function TorneoDetalleAdmin() {
             </div>
 
             <main className="p-4 md:p-8 max-w-[1600px] mx-auto w-full">
-                {/* --- BOTÓN VOLVER MEJORADO --- */}
                 <div className="mb-8">
                     <button
                         onClick={() => navigate(-1)}
@@ -137,10 +180,10 @@ export default function TorneoDetalleAdmin() {
                     </button>
                 </div>
 
-                <header className="bg-[#0a0c10] p-8 rounded-[2.5rem] border border-white/5 mb-10 shadow-2xl flex flex-col xl:flex-row justify-between items-center gap-8 relative overflow-hidden">
+                <header className="bg-[#0a0c10] p-8 rounded-[2.5rem] border border-white/5 mb-10 shadow-2xl flex flex-col xl:flex-row justify-between items-center gap-8 relative overflow-hidden text-center md:text-left">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-slate-400/5 blur-[100px] rounded-full -mr-32 -mt-32"></div>
 
-                    <div className="flex items-center gap-6 relative z-10">
+                    <div className="flex items-center gap-6 relative z-10 flex-col md:flex-row">
                         <div className="w-24 h-24 md:w-32 md:h-32 bg-black rounded-3xl border border-white/10 flex items-center justify-center shadow-2xl overflow-hidden shrink-0 group">
                             {torneo.fotoUrl ? (
                                 <img src={torneo.fotoUrl} alt={torneo.nombre} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
@@ -149,8 +192,8 @@ export default function TorneoDetalleAdmin() {
                             )}
                         </div>
 
-                        <div>
-                            <div className="flex items-center gap-4 flex-wrap">
+                        <div className="flex flex-col items-center md:items-start">
+                            <div className="flex items-center gap-4 flex-wrap justify-center md:justify-start">
                                 <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white leading-none">
                                     {torneo.nombre}
                                 </h1>
@@ -159,7 +202,7 @@ export default function TorneoDetalleAdmin() {
                                 </button>
                             </div>
 
-                            <div className="flex items-center gap-3 mt-4 flex-wrap">
+                            <div className="flex items-center gap-3 mt-4 flex-wrap justify-center md:justify-start">
                                 {torneo.genero && (
                                     <span className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400">
                                         {getGeneroIcon()} {torneo.genero}
@@ -170,10 +213,26 @@ export default function TorneoDetalleAdmin() {
                                     División {torneo.division} <span className="text-slate-700">|</span> {torneo.estado}
                                 </span>
                             </div>
+
+                            {/* --- BOTONES RESPONSIVOS: Columna en móvil, Fila en escritorio --- */}
+                            <div className="flex flex-col md:flex-row gap-4 mt-6 w-full md:w-auto items-center">
+                                <CustomSwitch
+                                    label="Fase de Grupos"
+                                    isActive={torneo.faseGrupos}
+                                    onToggle={() => handleToggleEstado("fase-grupos", torneo.faseGrupos)}
+                                    disabled={loadingAccion}
+                                />
+                                <CustomSwitch
+                                    label="Fase Final"
+                                    isActive={torneo.faseFinal}
+                                    onToggle={() => handleToggleEstado("fase-final", torneo.faseFinal)}
+                                    disabled={loadingAccion}
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap justify-center gap-3 w-full xl:w-auto relative z-10">
+                    <div className="flex flex-wrap justify-center gap-3 w-full xl:w-auto relative z-10 mt-6 xl:mt-0">
                         <button
                             onClick={() => navigate(`/dashboard/torneos/${torneo.id}/fase-final`)}
                             className="bg-white/5 hover:bg-white/10 text-slate-200 px-6 py-4 rounded-2xl font-black flex items-center gap-3 border border-white/10 transition-all uppercase text-[10px] tracking-widest shadow-xl active:scale-95"
@@ -308,17 +367,13 @@ export default function TorneoDetalleAdmin() {
                     </div>
                 ) : (
                     <div className="bg-[#0a0c10] border-2 border-dashed border-white/5 rounded-[4rem] p-24 flex flex-col items-center justify-center text-center shadow-inner relative overflow-hidden">
-                        <div className="absolute inset-0 bg-slate-400/5 blur-[120px] rounded-full"></div>
-                        <div className="bg-black p-10 rounded-full border border-white/10 text-slate-800 mb-8 shadow-2xl relative z-10">
+                        <div className="bg-black p-10 rounded-full border border-white/10 text-slate-800 mb-8 shadow-2xl relative z-10 mx-auto w-fit">
                             <FaLayerGroup size={60} />
                         </div>
-                        <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic mb-4 relative z-10">Estructura Vacía</h2>
-                        <p className="text-slate-500 text-sm max-w-md mb-10 leading-relaxed font-medium relative z-10 uppercase tracking-widest text-[11px]">
-                            Comienza creando la primera zona para este torneo y asigna los equipos participantes.
-                        </p>
+                        <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic mb-4 relative z-10 text-center">Estructura Vacía</h2>
                         <button
                             onClick={() => setModalZonaCrear(true)}
-                            className="bg-white text-black px-12 py-5 rounded-2xl font-black flex items-center gap-4 transition-all shadow-2xl uppercase text-[10px] tracking-widest active:scale-95 relative z-10"
+                            className="bg-white text-black px-12 py-5 rounded-2xl font-black flex items-center gap-4 transition-all shadow-2xl uppercase text-[10px] tracking-widest active:scale-95 relative z-10 mx-auto w-fit"
                         >
                             <FaPlus /> Crear Primera Zona
                         </button>
@@ -326,7 +381,7 @@ export default function TorneoDetalleAdmin() {
                 )}
             </main>
 
-            {/* Modales - Se mantienen igual pero heredarán los estilos plateados definidos en sus archivos */}
+            {/* --- MODALES --- */}
             {modalTorneoEditar && <ModalEditarTorneo torneo={torneo} onClose={() => setModalTorneoEditar(false)} onUpdated={cargarDatos} />}
             {modalZonaEditar && zonaSeleccionada && <ModalEditarZona zona={zonaSeleccionada} onClose={() => setModalZonaEditar(false)} onUpdated={cargarDatos} />}
             {modalEquipoEditar && equipoSeleccionado && <ModalEquipoEditar equipo={equipoSeleccionado} onClose={() => setModalEquipoEditar(false)} onUpdated={cargarDatos} />}
@@ -341,15 +396,7 @@ export default function TorneoDetalleAdmin() {
                 loading={loadingAccion}
                 requiereEscritura={esAbierto}
                 titulo={modalConfirmar.type === 'ZONA' ? "Eliminar Zona" : "Quitar Equipo"}
-                mensaje={
-                    modalConfirmar.type === 'ZONA'
-                        ? (esAbierto
-                            ? "¡ADVERTENCIA! Se borrarán permanentemente todos los partidos jugados, estadísticas y programaciones de esta zona."
-                            : "Se eliminará la zona y la lista de equipos inscritos en ella.")
-                        : (esAbierto
-                            ? "El equipo será removido de la zona, se actualizarán los datos de los demás equipos, se recalculará la tabla automáticamente."
-                            : "El equipo será quitado de la lista de inscritos de esta zona.")
-                }
+                mensaje="Se eliminará la información seleccionada."
             />
 
             <ConfirmarEliminacionModal
@@ -358,8 +405,8 @@ export default function TorneoDetalleAdmin() {
                 onConfirm={handleEjecutarGenerarFixture}
                 loading={loadingAccion}
                 requiereEscritura={true}
-                titulo="Generar Fixture Automático"
-                mensaje="Se generará partidos automáticos para cada equipo. Una vez generado ya no se podrá eliminar zonas ni equipos."
+                titulo="Generar Fixture"
+                mensaje="Se generará el fixture para todas las zonas."
             />
         </div>
     );
