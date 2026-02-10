@@ -89,17 +89,14 @@ export default function ProgramacionZona() {
     };
 
     const quitarUltimaFecha = () => {
-        // Validación de seguridad adicional
         if (totalFechas <= 1) return;
-
-        // Validación de partidos (Importante para tu proyecto de Analista)
         if (programados.length > 0) {
             Swal.fire({
                 title: 'Fecha con partidos',
                 text: 'Esta fecha contiene partidos programados. Debés eliminarlos antes de quitar la fecha.',
                 icon: 'error',
-                background: '#0a0f2c',
-                color: '#cbd5e1'
+                background: '#0a0a0a',
+                color: '#ffffff'
             });
             return;
         }
@@ -112,8 +109,8 @@ export default function ProgramacionZona() {
             icon: 'success',
             timer: 1500,
             showConfirmButton: false,
-            background: '#0a0f2c',
-            color: '#cbd5e1'
+            background: '#0a0a0a',
+            color: '#ffffff'
         });
     };
 
@@ -129,24 +126,24 @@ export default function ProgramacionZona() {
     const handleEliminarPartido = (p) => {
         Swal.fire({
             title: '¿Eliminar partido?',
-            text: "Se borrará de la programación y los equipos volverán a estar disponibles. Si el partido está finalizado, se borrarán los datos",
+            text: "Se borrará de la programación y los equipos volverán a estar disponibles.",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#0f172a',
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar',
-            background: '#0a0f2c',
-            color: '#cbd5e1'
+            confirmButtonColor: '#ffffff',
+            cancelButtonColor: '#1a1a1a',
+            confirmButtonText: 'SÍ, ELIMINAR',
+            cancelButtonText: 'CANCELAR',
+            background: '#0a0a0a',
+            color: '#ffffff'
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
                     await apiFetch(`/api/partidos/${p.partidoId}`, { method: 'DELETE' });
                     Swal.fire({
-                        title: 'Eliminado',
+                        title: 'ELIMINADO',
                         icon: 'success',
-                        background: '#0a0f2c',
-                        color: '#cbd5e1',
+                        background: '#0a0a0a',
+                        color: '#ffffff',
                         timer: 1500,
                         showConfirmButton: false
                     });
@@ -181,83 +178,88 @@ export default function ProgramacionZona() {
     }, [programados]);
 
     return (
-        <div className="min-h-screen bg-[#05081c] text-slate-200">
+        <div className="min-h-screen bg-black text-slate-200">
             <Navbar />
             <main className="p-4 md:p-8 max-w-[1500px] mx-auto w-full">
 
+                {/* Header Actions */}
                 <div className="flex justify-between items-center mb-10">
-                    <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-500 hover:text-cyan-500 transition-all group">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="flex items-center gap-3 bg-white text-black px-6 py-2.5 rounded-full hover:bg-slate-200 transition-all group shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-95"
+                    >
                         <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-                        <span className="font-bold uppercase text-[10px] tracking-widest text-white">Volver</span>
+                        <span className="font-black uppercase text-[10px] tracking-widest">Volver al Panel</span>
                     </button>
-                    <div className="bg-[#0a0f2c] px-4 py-2 rounded-xl border border-slate-800 flex items-center gap-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest shadow-lg">
-                        <FaUserCircle className="text-cyan-500 text-sm" /> {userEmail || "ADMIN"}
+                    <div className="bg-[#111] px-5 py-2.5 rounded-2xl border border-white/10 flex items-center gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <FaUserCircle className="text-white text-sm" /> {userEmail || "ADMINISTRADOR"}
                     </div>
                 </div>
 
+                {/* Titulares */}
                 <div className="text-center lg:text-left mb-12 px-2">
-                    <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-tight text-white mb-2 leading-none">
+                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-2 leading-none">
                         {nombreTorneo || "CARGANDO..."}
                     </h1>
-                    <p className="text-slate-500 font-bold uppercase text-[11px] md:text-xs tracking-[0.3em] opacity-80 flex flex-col lg:flex-row lg:items-center">
-                        Programación de fechas
-                        <span className="hidden lg:inline mx-2 text-slate-800">|</span>
-                        <span className="text-cyan-500 mt-2 lg:mt-0 italic font-black">"{nombreZona || '...'}"</span>
+                    <p className="text-slate-500 font-bold uppercase text-[11px] md:text-xs tracking-[0.4em] flex flex-col lg:flex-row lg:items-center">
+                        Gestión de Programación
+                        <span className="hidden lg:inline mx-3 text-white/20">/</span>
+                        <span className="text-white mt-2 lg:mt-0 font-black">ZONA: {nombreZona || '...'}</span>
                     </p>
                 </div>
 
-                <div className="flex items-center gap-4 mb-12 bg-[#0a0f2c] p-3 rounded-2xl border border-slate-800 w-full lg:w-fit overflow-x-auto shadow-xl">
+                {/* Selector de Fechas */}
+                <div className="flex items-center gap-4 mb-12 bg-[#0a0a0a] p-3 rounded-2xl border border-white/5 w-full lg:w-fit overflow-x-auto shadow-2xl">
                     <div className="flex gap-2">
                         {Array.from({ length: totalFechas }, (_, i) => i + 1).map((f) => (
                             <button
                                 key={`btn-fecha-${f}`}
                                 onClick={() => setFechaSeleccionada(f)}
-                                className={`px-6 py-2 rounded-xl font-bold text-[10px] uppercase transition-all ${
+                                className={`px-6 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${
                                     fechaSeleccionada === f
-                                        ? "bg-cyan-600 text-white shadow-lg border-cyan-500"
-                                        : "bg-transparent text-slate-500 border border-transparent hover:text-slate-300 hover:bg-slate-800"
+                                        ? "bg-white text-black shadow-lg"
+                                        : "bg-transparent text-slate-500 border border-transparent hover:text-white hover:bg-white/5"
                                 }`}
                             > Fecha {f} </button>
                         ))}
                     </div>
 
-                    <div className="flex gap-2 ml-4 pl-4 border-l border-slate-800">
-                        <button onClick={agregarFecha} className="bg-cyan-600/10 hover:bg-cyan-600 text-cyan-500 hover:text-white border border-cyan-500/20 px-4 py-2 rounded-xl flex items-center gap-2 transition-all group shrink-0">
+                    <div className="flex gap-2 ml-4 pl-4 border-l border-white/10">
+                        <button onClick={agregarFecha} className="bg-white/5 hover:bg-white/10 text-white border border-white/10 px-4 py-3 rounded-xl flex items-center gap-2 transition-all group shrink-0">
                             <FaPlus size={10} className="group-hover:rotate-90 transition-transform" />
-                            <span className="text-[10px] font-bold uppercase">Nueva Fecha</span>
+                            <span className="text-[10px] font-black uppercase">Nueva</span>
                         </button>
 
-                        {/* REGLA: Solo aparece si NO es la Fecha 1 Y si es la ÚLTIMA FECHA de la lista */}
                         {fechaSeleccionada !== 1 && fechaSeleccionada === totalFechas && (
                             <button
                                 onClick={quitarUltimaFecha}
-                                className="bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-500/20 px-4 py-2 rounded-xl flex items-center gap-2 transition-all group shrink-0 animate-in fade-in zoom-in duration-300"
+                                className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 px-4 py-3 rounded-xl flex items-center gap-2 transition-all shrink-0"
                             >
                                 <FaMinus size={10} />
-                                <span className="text-[10px] font-bold uppercase">Quitar Fecha</span>
+                                <span className="text-[10px] font-black uppercase tracking-tighter">Eliminar</span>
                             </button>
                         )}
                     </div>
                 </div>
 
-                {/* Resto del contenido (Grid de enfrentamientos y Aside) se mantiene igual */}
                 <div className="grid grid-cols-1 xl:grid-cols-5 gap-10">
+                    {/* Sección Principal: Enfrentamientos */}
                     <section className="xl:col-span-3 space-y-6">
-                        <div className="bg-[#0a0f2c] border border-slate-800 rounded-[2.5rem] p-6 md:p-8 shadow-2xl relative overflow-hidden">
-                            <div className="flex items-center gap-3 mb-8">
-                                <FaFutbol className="text-cyan-500" />
-                                <h2 className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em]">Enfrentamientos Disponibles</h2>
+                        <div className="bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-6 md:p-10 shadow-2xl relative overflow-hidden">
+                            <div className="flex items-center gap-3 mb-10 border-b border-white/5 pb-6">
+                                <FaFutbol className="text-white" />
+                                <h2 className="text-white font-black text-[11px] uppercase tracking-[0.3em]">Enfrentamientos Disponibles</h2>
                             </div>
 
                             {loading ? (
-                                <div className="py-20 flex flex-col items-center gap-3 opacity-30">
-                                    <div className="w-10 h-10 border-4 border-cyan-500/10 border-t-cyan-500 rounded-full animate-spin"></div>
+                                <div className="py-24 flex flex-col items-center gap-3">
+                                    <div className="w-10 h-10 border-2 border-white/10 border-t-white rounded-full animate-spin"></div>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
                                     {tarjetas.length === 0 ? (
-                                        <div className="py-20 text-center border border-dashed border-slate-800 rounded-2xl">
-                                            <p className="text-slate-700 text-[10px] font-bold uppercase tracking-widest">No hay equipos para programar</p>
+                                        <div className="py-20 text-center border border-dashed border-white/10 rounded-[2rem]">
+                                            <p className="text-slate-600 text-[10px] font-black uppercase tracking-[0.2em]">No hay datos para esta fecha</p>
                                         </div>
                                     ) : (
                                         tarjetas.map((t) => (
@@ -278,25 +280,26 @@ export default function ProgramacionZona() {
                         </div>
                     </section>
 
+                    {/* Aside: Partidos Programados */}
                     <aside className="xl:col-span-2">
-                        <div className="bg-[#0a0f2c] border border-slate-800 rounded-[2.5rem] p-6 shadow-2xl sticky top-24">
-                            <div className="flex flex-wrap items-center justify-between gap-3 mb-8 px-2">
+                        <div className="bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl sticky top-24">
+                            <div className="flex flex-wrap items-center justify-between gap-3 mb-10 border-b border-white/5 pb-6">
                                 <div className="flex items-center gap-3">
-                                    <FaCalendarAlt className="text-cyan-500" />
-                                    <h2 className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em]">FECHA {fechaSeleccionada}</h2>
+                                    <FaCalendarAlt className="text-white" />
+                                    <h2 className="text-white font-black text-[11px] uppercase tracking-[0.3em]">FECHA ACTUAL: {fechaSeleccionada}</h2>
                                 </div>
                                 {equiposDuplicados.size > 0 && (
-                                    <div className="flex items-center gap-2 bg-red-600/20 border border-red-500/50 px-3 py-1.5 rounded-xl">
+                                    <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-xl">
                                         <FaExclamationTriangle className="text-red-500" size={12} />
-                                        <span className="text-red-500 text-[9px] font-bold uppercase tracking-wider">Juega 2 partidos</span>
+                                        <span className="text-red-500 text-[9px] font-black uppercase tracking-wider">Conflicto de equipos</span>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 {programados.length === 0 ? (
-                                    <div className="py-16 text-center border border-dashed border-slate-800 rounded-2xl">
-                                        <p className="text-slate-700 text-[10px] font-bold uppercase tracking-widest">Sin partidos programados</p>
+                                    <div className="py-20 text-center border border-dashed border-white/10 rounded-[2rem]">
+                                        <p className="text-slate-700 text-[10px] font-black uppercase tracking-[0.2em]">Sin partidos asignados</p>
                                     </div>
                                 ) : (
                                     programados.map((p) => (
@@ -317,6 +320,7 @@ export default function ProgramacionZona() {
                 </div>
             </main>
 
+            {/* Modales - Se asume que estos componentes internos ya manejan el estilo o se actualizarán globalmente */}
             <CerrarPartidoModal
                 open={modalCerrar}
                 partido={partidoSeleccionado}

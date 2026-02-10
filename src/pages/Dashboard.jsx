@@ -4,7 +4,8 @@ import Navbar from "../components/Navbar";
 import TorneosList from "../components/dashboard/TorneosList";
 import EquiposList from "../components/equipos/EquiposList";
 import UsuariosList from "../components/usuarios/UsuariosList";
-import { FaTrophy, FaUsers, FaUserShield, FaTimes, FaBars, FaLayerGroup } from "react-icons/fa";
+import CanchasList from "../components/canchas/CanchasList"; // <-- Importamos Canchas
+import { FaTrophy, FaUsers, FaUserShield, FaTimes, FaBars, FaLayerGroup, FaMapMarkerAlt } from "react-icons/fa";
 
 /* --- 1. COMPONENTES AUXILIARES --- */
 
@@ -14,6 +15,7 @@ function SidebarMenu({ selected, setSelected, user }) {
 
     const items = [
         { id: "torneos", icon: <FaLayerGroup />, label: "Torneos" },
+        { id: "canchas", icon: <FaMapMarkerAlt />, label: "Canchas", restricted: true }, // <-- Nuevo item
         { id: "equipos", icon: <FaTrophy />, label: "Equipos", restricted: true },
         { id: "usuarios", icon: <FaUsers />, label: "Usuarios", restricted: true },
     ];
@@ -63,6 +65,7 @@ function Content({ selected, user }) {
     const tieneAccesoTotal = userRole === "ROLE_ADMIN" || userRole === "ROLE_ENCARGADOTORNEO" || userRole === "ADMIN";
 
     if (selected === "torneos") return <TorneosList />;
+    if (selected === "canchas" && tieneAccesoTotal) return <CanchasList />; // <-- Lógica para canchas
     if (selected === "equipos" && tieneAccesoTotal) return <EquiposList />;
     if (selected === "usuarios" && tieneAccesoTotal) return <UsuariosList />;
 
@@ -81,12 +84,10 @@ export default function Dashboard() {
     return (
         <div className="min-h-screen bg-[#05070a] text-slate-300 font-sans">
 
-            {/* Fondo con profundidad metálica */}
             <div className="fixed inset-0 z-0">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_#1e293b_0%,_transparent_50%)] opacity-30"></div>
             </div>
 
-            {/* Navbar con Z-INDEX controlado para no quedar "huérfano" detrás del modal */}
             <div className="fixed top-0 left-0 right-0 z-[100]">
                 <Navbar onMenuClick={() => setMobileSidebar(true)} />
             </div>
@@ -101,15 +102,16 @@ export default function Dashboard() {
                     className={`fixed top-0 left-0 h-full w-72 bg-[#0a0c10] border-r border-slate-800 z-[120] transform transition-transform duration-300 ease-in-out flex flex-col p-6
                     ${mobileSidebar ? "translate-x-0" : "-translate-x-full"}`}
                 >
+                    {/* BOTÓN DESLIZANTE - AJUSTADO (Verticalmente más pequeño: h-[80px]) */}
                     <div
                         onClick={() => setMobileSidebar(!mobileSidebar)}
-                        className="absolute top-1/2 -translate-y-1/2 -right-[36px] w-[38px] h-[180px] bg-[#0a0c10] border border-l-0 border-slate-800 rounded-r-2xl flex flex-col items-center justify-center cursor-pointer shadow-[10px_0_15px_rgba(0,0,0,0.5)] active:scale-95 transition-all"
+                        className="absolute top-1/2 -translate-y-1/2 -right-[32px] w-[34px] h-[80px] bg-[#0a0c10] border border-l-0 border-slate-800 rounded-r-2xl flex flex-col items-center justify-center cursor-pointer shadow-[10px_0_15px_rgba(0,0,0,0.5)] active:scale-95 transition-all"
                     >
-                        <div className="flex flex-col items-center gap-3">
+                        <div className="flex flex-col items-center justify-center h-full">
                             {mobileSidebar ? (
-                                <FaTimes className="text-slate-200 mb-2" size={14} />
+                                <FaTimes className="text-slate-200" size={14} />
                             ) : (
-                                <FaBars className="text-slate-400 mb-2" size={14} />
+                                <FaBars className="text-slate-400" size={14} />
                             )}
                         </div>
                     </div>

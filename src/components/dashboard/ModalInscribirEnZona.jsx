@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../api/api";
-// AGREGADO FaLayerGroup AQUÍ ABAJO
 import { FaSearch, FaTimes, FaUserPlus, FaFutbol, FaShieldAlt, FaLayerGroup } from "react-icons/fa";
 
 export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated }) {
@@ -58,26 +57,25 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
     if (!torneo || !zona) return null;
 
     return (
-        <div className="fixed inset-0 bg-[#040714]/90 backdrop-blur-md flex justify-center items-center z-[500] p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-md flex justify-center items-center z-[500] p-4" onClick={onClose}>
             <div
-                className="bg-[#0a0f2c] w-full max-w-md rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden relative"
+                className="bg-[#0a0a0a] w-full max-w-md rounded-[2.5rem] border border-white/10 shadow-[0_0_50px_-12px_rgba(255,255,255,0.1)] overflow-hidden relative"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Decoración de fondo */}
-                <div className="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl"></div>
-
                 {/* Header */}
-                <div className="bg-[#05081c]/50 px-8 py-6 border-b border-slate-800 flex justify-between items-center relative z-10">
+                <div className="bg-[#111]/50 px-8 py-7 border-b border-white/5 flex justify-between items-center relative z-10">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-cyan-500/10 rounded-2xl border border-cyan-500/20 text-cyan-500">
+                        <div className="p-3 bg-white/5 rounded-2xl border border-white/10 text-white">
                             <FaUserPlus size={20} />
                         </div>
                         <div>
                             <h3 className="text-sm font-black uppercase tracking-widest text-white leading-none">Inscribir Equipo</h3>
-                            <p className="text-[10px] font-bold text-cyan-500 uppercase mt-1.5 tracking-tighter">Zona Destino: {zona.nombre}</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase mt-1.5 tracking-tighter">
+                                Zona Destino: <span className="text-white">{zona.nombre}</span>
+                            </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="bg-slate-800/50 p-2 rounded-xl text-slate-400 hover:text-white transition-all">
+                    <button onClick={onClose} className="bg-white/5 p-2.5 rounded-xl text-slate-500 hover:text-white border border-white/5 transition-all">
                         <FaTimes size={16} />
                     </button>
                 </div>
@@ -85,11 +83,11 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
                 {/* Buscador */}
                 <div className="p-6 pb-2 relative z-10">
                     <div className="relative">
-                        <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" />
+                        <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600" />
                         <input
                             type="text"
-                            placeholder="Buscar en mis equipos..."
-                            className="w-full bg-[#040714] border border-slate-800 rounded-2xl py-4 pl-12 pr-4 text-xs font-bold text-slate-200 outline-none focus:border-cyan-500/50 transition-all placeholder:text-slate-600 shadow-inner uppercase tracking-widest"
+                            placeholder="Buscar equipo por nombre..."
+                            className="w-full bg-black border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-xs font-bold text-white outline-none focus:border-white/30 transition-all placeholder:text-slate-800 shadow-inner uppercase tracking-widest"
                             autoFocus
                             value={busqueda}
                             onChange={(e) => setBusqueda(e.target.value)}
@@ -105,46 +103,53 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
                 )}
 
                 {/* Lista de Equipos */}
-                <div className="max-h-[380px] overflow-y-auto p-6 space-y-3 custom-scrollbar relative z-10">
+                <div className="max-h-[380px] overflow-y-auto p-6 space-y-4 custom-scrollbar relative z-10">
                     {loading ? (
                         <div className="flex flex-col items-center py-16 gap-4 opacity-50">
-                            <FaFutbol className="text-4xl text-cyan-500 animate-spin" />
+                            <FaFutbol className="text-4xl text-white animate-spin" />
                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Cargando Autorizados</p>
                         </div>
                     ) : disponibles.length > 0 ? (
                         disponibles.map(equipo => (
-                            <div key={equipo.id} className="flex justify-between items-center p-4 bg-[#05081c] hover:bg-[#0d153a] rounded-[1.5rem] border border-slate-800 hover:border-cyan-500/30 transition-all group">
-                                <div className="flex items-center gap-4 overflow-hidden">
-                                    <div className="w-12 h-12 bg-[#0a0f2c] rounded-2xl border border-slate-800 flex items-center justify-center shrink-0 overflow-hidden shadow-inner group-hover:border-cyan-500/30 transition-all">
+                            <div
+                                key={equipo.id}
+                                className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-5 bg-[#111] hover:bg-[#1a1a1a] rounded-[2rem] border border-white/5 hover:border-white/20 transition-all group gap-5"
+                            >
+                                <div className="flex items-center gap-5">
+                                    {/* Escudo Agrandado */}
+                                    <div className="w-16 h-16 bg-black rounded-2xl border border-white/10 flex items-center justify-center shrink-0 overflow-hidden shadow-inner group-hover:border-white/30 transition-all">
                                         {equipo.escudo ? (
                                             <img
                                                 src={equipo.escudo}
                                                 alt={equipo.nombre}
-                                                className="w-full h-full object-contain p-1.5"
+                                                className="w-full h-full object-contain p-2"
                                             />
                                         ) : (
-                                            <FaShieldAlt className="text-slate-700 text-xl" />
+                                            <FaShieldAlt className="text-slate-800 text-2xl" />
                                         )}
                                     </div>
-                                    <div className="truncate">
-                                        <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest group-hover:text-white transition-colors block truncate">
+                                    <div className="min-w-0 flex-1">
+                                        <span className="text-xs font-black text-slate-300 uppercase tracking-widest group-hover:text-white transition-colors block break-words">
                                             {equipo.nombre}
                                         </span>
-                                        <span className="text-[8px] font-bold text-slate-600 uppercase">Disponible</span>
+                                        <span className="text-[8px] font-bold text-slate-600 uppercase tracking-tighter block mt-1">
+                                            Disponible para inscripción
+                                        </span>
                                     </div>
                                 </div>
+
                                 <button
                                     disabled={enviando}
                                     onClick={() => handleInscribir(equipo.id)}
-                                    className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-[10px] font-black px-5 py-3 rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-widest shrink-0"
+                                    className="w-full sm:w-auto bg-white hover:bg-slate-200 disabled:opacity-20 text-black text-[10px] font-black px-8 py-4 rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-widest shrink-0"
                                 >
                                     {enviando ? "..." : "Inscribir"}
                                 </button>
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-16 px-6 border border-dashed border-slate-800 rounded-[2rem]">
-                            <FaLayerGroup className="mx-auto text-slate-800 mb-4" size={30} />
+                        <div className="text-center py-16 px-6 border border-dashed border-white/10 rounded-[2rem]">
+                            <FaLayerGroup className="mx-auto text-white/10 mb-4" size={30} />
                             <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest leading-relaxed italic">
                                 {busqueda ? "No hay coincidencias." : "No hay equipos disponibles."}
                             </p>
@@ -152,8 +157,8 @@ export default function ModalInscribirEnZona({ zona, torneo, onClose, onUpdated 
                     )}
                 </div>
 
-                <div className="p-5 bg-[#05081c]/50 text-center border-t border-slate-800">
-                    <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.3em]">
+                <div className="p-6 bg-black text-center border-t border-white/5">
+                    <p className="text-[8px] font-black text-slate-700 uppercase tracking-[0.4em]">
                         Seguridad de la Liga • Control de Acceso
                     </p>
                 </div>

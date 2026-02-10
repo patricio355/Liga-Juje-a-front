@@ -157,7 +157,7 @@ export default function TorneoPublico() {
                                 onClick={() => setSeccionActiva("ZONAS")}
                                 className={`flex items-center gap-2 px-6 md:px-8 py-2 md:py-3 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${seccionActiva === "ZONAS" ? "bg-[var(--tp)] text-[var(--p)] shadow-lg" : "text-[var(--ts)] hover:text-[var(--tp)]"}`}
                             >
-                                <FaLayerGroup /> GRUPOS
+                                <FaLayerGroup /> FASE DE GRUPOS
                             </button>
                             <button
                                 onClick={() => setSeccionActiva("FINAL")}
