@@ -223,7 +223,7 @@ export default function PartidoCard({ partido }) {
                     >
                         <FaMapMarkerAlt size={12} style={{ color: (hoverCancha && partido.ubicacionUrl) ? "#60a5fa" : "var(--ts)" }} />
                         <span className="text-[11px] font-black uppercase tracking-widest truncate" style={{ color: (hoverCancha && partido.ubicacionUrl) ? "#60a5fa" : "var(--tp)" }}>
-                            {(hoverCancha && partido.ubicacionUrl) ? "VER UBICACIÓN" : formatDato(partido.canchaNombre || partido.cancha)}
+                            {(hoverCancha && partido.ubicacionUrl) ? "VER UBICACIÓN." : formatDato(partido.canchaNombre || partido.cancha)}
                         </span>
                     </div>
 
