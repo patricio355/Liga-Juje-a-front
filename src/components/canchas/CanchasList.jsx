@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { apiFetch } from "../../api/api";
 import {
     FaMapMarkerAlt,
@@ -36,22 +36,82 @@ export default function CanchasList() {
 
     const eliminarCancha = (id) => {
         Swal.fire({
-            title: "¿ELIMINAR CANCHA?",
-            text: "Se borrará permanentemente del sistema.",
+            title: "¿ELIMINAR PREDIO?",
+            html: '<p style="font-size: 13px; color: #94a3b8; font-weight: 600; letter-spacing: 0.05em;">Se borrará permanentemente del sistema</p>',
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#ffffff",
-            cancelButtonColor: "#1a1a1a",
-            confirmButtonText: "SÍ, ELIMINAR",
+            cancelButtonColor: "#334155",
+            confirmButtonText: '<span style="color: #000; font-weight: 900; font-size: 11px; letter-spacing: 0.1em;">SÍ, ELIMINAR</span>',
+            cancelButtonText: '<span style="font-weight: 900; font-size: 11px; letter-spacing: 0.1em;">CANCELAR</span>',
             background: "#0a0a0a",
-            color: "#fff"
+            color: "#fff",
+            iconColor: "#fbbf24",
+            customClass: {
+                popup: "rounded-3xl border border-white/10",
+                title: "text-xl font-black uppercase tracking-tight",
+                confirmButton: "rounded-2xl px-8 py-3 shadow-lg hover:bg-slate-200",
+                cancelButton: "rounded-2xl px-8 py-3 hover:bg-slate-700"
+            },
+            buttonsStyling: true,
+            reverseButtons: true
         }).then(async (result) => {
             if (result.isConfirmed) {
+                Swal.fire({
+                    title: "ELIMINANDO...",
+                    html: '<p style="font-size: 13px; color: #94a3b8; font-weight: 600; letter-spacing: 0.05em;">Por favor espera</p>',
+                    background: "#0a0a0a",
+                    color: "#fff",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    customClass: {
+                        popup: "rounded-3xl border border-white/10",
+                        title: "text-xl font-black uppercase tracking-tight"
+                    },
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 try {
                     await apiFetch(`/api/canchas/${id}`, { method: "DELETE" });
+
+                    Swal.fire({
+                        title: "¡ELIMINADO!",
+                        html: '<p style="font-size: 13px; color: #94a3b8; font-weight: 600; letter-spacing: 0.05em;">El predio ha sido eliminado correctamente</p>',
+                        icon: "success",
+                        background: "#0a0a0a",
+                        color: "#fff",
+                        iconColor: "#10b981",
+                        confirmButtonColor: "#ffffff",
+                        confirmButtonText: '<span style="color: #000; font-weight: 900; font-size: 11px; letter-spacing: 0.1em;">ENTENDIDO</span>',
+                        customClass: {
+                            popup: "rounded-3xl border border-white/10",
+                            title: "text-xl font-black uppercase tracking-tight",
+                            confirmButton: "rounded-2xl px-8 py-3 shadow-lg hover:bg-slate-200"
+                        },
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+
                     cargarCanchas();
                 } catch (e) {
-                    Swal.fire("ERROR", "No se pudo eliminar", "error");
+                    Swal.fire({
+                        title: "ERROR",
+                        html: '<p style="font-size: 13px; color: #94a3b8; font-weight: 600; letter-spacing: 0.05em;">No se pudo eliminar el predio. Intenta nuevamente.</p>',
+                        icon: "error",
+                        background: "#0a0a0a",
+                        color: "#fff",
+                        iconColor: "#ef4444",
+                        confirmButtonColor: "#ffffff",
+                        confirmButtonText: '<span style="color: #000; font-weight: 900; font-size: 11px; letter-spacing: 0.1em;">CERRAR</span>',
+                        customClass: {
+                            popup: "rounded-3xl border border-white/10",
+                            title: "text-xl font-black uppercase tracking-tight",
+                            confirmButton: "rounded-2xl px-8 py-3 shadow-lg hover:bg-slate-200"
+                        }
+                    });
                 }
             }
         });

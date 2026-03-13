@@ -11,7 +11,10 @@ import {
     FaVenusMars,
     FaUserAlt,
     FaToggleOn,
-    FaGlobe
+    FaGlobe,
+    FaPhone,
+    FaFlagCheckered,
+    FaMedal
 } from "react-icons/fa";
 import ImageUpload from "../../images/ImageUpload";
 
@@ -41,6 +44,9 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
     const [fotoUrl, setFotoUrl] = useState("");
     const [genero, setGenero] = useState("MASCULINO");
     const [redSocial, setRedSocial] = useState("");
+    const [telefono, setTelefono] = useState("");
+    const [estadoTorneo, setEstadoTorneo] = useState(true);
+    const [campeon, setCampeon] = useState("");
     const [puntosGanador, setPuntosGanador] = useState(3);
     const [puntosEmpate, setPuntosEmpate] = useState(1);
     const [plantillaActiva, setPlantillaActiva] = useState("NEGRO");
@@ -51,6 +57,10 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
 
     useEffect(() => {
         if (torneo) {
+            console.log("📋 DATOS RECIBIDOS DEL TORNEO:", torneo);
+            console.log("📞 Teléfono recibido:", torneo.telefono);
+            console.log("🏆 Estado torneo recibido:", torneo.estadoTorneo);
+
             setNombre(torneo.nombre || "");
             setDivision(torneo.division || "");
             setEncargadoEmail(torneo.encargadoEmail || "");
@@ -59,6 +69,9 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
             setFotoUrl(torneo.fotoUrl || "");
             setGenero(torneo.genero || "MASCULINO");
             setRedSocial(torneo.redSocial || "");
+            setTelefono(torneo.telefono || "");
+            setEstadoTorneo(torneo.estadoTorneo ?? true);
+            setCampeon(torneo.campeon || "");
             setPuntosGanador(torneo.puntosGanador ?? 3);
             setPuntosEmpate(torneo.puntosEmpate ?? 1);
 
@@ -106,6 +119,9 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                 fotoUrl: fotoUrl || null,
                 genero,
                 redSocial: redSocial || null,
+                telefono: telefono || null,
+                estadoTorneo: estadoTorneo,
+                campeon: (!estadoTorneo && campeon.trim()) ? campeon.trim() : null,
                 puntosGanador: Number(puntosGanador),
                 puntosEmpate: Number(puntosEmpate),
                 colorPrimario: PLANTILLAS[plantillaActiva].p,
@@ -118,6 +134,8 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                 payload.encargadoEmail = encargadoEmail === "" ? null : encargadoEmail;
             }
 
+           
+
             await apiFetch(`/api/torneos/${torneo.id}`, {
                 method: "PUT",
                 body: JSON.stringify(payload),
@@ -126,6 +144,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
             if (onUpdated) await onUpdated();
             onClose();
         } catch (e) {
+            console.error("❌ ERROR AL ACTUALIZAR:", e);
             setError(e.message || "Error al actualizar torneo");
         } finally {
             setLoading(false);
@@ -241,6 +260,21 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             </div>
 
                             <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    <FaPhone size={10} /> Teléfono de Contacto
+                                </label>
+                                <div className="relative">
+                                    <FaPhone className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700" />
+                                    <input
+                                        placeholder="+54 9 388..."
+                                        className="w-full pl-14 pr-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-bold text-white placeholder:text-slate-900 shadow-inner"
+                                        value={telefono}
+                                        onChange={e => setTelefono(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Red Social</label>
                                 <div className="relative">
                                     <FaGlobe className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700" />
@@ -253,18 +287,47 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                                 </div>
                             </div>
 
+                            <div className="space-y-2 bg-white/5 p-4 rounded-2xl border border-white/5 shadow-inner">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    <FaFlagCheckered size={10} /> Estado del Torneo
+                                </label>
+                                <select
+                                    className="w-full bg-transparent outline-none text-xs font-black text-white uppercase italic cursor-pointer"
+                                    value={estadoTorneo ? "EN_CURSO" : "FINALIZADO"}
+                                    onChange={e => setEstadoTorneo(e.target.value === "EN_CURSO")}
+                                >
+                                    <option value="EN_CURSO" className="bg-black">⚽ EN CURSO</option>
+                                    <option value="FINALIZADO" className="bg-black">🏆 FINALIZADO</option>
+                                </select>
+                            </div>
+
+                            {/* CAMPO CAMPEÓN - Solo visible si está FINALIZADO */}
+                            {!estadoTorneo && (
+                                <div className="space-y-2 bg-amber-500/5 p-4 rounded-2xl border border-amber-500/20 shadow-inner">
+                                    <label className="text-[10px] font-black text-amber-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                        <FaMedal size={10} /> Campeón del Torneo
+                                    </label>
+                                    <input
+                                        placeholder="NOMBRE DEL EQUIPO CAMPEÓN"
+                                        className="w-full px-4 py-3 bg-black/50 border border-amber-500/20 rounded-xl outline-none focus:border-amber-500 text-xs font-black text-amber-100 placeholder:text-slate-800 italic uppercase transition-all"
+                                        value={campeon}
+                                        onChange={e => setCampeon(e.target.value.toUpperCase())}
+                                    />
+                                </div>
+                            )}
+
                             {esAdminGenuino && (
                                 <div className="space-y-2 bg-white/5 p-4 rounded-2xl border border-white/5 shadow-inner">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                                        <FaToggleOn size={10} /> Estado del Torneo
+                                        <FaToggleOn size={10} /> Visibilidad
                                     </label>
                                     <select
                                         className="w-full bg-transparent outline-none text-xs font-black text-white uppercase italic cursor-pointer"
                                         value={estado}
                                         onChange={e => setEstado(e.target.value)}
                                     >
-                                        <option value="activo" className="bg-black">ACTIVO (VISIBLE)</option>
-                                        <option value="inactivo" className="bg-black">INACTIVO (BORRADOR)</option>
+                                        <option value="activo" className="bg-black">👁️ ACTIVO (VISIBLE)</option>
+                                        <option value="inactivo" className="bg-black">📝 INACTIVO (BORRADOR)</option>
                                     </select>
                                 </div>
                             )}

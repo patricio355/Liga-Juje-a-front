@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
     FaArrowLeft, FaPlus, FaSync,
@@ -18,7 +18,8 @@ export default function GestionFaseFinal() {
 
     const [etapasDb, setEtapasDb] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [creandoEtapa, setCreandoEtapa] = useState(false); // Nuevo estado para el feedback
+    const [creandoEtapa, setCreandoEtapa] = useState(false);
+    const [operando, setOperando] = useState(false);
 
     const [partidoSeleccionado, setPartidoSeleccionado] = useState(null);
     const [etapaSeleccionada, setEtapaSeleccionada] = useState(null);
@@ -30,7 +31,7 @@ export default function GestionFaseFinal() {
 
     const nombresFases = ["Final", "Semifinales", "Cuartos de Final", "Octavos de Final", "16avos de Final", "32avos de Final"];
 
-    const cargarEtapas = async () => {
+    const cargarEtapas = useCallback(async () => {
         try {
             setLoading(true);
             const data = await apiFetch(`/api/torneos/${id}/cuadro-completo`);
@@ -40,9 +41,9 @@ export default function GestionFaseFinal() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
 
-    useEffect(() => { cargarEtapas(); }, [id]);
+    useEffect(() => { cargarEtapas(); }, [cargarEtapas]);
 
     const gestionarNuevaEtapa = async () => {
         const profundidadActual = etapasDb.length;
@@ -77,16 +78,20 @@ export default function GestionFaseFinal() {
     };
 
     const eliminarPartido = async (partidoId) => {
+        if (operando) return;
         if (!window.confirm("¿Estás seguro de eliminar este partido?")) return;
+        setOperando(true);
         try {
             await apiFetch(`/api/partidos/faseFinal/${partidoId}`, { method: "DELETE" });
             await cargarEtapas();
         } catch (error) {
             alert("Error al eliminar");
+        } finally {
+            setOperando(false);
         }
     };
 
-    const prepararPartidoParaModal = (p) => {
+    const prepararPartidoParaModal = useCallback((p) => {
         if (!p) return null;
         return {
             ...p,
@@ -99,9 +104,9 @@ export default function GestionFaseFinal() {
             golesLocalPenales: p.golesLocalPenales,
             golesVisitantePenales: p.golesVisitantePenales
         };
-    };
+    }, []);
 
-    const generarColumnasEspejo = () => {
+    const columnas = useMemo(() => {
         if (etapasDb.length === 0) return [];
         const final = etapasDb.find(e => e.orden === 1);
         const otrasEtapas = etapasDb.filter(e => e.orden !== 1).sort((a, b) => b.orden - a.orden);
@@ -131,9 +136,11 @@ export default function GestionFaseFinal() {
 
         const columnaFinal = final ? [{ ...final, esFinal: true, celdas: [{ ordenReal: 1, partido: final.partidos[0] }] }] : [];
         return [...ladoIzquierdo, ...columnaFinal, ...ladoDerecho];
-    };
+    }, [etapasDb]);
 
-    const columnas = generarColumnasEspejo();
+    const ordenMaximo = useMemo(() => {
+        return etapasDb.length > 0 ? Math.max(...etapasDb.map(e => e.orden)) : 0;
+    }, [etapasDb]);
 
     if (loading && !creandoEtapa) return (
         <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
@@ -141,8 +148,6 @@ export default function GestionFaseFinal() {
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Sincronizando Cuadro</span>
         </div>
     );
-
-    const ordenMaximo = etapasDb.length > 0 ? Math.max(...etapasDb.map(e => e.orden)) : 0;
 
     return (
         <div className="min-h-screen bg-black text-slate-200 font-sans">
@@ -209,12 +214,12 @@ export default function GestionFaseFinal() {
                                                     <div className="p-4">
                                                         <div className="space-y-3">
                                                             {/* Local */}
-                                                            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-tighter">
-                                                                <div className="flex items-center gap-2 overflow-hidden">
+                                                            <div className="flex justify-between items-start text-[10px] font-black uppercase tracking-tighter">
+                                                                <div className="flex items-center gap-2 flex-1 min-w-0">
                                                                     <div className="w-6 h-6 bg-[#111] rounded-md flex items-center justify-center shrink-0 border border-white/5">
                                                                         {celda.partido?.equipoLocalEscudo ? <img src={celda.partido.equipoLocalEscudo} className="w-4 h-4 object-contain" alt="" /> : <FaShieldAlt className="text-white/10" />}
                                                                     </div>
-                                                                    <span className={`truncate max-w-[90px] ${celda.partido ? "text-white" : "text-slate-800"}`}>
+                                                                    <span className={`break-words leading-tight ${celda.partido ? "text-white" : "text-slate-800"}`}>
                                                                         {celda.partido?.equipoLocal || "ESPERANDO"}
                                                                     </span>
                                                                 </div>
@@ -227,12 +232,12 @@ export default function GestionFaseFinal() {
                                                             </div>
 
                                                             {/* Visitante */}
-                                                            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-tighter">
-                                                                <div className="flex items-center gap-2 overflow-hidden">
+                                                            <div className="flex justify-between items-start text-[10px] font-black uppercase tracking-tighter">
+                                                                <div className="flex items-center gap-2 flex-1 min-w-0">
                                                                     <div className="w-6 h-6 bg-[#111] rounded-md flex items-center justify-center shrink-0 border border-white/5">
                                                                         {celda.partido?.equipoVisitanteEscudo ? <img src={celda.partido.equipoVisitanteEscudo} className="w-4 h-4 object-contain" alt="" /> : <FaShieldAlt className="text-white/10" />}
                                                                     </div>
-                                                                    <span className={`truncate max-w-[90px] ${celda.partido ? "text-white" : "text-slate-800"}`}>
+                                                                    <span className={`break-words leading-tight ${celda.partido ? "text-white" : "text-slate-800"}`}>
                                                                         {celda.partido?.equipoVisitante || "ESPERANDO"}
                                                                     </span>
                                                                 </div>
@@ -253,7 +258,8 @@ export default function GestionFaseFinal() {
                                                                 setIdxPartSeleccionado(celda.ordenReal - 1);
                                                                 setModalCrearOpen(true);
                                                             }}
-                                                            className="text-slate-600 hover:text-white transition-all p-2"
+                                                            disabled={operando}
+                                                            className="text-slate-600 hover:text-white transition-all p-2 bg-white/5 rounded-lg border border-white/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             <FaEdit size={14}/>
                                                         </button>
@@ -264,13 +270,15 @@ export default function GestionFaseFinal() {
                                                                         setPartidoSeleccionado(prepararPartidoParaModal(celda.partido));
                                                                         setModalCerrarOpen(true);
                                                                     }}
-                                                                    className="text-slate-600 hover:text-white transition-all p-2"
+                                                                    disabled={operando}
+                                                                    className="text-slate-600 hover:text-white transition-all p-2 bg-white/5 rounded-lg border border-white/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                                                 >
                                                                     <FaCheckCircle size={14}/>
                                                                 </button>
                                                                 <button
                                                                     onClick={() => eliminarPartido(celda.partido.id)}
-                                                                    className="text-slate-600 hover:text-red-500 transition-all p-2"
+                                                                    disabled={operando}
+                                                                    className="text-slate-600 hover:text-red-500 transition-all p-2 bg-white/5 rounded-lg border border-white/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                                                 >
                                                                     <FaTrashAlt size={14}/>
                                                                 </button>
@@ -294,15 +302,45 @@ export default function GestionFaseFinal() {
                     torneoId={id}
                     etapa={etapaSeleccionada}
                     idxPart={idxPartSeleccionado}
-                    onClose={() => { setModalCrearOpen(false); setEtapaSeleccionada(null); }}
-                    onSuccess={cargarEtapas}
+                    onClose={() => {
+                        setModalCrearOpen(false);
+                        setEtapaSeleccionada(null);
+                        setIdxPartSeleccionado(null);
+                    }}
+                    onSuccess={() => {
+                        cargarEtapas();
+                        setEtapaSeleccionada(null);
+                        setIdxPartSeleccionado(null);
+                    }}
                 />
             )}
             {modalEditarOpen && partidoSeleccionado && (
-                <EditarInfoModal open={modalEditarOpen} partido={partidoSeleccionado} onClose={() => { setModalEditarOpen(false); setPartidoSeleccionado(null); }} onSuccess={cargarEtapas} />
+                <EditarInfoModal
+                    open={modalEditarOpen}
+                    partido={partidoSeleccionado}
+                    onClose={() => {
+                        setModalEditarOpen(false);
+                        setPartidoSeleccionado(null);
+                    }}
+                    onSuccess={() => {
+                        cargarEtapas();
+                        setPartidoSeleccionado(null);
+                    }}
+                />
             )}
             {modalCerrarOpen && partidoSeleccionado && (
-                <CerrarPartidoModal open={modalCerrarOpen} partido={partidoSeleccionado} onClose={() => { setModalCerrarOpen(false); setPartidoSeleccionado(null); }} onSuccess={cargarEtapas} />
+                <CerrarPartidoModal
+                    open={modalCerrarOpen}
+                    partido={partidoSeleccionado}
+                    onClose={() => {
+                        setModalCerrarOpen(false);
+                        setPartidoSeleccionado(null);
+                    }}
+                    onSuccess={() => {
+                        cargarEtapas();
+                        setPartidoSeleccionado(null);
+                    }}
+                />
             )}
         </div>
     );

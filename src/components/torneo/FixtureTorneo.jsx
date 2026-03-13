@@ -145,6 +145,7 @@ export default function FixtureTorneo({ zonaId }) {
                                 equipoLocalEscudo: partido.equipoLocalEscudo || partido.localEscudo,
                                 equipoVisitanteEscudo: partido.equipoVisitanteEscudo || partido.visitanteEscudo,
                                 canchaNombre: partido.canchaNombre || partido.cancha,
+                                ubicacionUrl: partido.ubicacionUrl || partido.canchaUbicacionUrl,
                                 hora: partido.hora || partido.Hora,
                                 arbitro: partido.arbitro || partido.arbitroNombre,
                                 golesLocal: partido.golesLocal ?? partido.golesL,

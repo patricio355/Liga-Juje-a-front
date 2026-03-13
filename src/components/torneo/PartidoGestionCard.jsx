@@ -53,7 +53,7 @@ export default function PartidoGestionCard({ partido, onEditInfo, onFinalize, on
                         }`}></div>
                     </div>
 
-                    <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 flex-1 justify-end">
+                    <div className="flex flex-col-reverse md:flex-row items-center gap-2 md:gap-4 flex-1 justify-end">
                         <span className="text-white font-black uppercase text-[10px] md:text-lg tracking-tighter leading-none self-center">
                             {partido.equipoVisitanteNombre}
                         </span>

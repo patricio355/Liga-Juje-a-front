@@ -88,7 +88,7 @@ export default function GestionPartidosFixture() {
                 </div>
 
                 {/* Header Principal Imponente */}
-                <header className="bg-[#0a0a0a] p-8 md:p-12 rounded-[3rem] border border-white/10 mb-10 shadow-2xl relative overflow-hidden">
+                <header className="bg-[#0a0a0a] p-8 md:p-12 rounded-[3rem] border border-white/10 mb-10 shadow-2xl relative">
                     <div className="flex flex-col lg:flex-row justify-between items-center gap-10 relative z-10">
 
                         <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
@@ -131,7 +131,7 @@ export default function GestionPartidosFixture() {
                                 <FaChevronDown size={10} className={`text-white transition-transform ${menuAbierto ? "rotate-180" : ""}`} />
                             </div>
                             {menuAbierto && (
-                                <div className="absolute top-[calc(100%+10px)] right-0 w-full bg-[#111] border border-white/10 rounded-[1.5rem] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="absolute top-[calc(100%+10px)] right-0 w-full bg-[#111] border border-white/10 rounded-[1.5rem] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[400px] overflow-y-auto">
                                     {zonas.map(z => (
                                         <button
                                             key={z.id}

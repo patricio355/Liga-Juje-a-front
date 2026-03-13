@@ -15,7 +15,8 @@ import {
     FaLayerGroup,
     FaSitemap,
     FaCogs,
-    FaInfoCircle
+    FaInfoCircle,
+    FaPhone
 } from "react-icons/fa";
 import ImageUpload from "../../images/ImageUpload";
 
@@ -46,6 +47,7 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
     const [fotoUrl, setFotoUrl] = useState("");
     const [genero, setGenero] = useState("MASCULINO");
     const [redSocial, setRedSocial] = useState("");
+    const [telefono, setTelefono] = useState("");
 
     // Nuevos atributos de visibilidad inicial
     const [mostrarGrupos, setMostrarGrupos] = useState(true);
@@ -96,6 +98,8 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                 fotoUrl: fotoUrl || null,
                 genero: genero,
                 redSocial: redSocial || null,
+                telefono: telefono || null,
+                estadoTorneo: true,
                 faseGrupos: mostrarGrupos,
                 faseFinal: mostrarFinal
             };
@@ -228,6 +232,21 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
 
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    <FaPhone size={10} /> Teléfono de Contacto
+                                </label>
+                                <div className="relative">
+                                    <FaPhone className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700" />
+                                    <input
+                                        placeholder="+54 9 388..."
+                                        className="w-full pl-14 pr-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-bold text-white placeholder:text-slate-900 shadow-inner"
+                                        value={telefono}
+                                        onChange={e => setTelefono(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
                                     <FaGlobe size={10} /> Red Social
                                 </label>
                                 <div className="relative">
@@ -238,26 +257,6 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                                         value={redSocial}
                                         onChange={e => setRedSocial(e.target.value)}
                                     />
-                                </div>
-                            </div>
-
-                            {/* LEYENDA EXPLICATIVA DE MODALIDAD */}
-                            <div className="col-span-1 md:col-span-2 bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                                <div className="flex items-center gap-2 text-slate-400">
-                                    <FaInfoCircle size={12} />
-                                    <span className="text-[9px] font-black uppercase tracking-widest">Información de Modalidad</span>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className={`p-4 rounded-2xl border transition-all ${tipo === 'CERRADO' ? 'bg-slate-400/10 border-slate-400/30' : 'opacity-30 border-transparent'}`}>
-                                        <p className="text-[10px] leading-relaxed text-slate-200">
-                                            <span className="font-black text-slate-400 uppercase">* CERRADO:</span> Ya tengo mis equipos y quiero fixture automático para solo cerrar partidos con el resultado (ideal para torneos profesionales).
-                                        </p>
-                                    </div>
-                                    <div className={`p-4 rounded-2xl border transition-all ${tipo === 'ABIERTO' ? 'bg-slate-400/10 border-slate-400/30' : 'opacity-30 border-transparent'}`}>
-                                        <p className="text-[10px] leading-relaxed text-slate-200">
-                                            <span className="font-black text-slate-400 uppercase">* ABIERTO:</span> Voy a permitir añadir equipos a mitad del torneo y voy a gestionar el fixture manualmente (ideal para torneos barriales).
-                                        </p>
-                                    </div>
                                 </div>
                             </div>
 
@@ -289,8 +288,28 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                             </div>
                         </div>
 
+                        {/* LEYENDA EXPLICATIVA DE MODALIDAD */}
+                        <div className="col-span-1 md:col-span-2 bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                            <div className="flex items-center gap-2 text-slate-400">
+                                <FaInfoCircle size={12} />
+                                <span className="text-[9px] font-black uppercase tracking-widest">Información de Modalidad</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className={`p-4 rounded-2xl border transition-all ${tipo === 'CERRADO' ? 'bg-slate-400/10 border-slate-400/30' : 'opacity-30 border-transparent'}`}>
+                                    <p className="text-[10px] leading-relaxed text-slate-200">
+                                        <span className="font-black text-slate-400 uppercase">* CERRADO:</span> Ya tengo mis equipos y quiero fixture automático para solo cerrar partidos con el resultado (ideal para torneos profesionales).
+                                    </p>
+                                </div>
+                                <div className={`p-4 rounded-2xl border transition-all ${tipo === 'ABIERTO' ? 'bg-slate-400/10 border-slate-400/30' : 'opacity-30 border-transparent'}`}>
+                                    <p className="text-[10px] leading-relaxed text-slate-200">
+                                        <span className="font-black text-slate-400 uppercase">* ABIERTO:</span> Voy a permitir añadir equipos a mitad del torneo y voy a gestionar el fixture manualmente (ideal para torneos barriales).
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* ESTRUCTURA DE FASES */}
-                        <div className="col-span-1 md:col-span-2 space-y-4 pt-6 border-t border-white/5">
+                        <div className="col-span-1 md:col-span-2 space-y-4">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estructura de Fases Iniciales</label>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <button

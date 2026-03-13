@@ -1,8 +1,9 @@
-import { useContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
     FaTrophy, FaTimes, FaCheck,
-    FaCalendarAlt, FaMapMarkerAlt, FaClock, FaEdit
+    FaCalendarAlt, FaMapMarkerAlt, FaClock, FaEdit,
+    FaPlus, FaMinus
 } from "react-icons/fa";
 import EditarInfoModal from "./EditarInfoModal";
 
@@ -29,15 +30,24 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
 
     if (!open || !partido) return null;
 
-    // Validación para no permitir números menores a 0
     const handleGolesChange = (valor, setter) => {
-        const num = parseInt(valor);
-        if (valor === "") setter(0);
-        if (num >= 0) setter(num);
+        if (valor === "" || valor === null || valor === undefined) {
+            setter(0);
+            return;
+        }
+        const num = parseInt(valor, 10);
+        if (!isNaN(num) && num >= 0) {
+            setter(num);
+        }
     };
 
-    // VALIDACIONES DE ESTADO (Ahora siempre hay números, así que validamos por coherencia)
-    const camposGolesVacios = golesLocal === "" || golesVisitante === "";
+    const incrementar = (setter, valor) => {
+        setter(prev => prev + 1);
+    };
+
+    const decrementar = (setter, valor) => {
+        setter(prev => prev > 0 ? prev - 1 : 0);
+    };
 
     const esEmpateFaseFinal = partido.esFaseFinal &&
         Number(golesLocal) === Number(golesVisitante);
@@ -94,7 +104,7 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
                         </div>
                         <div>
                             <h2 className="text-xl font-black uppercase italic tracking-tighter text-white">
-                                {partido.esFaseFinal ? "Cerrar Eliminatoria" : "Cerrar Planilla"}
+                                {partido.esFaseFinal ? "Cerrar Eliminatoria." : "Cerrar Planilla."}
                             </h2>
                             <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">
                                 Registro de resultado oficial
@@ -141,13 +151,32 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
                             <p className="text-white font-black text-[10px] uppercase text-center mb-4 break-words w-full leading-tight h-8 flex items-center justify-center">
                                 {partido.equipoLocalNombre || partido.local}
                             </p>
-                            <input
-                                type="number"
-                                min="0"
-                                className="w-16 h-16 bg-black border-2 border-white/10 rounded-2xl text-center text-2xl font-black text-white focus:border-slate-400 outline-none shadow-2xl transition-all"
-                                value={golesLocal}
-                                onChange={(e) => handleGolesChange(e.target.value, setGolesLocal)}
-                            />
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    className="w-16 h-16 bg-black border-2 border-white/10 rounded-2xl text-center text-2xl font-black text-white focus:border-slate-400 outline-none shadow-2xl transition-all"
+                                    value={golesLocal}
+                                    onChange={(e) => handleGolesChange(e.target.value, setGolesLocal)}
+                                />
+                                <div className="flex flex-col gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => incrementar(setGolesLocal, golesLocal)}
+                                        className="w-7 h-7 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-white transition-all active:scale-95"
+                                    >
+                                        <FaPlus size={10} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => decrementar(setGolesLocal, golesLocal)}
+                                        className="w-7 h-7 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-white transition-all active:scale-95"
+                                    >
+                                        <FaMinus size={10} />
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="text-slate-800 font-black text-xl pt-8 shrink-0">VS</div>
@@ -156,13 +185,32 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
                             <p className="text-white font-black text-[10px] uppercase text-center mb-4 break-words w-full leading-tight h-8 flex items-center justify-center">
                                 {partido.equipoVisitanteNombre || partido.visitante}
                             </p>
-                            <input
-                                type="number"
-                                min="0"
-                                className="w-16 h-16 bg-black border-2 border-white/10 rounded-2xl text-center text-2xl font-black text-white focus:border-slate-400 outline-none shadow-2xl transition-all"
-                                value={golesVisitante}
-                                onChange={(e) => handleGolesChange(e.target.value, setGolesVisitante)}
-                            />
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    className="w-16 h-16 bg-black border-2 border-white/10 rounded-2xl text-center text-2xl font-black text-white focus:border-slate-400 outline-none shadow-2xl transition-all"
+                                    value={golesVisitante}
+                                    onChange={(e) => handleGolesChange(e.target.value, setGolesVisitante)}
+                                />
+                                <div className="flex flex-col gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => incrementar(setGolesVisitante, golesVisitante)}
+                                        className="w-7 h-7 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-white transition-all active:scale-95"
+                                    >
+                                        <FaPlus size={10} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => decrementar(setGolesVisitante, golesVisitante)}
+                                        className="w-7 h-7 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-white transition-all active:scale-95"
+                                    >
+                                        <FaMinus size={10} />
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -172,26 +220,62 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
                             <p className="text-[10px] text-center font-black text-slate-500 uppercase tracking-[0.3em] mb-4">
                                 Definición por Penales
                             </p>
-                            <div className="flex justify-center items-center gap-8">
+                            <div className="flex justify-center items-center gap-6">
                                 <div className="flex flex-col items-center gap-2">
                                     <span className="text-[9px] font-bold text-slate-600 uppercase tracking-tighter">Local</span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        className="w-14 h-14 bg-black border-2 border-white/10 rounded-2xl text-center text-xl font-black text-white focus:border-slate-400 outline-none"
-                                        value={golesLocalPenales}
-                                        onChange={(e) => handleGolesChange(e.target.value, setGolesLocalPenales)}
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            className="w-14 h-14 bg-black border-2 border-white/10 rounded-2xl text-center text-xl font-black text-white focus:border-slate-400 outline-none"
+                                            value={golesLocalPenales}
+                                            onChange={(e) => handleGolesChange(e.target.value, setGolesLocalPenales)}
+                                        />
+                                        <div className="flex flex-col gap-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => incrementar(setGolesLocalPenales, golesLocalPenales)}
+                                                className="w-6 h-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-white transition-all active:scale-95"
+                                            >
+                                                <FaPlus size={8} />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => decrementar(setGolesLocalPenales, golesLocalPenales)}
+                                                className="w-6 h-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-white transition-all active:scale-95"
+                                            >
+                                                <FaMinus size={8} />
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="flex flex-col items-center gap-2">
                                     <span className="text-[9px] font-bold text-slate-600 uppercase tracking-tighter">Visitante</span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        className="w-14 h-14 bg-black border-2 border-white/10 rounded-2xl text-center text-xl font-black text-white focus:border-slate-400 outline-none"
-                                        value={golesVisitantePenales}
-                                        onChange={(e) => handleGolesChange(e.target.value, setGolesVisitantePenales)}
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            className="w-14 h-14 bg-black border-2 border-white/10 rounded-2xl text-center text-xl font-black text-white focus:border-slate-400 outline-none"
+                                            value={golesVisitantePenales}
+                                            onChange={(e) => handleGolesChange(e.target.value, setGolesVisitantePenales)}
+                                        />
+                                        <div className="flex flex-col gap-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => incrementar(setGolesVisitantePenales, golesVisitantePenales)}
+                                                className="w-6 h-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-white transition-all active:scale-95"
+                                            >
+                                                <FaPlus size={8} />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => decrementar(setGolesVisitantePenales, golesVisitantePenales)}
+                                                className="w-6 h-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-white transition-all active:scale-95"
+                                            >
+                                                <FaMinus size={8} />
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             {Number(golesLocalPenales) === Number(golesVisitantePenales) && (

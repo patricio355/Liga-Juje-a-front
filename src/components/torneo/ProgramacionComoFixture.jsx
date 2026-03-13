@@ -151,6 +151,7 @@ export default function ProgramacionComoFixture({ zonaId }) {
                             equipoLocalEscudo: p.localEscudo || p.equipoLocalEscudo,
                             equipoVisitanteEscudo: p.visitanteEscudo || p.equipoVisitanteEscudo,
                             canchaNombre: p.cancha || p.canchaNombre,
+                            ubicacionUrl: p.ubicacionUrl || p.canchaUbicacionUrl,
                             hora: p.hora || p.Hora,
                             arbitro: p.arbitro || p.arbitroNombre,
                             golesLocal: p.golesLocal ?? p.golesL,

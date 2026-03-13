@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { apiFetch } from "../api/api";
 import {
     FaSync, FaCalendarAlt,
-    FaMapMarkerAlt, FaChevronDown, FaClock, FaTrophy
+    FaMapMarkerAlt, FaChevronDown, FaClock, FaTrophy, FaUserTie
 } from "react-icons/fa";
 
 export default function CuadroFaseFinal({ torneoId, fallback }) {
@@ -148,18 +148,18 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
                                                 >
                                                     {/* FILA LOCAL */}
                                                     <div
-                                                        className="flex justify-between items-center py-1 px-1"
+                                                        className="flex justify-between items-start py-1 px-1"
                                                         style={{
                                                             borderBottom: borderDivider,
                                                             backgroundColor: localGano ? "var(--ts)15" : "transparent"
                                                         }}
                                                     >
-                                                        <div className="flex items-center gap-1 overflow-hidden">
+                                                        <div className="flex items-center gap-1 flex-1 min-w-0">
                                                             {partido.equipoLocalEscudo &&
-                                                                <img src={partido.equipoLocalEscudo} className="w-3 h-3 object-contain" alt="" />
+                                                                <img src={partido.equipoLocalEscudo} className="w-3 h-3 object-contain shrink-0" alt="" />
                                                             }
                                                             <span
-                                                                className="text-[8px] md:text-[9px] font-medium uppercase truncate max-w-[65px]"
+                                                                className="text-[8px] md:text-[9px] font-medium uppercase break-words leading-tight"
                                                                 style={{ color: localGano ? "var(--ts)" : "var(--tp)", opacity: localGano ? 1 : 0.8 }}
                                                             >
                                                                 {partido.equipoLocal || "A DEFINIR"}
@@ -179,17 +179,17 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
 
                                                     {/* FILA VISITANTE */}
                                                     <div
-                                                        className="flex justify-between items-center py-1 px-1"
+                                                        className="flex justify-between items-start py-1 px-1"
                                                         style={{
                                                             backgroundColor: visitanteGano ? "var(--ts)15" : "transparent"
                                                         }}
                                                     >
-                                                        <div className="flex items-center gap-1 overflow-hidden">
+                                                        <div className="flex items-center gap-1 flex-1 min-w-0">
                                                             {partido.equipoVisitanteEscudo &&
-                                                                <img src={partido.equipoVisitanteEscudo} className="w-3 h-3 object-contain" alt="" />
+                                                                <img src={partido.equipoVisitanteEscudo} className="w-3 h-3 object-contain shrink-0" alt="" />
                                                             }
                                                             <span
-                                                                className="text-[8px] md:text-[9px] font-medium uppercase truncate max-w-[65px]"
+                                                                className="text-[8px] md:text-[9px] font-medium uppercase break-words leading-tight"
                                                                 style={{ color: visitanteGano ? "var(--ts)" : "var(--tp)", opacity: visitanteGano ? 1 : 0.8 }}
                                                             >
                                                                 {partido.equipoVisitante || "A DEFINIR"}
@@ -225,6 +225,11 @@ export default function CuadroFaseFinal({ torneoId, fallback }) {
                                                             {partido.cancha && (
                                                                 <div className="flex items-center gap-1.5 text-[7px] opacity-70 truncate" style={{ color: "var(--tp)" }}>
                                                                     <FaMapMarkerAlt size={7} /> <span className="truncate">{partido.cancha}</span>
+                                                                </div>
+                                                            )}
+                                                            {partido.arbitro && (
+                                                                <div className="flex items-center gap-1.5 text-[7px] opacity-70" style={{ color: "var(--tp)" }}>
+                                                                    <FaUserTie size={7} /> <span>{partido.arbitro}</span>
                                                                 </div>
                                                             )}
                                                         </div>

@@ -66,12 +66,22 @@ export default function TorneosList() {
 
     const torneosFiltrados = torneos
         .filter((t) => {
-            if (!esAdmin) return t.estado === "activo";
+            if (!esAdmin) return t.estado === "activo"; // Encargados solo ven torneos activos
             if (filtro === "activos") return t.estado === "activo";
             if (filtro === "inactivos") return t.estado === "inactivo";
             return true;
         })
-        .filter((t) => t.nombre.toLowerCase().includes(busqueda.toLowerCase()));
+        .filter((t) => t.nombre.toLowerCase().includes(busqueda.toLowerCase()))
+        .sort((a, b) => {
+            // Para encargados: FINALIZADOS al final
+            if (!esAdmin) {
+                const aFinalizado = !(a.estadoTorneo ?? true);
+                const bFinalizado = !(b.estadoTorneo ?? true);
+                if (aFinalizado && !bFinalizado) return 1;
+                if (!aFinalizado && bFinalizado) return -1;
+            }
+            return 0;
+        });
 
     const getGeneroIcon = (genero) => {
         if (genero === "MASCULINO") return <FaMars className="text-slate-400" />;
@@ -144,12 +154,18 @@ export default function TorneosList() {
 
             {/* LISTADO */}
             <div className="grid grid-cols-1 gap-4">
-                {torneosFiltrados.map((t) => (
-                    <div
-                        key={t.id}
-                        onClick={() => navigate(`/dashboard/torneos/${t.slug || t.id}`)}
-                        className="bg-[#0a0c10] p-5 rounded-[1.8rem] border border-slate-800/50 hover:border-slate-600 transition-all flex flex-col lg:flex-row justify-between items-start lg:items-center group cursor-pointer shadow-sm relative overflow-hidden"
-                    >
+                {torneosFiltrados.map((t) => {
+                    const estadoTorneoEnCurso = t.estadoTorneo ?? true;
+                    const esFinalizado = !estadoTorneoEnCurso;
+
+                    return (
+                        <div
+                            key={t.id}
+                            onClick={() => navigate(`/dashboard/torneos/${t.slug || t.id}`)}
+                            className={`bg-[#0a0c10] p-5 rounded-[1.8rem] border border-slate-800/50 hover:border-slate-600 transition-all flex flex-col lg:flex-row justify-between items-start lg:items-center group cursor-pointer shadow-sm relative overflow-hidden ${
+                                esFinalizado && !esAdmin ? "opacity-40" : ""
+                            }`}
+                        >
                         <div className="flex-1 w-full text-left flex flex-col md:flex-row gap-5 items-start md:items-center">
 
                             {/* FOTO / LOGO */}
@@ -175,9 +191,20 @@ export default function TorneosList() {
                                         <span className={`text-[9px] px-2 py-0.5 rounded-md font-black border tracking-tighter uppercase ${t.tipo === 'ABIERTO' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
                                             {t.tipo}
                                         </span>
-                                        <span className={`text-[9px] px-2 py-0.5 rounded-md font-black border tracking-tighter uppercase ${t.estado === 'activo' ? 'bg-slate-100 text-black border-white' : 'bg-transparent text-slate-500 border-slate-800'}`}>
-                                            {t.estado}
-                                        </span>
+
+                                        {/* Para ADMIN: Mostrar estado activo/inactivo */}
+                                        {esAdmin && (
+                                            <span className={`text-[9px] px-2 py-0.5 rounded-md font-black border tracking-tighter uppercase ${t.estado === 'activo' ? 'bg-slate-100 text-black border-white' : 'bg-transparent text-slate-500 border-slate-800'}`}>
+                                                {t.estado}
+                                            </span>
+                                        )}
+
+                                        {/* Para ENCARGADO: Mostrar EN CURSO / FINALIZADO */}
+                                        {!esAdmin && (
+                                            <span className={`text-[9px] px-2 py-0.5 rounded-md font-black border tracking-tighter uppercase ${estadoTorneoEnCurso ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>
+                                                {estadoTorneoEnCurso ? "⚽ EN CURSO" : "🏆 FINALIZADO"}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
 
@@ -223,7 +250,8 @@ export default function TorneosList() {
                             </button>
                         </div>
                     </div>
-                ))}
+                    );
+                })}
 
                 {torneosFiltrados.length === 0 && (
                     <div className="py-24 text-center border border-dashed border-slate-800 rounded-[3rem]">

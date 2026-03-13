@@ -1,0 +1,312 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\torneo\\ProgramacionComoFixture.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\torneo\\ProgramacionComoFixture.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\TorneoPublico.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\pages\\TorneoPublico.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\torneo\\FixtureTorneo.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\torneo\\FixtureTorneo.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\torneo\\PartidoCard.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\torneo\\PartidoCard.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\torneo\\PartidoGestionCard.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\torneo\\PartidoGestionCard.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\GestionPartidosFixture.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\pages\\GestionPartidosFixture.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\ProgramacionZona.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\pages\\ProgramacionZona.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\dashboard\\ModalEditarTorneo.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\dashboard\\ModalEditarTorneo.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\dashboard\\TorneosList.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\dashboard\\TorneosList.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\dashboard\\ModalCrearTorneo.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\dashboard\\ModalCrearTorneo.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\GestionFaseFinal.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\pages\\GestionFaseFinal.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\CuadroFaseFinal.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\pages\\CuadroFaseFinal.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\TorneoDetalleAdmin.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\pages\\TorneoDetalleAdmin.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\modal\\EditarResultadoModal.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\modal\\EditarResultadoModal.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\modal\\CerrarPartidoModal.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\modal\\CerrarPartidoModal.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\canchas\\CanchasList.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\canchas\\CanchasList.jsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 180,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 344,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "PartidoGestionCard.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\torneo\\PartidoGestionCard.jsx",
+              "RelativeDocumentMoniker": "src\\components\\torneo\\PartidoGestionCard.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\torneo\\PartidoGestionCard.jsx",
+              "RelativeToolTip": "src\\components\\torneo\\PartidoGestionCard.jsx",
+              "ViewState": "AgIAACIAAAAAAAAAAAApwB4AAABeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T23:53:29.286Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "PartidoCard.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\torneo\\PartidoCard.jsx",
+              "RelativeDocumentMoniker": "src\\components\\torneo\\PartidoCard.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\torneo\\PartidoCard.jsx",
+              "RelativeToolTip": "src\\components\\torneo\\PartidoCard.jsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T23:56:32.845Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ProgramacionComoFixture.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\torneo\\ProgramacionComoFixture.jsx",
+              "RelativeDocumentMoniker": "src\\components\\torneo\\ProgramacionComoFixture.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\torneo\\ProgramacionComoFixture.jsx",
+              "RelativeToolTip": "src\\components\\torneo\\ProgramacionComoFixture.jsx",
+              "ViewState": "AgIAACoAAAAAAAAAAAAAAI4AAABPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T23:45:55.515Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "TorneoPublico.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\TorneoPublico.jsx",
+              "RelativeDocumentMoniker": "src\\pages\\TorneoPublico.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\TorneoPublico.jsx",
+              "RelativeToolTip": "src\\pages\\TorneoPublico.jsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T23:00:48.969Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "FixtureTorneo.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\torneo\\FixtureTorneo.jsx",
+              "RelativeDocumentMoniker": "src\\components\\torneo\\FixtureTorneo.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\torneo\\FixtureTorneo.jsx",
+              "RelativeToolTip": "src\\components\\torneo\\FixtureTorneo.jsx",
+              "ViewState": "AgIAAHsAAAAAAAAAAAAAAJUAAABSAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T18:31:28.992Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ProgramacionZona.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\ProgramacionZona.jsx",
+              "RelativeDocumentMoniker": "src\\pages\\ProgramacionZona.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\ProgramacionZona.jsx",
+              "RelativeToolTip": "src\\pages\\ProgramacionZona.jsx",
+              "ViewState": "AgIAABABAAAAAAAAAAAAAIYBAACDAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T18:33:25.062Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "GestionPartidosFixture.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\GestionPartidosFixture.jsx",
+              "RelativeDocumentMoniker": "src\\pages\\GestionPartidosFixture.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\GestionPartidosFixture.jsx",
+              "RelativeToolTip": "src\\pages\\GestionPartidosFixture.jsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFsAAABxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T18:32:34.302Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ModalEditarTorneo.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\dashboard\\ModalEditarTorneo.jsx",
+              "RelativeDocumentMoniker": "src\\components\\dashboard\\ModalEditarTorneo.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\dashboard\\ModalEditarTorneo.jsx",
+              "RelativeToolTip": "src\\components\\dashboard\\ModalEditarTorneo.jsx",
+              "ViewState": "AgIAAH0AAAAAAAAAAAAAAIgAAAALAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T22:24:32.186Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "TorneosList.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\dashboard\\TorneosList.jsx",
+              "RelativeDocumentMoniker": "src\\components\\dashboard\\TorneosList.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\dashboard\\TorneosList.jsx",
+              "RelativeToolTip": "src\\components\\dashboard\\TorneosList.jsx",
+              "ViewState": "AgIAAC8AAAAAAAAAAAApwAAAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T22:54:19.042Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "GestionFaseFinal.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\GestionFaseFinal.jsx",
+              "RelativeDocumentMoniker": "src\\pages\\GestionFaseFinal.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\GestionFaseFinal.jsx",
+              "RelativeToolTip": "src\\pages\\GestionFaseFinal.jsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T21:50:56.333Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ModalCrearTorneo.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\dashboard\\ModalCrearTorneo.jsx",
+              "RelativeDocumentMoniker": "src\\components\\dashboard\\ModalCrearTorneo.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\dashboard\\ModalCrearTorneo.jsx",
+              "RelativeToolTip": "src\\components\\dashboard\\ModalCrearTorneo.jsx",
+              "ViewState": "AgIAAPcAAAAAAAAAAAApwAwAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T22:22:03.444Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "CerrarPartidoModal.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\modal\\CerrarPartidoModal.jsx",
+              "RelativeDocumentMoniker": "src\\components\\modal\\CerrarPartidoModal.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\modal\\CerrarPartidoModal.jsx",
+              "RelativeToolTip": "src\\components\\modal\\CerrarPartidoModal.jsx",
+              "ViewState": "AgIAAGkAAAAAAAAAAAAAAGsAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T18:39:37.102Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "CuadroFaseFinal.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\CuadroFaseFinal.jsx",
+              "RelativeDocumentMoniker": "src\\pages\\CuadroFaseFinal.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\CuadroFaseFinal.jsx",
+              "RelativeToolTip": "src\\pages\\CuadroFaseFinal.jsx",
+              "ViewState": "AgIAALUAAAAAAAAAAAApwBIAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T21:46:42.624Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "TorneoDetalleAdmin.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\TorneoDetalleAdmin.jsx",
+              "RelativeDocumentMoniker": "src\\pages\\TorneoDetalleAdmin.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\pages\\TorneoDetalleAdmin.jsx",
+              "RelativeToolTip": "src\\pages\\TorneoDetalleAdmin.jsx",
+              "ViewState": "AgIAADIBAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T19:09:13.97Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "EditarResultadoModal.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\modal\\EditarResultadoModal.jsx",
+              "RelativeDocumentMoniker": "src\\components\\modal\\EditarResultadoModal.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\modal\\EditarResultadoModal.jsx",
+              "RelativeToolTip": "src\\components\\modal\\EditarResultadoModal.jsx",
+              "ViewState": "AgIAAI4AAAAAAAAAAAAAALAAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T18:55:04.437Z",
+              "EditorCaption": ""
+            }
+          ]
+        },
+        {
+          "DockedWidth": 160,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "CanchasList.jsx",
+              "DocumentMoniker": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\canchas\\CanchasList.jsx",
+              "RelativeDocumentMoniker": "src\\components\\canchas\\CanchasList.jsx",
+              "ToolTip": "C:\\Users\\PATRICIO\\Desktop\\LigaFRONT\\Liga-Juje-a-front\\src\\components\\canchas\\CanchasList.jsx",
+              "RelativeToolTip": "src\\components\\canchas\\CanchasList.jsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2026-03-12T18:34:22.358Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

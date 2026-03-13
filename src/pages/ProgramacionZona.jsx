@@ -115,41 +115,140 @@ export default function ProgramacionZona() {
     };
 
     const handleSeleccionDirecta = async (partidoId) => {
+        Swal.fire({
+            title: 'PROGRAMANDO...',
+            html: '<p style="font-size: 13px; color: #94a3b8; font-weight: 600; letter-spacing: 0.05em;">Asignando partido a la fecha</p>',
+            background: '#0a0a0a',
+            color: '#fff',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            customClass: {
+                popup: 'rounded-3xl border border-white/10',
+                title: 'text-xl font-black uppercase tracking-tight'
+            },
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         try {
             await programarPartido(zonaId, fechaSeleccionada, partidoId);
+
+            Swal.fire({
+                title: '¡PROGRAMADO!',
+                html: '<p style="font-size: 13px; color: #94a3b8; font-weight: 600; letter-spacing: 0.05em;">El partido ha sido asignado correctamente</p>',
+                icon: 'success',
+                background: '#0a0a0a',
+                color: '#fff',
+                iconColor: '#10b981',
+                timer: 2000,
+                showConfirmButton: false,
+                timerProgressBar: true,
+                customClass: {
+                    popup: 'rounded-3xl border border-white/10',
+                    title: 'text-xl font-black uppercase tracking-tight'
+                }
+            });
+
             await cargarTodo();
         } catch (error) {
-            alert("Error al programar");
+            Swal.fire({
+                title: 'ERROR',
+                html: '<p style="font-size: 13px; color: #94a3b8; font-weight: 600; letter-spacing: 0.05em;">No se pudo programar el partido. Intenta nuevamente.</p>',
+                icon: 'error',
+                background: '#0a0a0a',
+                color: '#fff',
+                iconColor: '#ef4444',
+                confirmButtonColor: '#ffffff',
+                confirmButtonText: '<span style="color: #000; font-weight: 900; font-size: 11px; letter-spacing: 0.1em;">CERRAR</span>',
+                customClass: {
+                    popup: 'rounded-3xl border border-white/10',
+                    title: 'text-xl font-black uppercase tracking-tight',
+                    confirmButton: 'rounded-2xl px-8 py-3 shadow-lg hover:bg-slate-200'
+                }
+            });
         }
     };
 
     const handleEliminarPartido = (p) => {
         Swal.fire({
-            title: '¿Eliminar partido?',
-            text: "Se borrará de la programación y los equipos volverán a estar disponibles.",
+            title: '¿ELIMINAR PARTIDO?',
+            html: '<p style="font-size: 13px; color: #94a3b8; font-weight: 600; letter-spacing: 0.05em;">Se borrará de la programación y los equipos volverán a estar disponibles</p>',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ffffff',
-            cancelButtonColor: '#1a1a1a',
-            confirmButtonText: 'SÍ, ELIMINAR',
-            cancelButtonText: 'CANCELAR',
+            cancelButtonColor: '#334155',
+            confirmButtonText: '<span style="color: #000; font-weight: 900; font-size: 11px; letter-spacing: 0.1em;">SÍ, ELIMINAR</span>',
+            cancelButtonText: '<span style="font-weight: 900; font-size: 11px; letter-spacing: 0.1em;">CANCELAR</span>',
             background: '#0a0a0a',
-            color: '#ffffff'
+            color: '#fff',
+            iconColor: '#fbbf24',
+            customClass: {
+                popup: 'rounded-3xl border border-white/10',
+                title: 'text-xl font-black uppercase tracking-tight',
+                confirmButton: 'rounded-2xl px-8 py-3 shadow-lg hover:bg-slate-200',
+                cancelButton: 'rounded-2xl px-8 py-3 hover:bg-slate-700'
+            },
+            buttonsStyling: true,
+            reverseButtons: true
         }).then(async (result) => {
             if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'ELIMINANDO...',
+                    html: '<p style="font-size: 13px; color: #94a3b8; font-weight: 600; letter-spacing: 0.05em;">Por favor espera</p>',
+                    background: '#0a0a0a',
+                    color: '#fff',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    customClass: {
+                        popup: 'rounded-3xl border border-white/10',
+                        title: 'text-xl font-black uppercase tracking-tight'
+                    },
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 try {
                     await apiFetch(`/api/partidos/${p.partidoId}`, { method: 'DELETE' });
+
                     Swal.fire({
-                        title: 'ELIMINADO',
+                        title: '¡ELIMINADO!',
+                        html: '<p style="font-size: 13px; color: #94a3b8; font-weight: 600; letter-spacing: 0.05em;">El partido ha sido eliminado correctamente</p>',
                         icon: 'success',
                         background: '#0a0a0a',
-                        color: '#ffffff',
-                        timer: 1500,
-                        showConfirmButton: false
+                        color: '#fff',
+                        iconColor: '#10b981',
+                        confirmButtonColor: '#ffffff',
+                        confirmButtonText: '<span style="color: #000; font-weight: 900; font-size: 11px; letter-spacing: 0.1em;">ENTENDIDO</span>',
+                        customClass: {
+                            popup: 'rounded-3xl border border-white/10',
+                            title: 'text-xl font-black uppercase tracking-tight',
+                            confirmButton: 'rounded-2xl px-8 py-3 shadow-lg hover:bg-slate-200'
+                        },
+                        timer: 2000,
+                        timerProgressBar: true
                     });
+
                     await cargarTodo();
                 } catch (error) {
-                    Swal.fire('Error', 'No se pudo eliminar el partido', 'error');
+                    Swal.fire({
+                        title: 'ERROR',
+                        html: '<p style="font-size: 13px; color: #94a3b8; font-weight: 600; letter-spacing: 0.05em;">No se pudo eliminar el partido. Intenta nuevamente.</p>',
+                        icon: 'error',
+                        background: '#0a0a0a',
+                        color: '#fff',
+                        iconColor: '#ef4444',
+                        confirmButtonColor: '#ffffff',
+                        confirmButtonText: '<span style="color: #000; font-weight: 900; font-size: 11px; letter-spacing: 0.1em;">CERRAR</span>',
+                        customClass: {
+                            popup: 'rounded-3xl border border-white/10',
+                            title: 'text-xl font-black uppercase tracking-tight',
+                            confirmButton: 'rounded-2xl px-8 py-3 shadow-lg hover:bg-slate-200'
+                        }
+                    });
                 }
             }
         });
@@ -291,7 +390,7 @@ export default function ProgramacionZona() {
                                 {equiposDuplicados.size > 0 && (
                                     <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-xl">
                                         <FaExclamationTriangle className="text-red-500" size={12} />
-                                        <span className="text-red-500 text-[9px] font-black uppercase tracking-wider">Conflicto de equipos</span>
+                                        <span className="text-red-500 text-[9px] font-black uppercase tracking-wider">Juega 2 partidos</span>
                                     </div>
                                 )}
                             </div>

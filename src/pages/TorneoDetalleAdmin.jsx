@@ -330,12 +330,12 @@ export default function TorneoDetalleAdmin() {
                                                     <span className="text-slate-400 font-black uppercase text-[10px] tracking-widest truncate group-hover/item:text-white transition-colors">{equipo.nombre}</span>
                                                 </div>
 
-                                                <div className="flex items-center gap-2 opacity-0 group-hover/item:opacity-100 transition-opacity">
-                                                    <button onClick={() => { setEquipoSeleccionado(equipo); setModalEquipoEditar(true); }} className="text-slate-500 hover:text-white p-2">
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    <button onClick={() => { setEquipoSeleccionado(equipo); setModalEquipoEditar(true); }} className="text-slate-500 hover:text-white p-2 bg-white/5 rounded-lg border border-white/10 transition-all active:scale-95">
                                                         <FaEdit size={14}/>
                                                     </button>
                                                     {(!fixtureYaGenerado || esAbierto) && (
-                                                        <button onClick={() => setModalConfirmar({ open: true, type: 'EQUIPO', id: equipo.equipoZonaId })} className="text-slate-700 hover:text-red-500 p-2">
+                                                        <button onClick={() => setModalConfirmar({ open: true, type: 'EQUIPO', id: equipo.equipoZonaId })} className="text-slate-600 hover:text-red-500 p-2 bg-white/5 rounded-lg border border-white/10 transition-all active:scale-95">
                                                             <FaTrash size={14}/>
                                                         </button>
                                                     )}

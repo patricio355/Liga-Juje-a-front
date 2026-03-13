@@ -9,7 +9,7 @@ import Navbar from "../components/Navbar";
 import {
     FaTrophy, FaCalendarAlt, FaFutbol, FaChevronDown,
     FaProjectDiagram, FaLayerGroup, FaGlobe, FaVenusMars,
-    FaMars, FaVenus, FaPhone, FaExclamationTriangle, FaHome, FaInfoCircle
+    FaMars, FaVenus, FaPhone, FaExclamationTriangle, FaHome, FaInfoCircle, FaShareAlt, FaMedal
 } from "react-icons/fa";
 
 export default function TorneoPublico() {
@@ -103,6 +103,26 @@ export default function TorneoPublico() {
         "--ts": torneo.colorTextoSecundario || "#94a3b8",
     };
 
+    const compartirTorneo = async () => {
+        const url = window.location.href;
+        const texto = `🏆 ${torneo.nombre} ${torneo.division ? `- División ${torneo.division}` : ''}`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: torneo.nombre, text: texto, url });
+            } catch (err) {
+                if (err.name !== 'AbortError') console.error("Error al compartir:", err);
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(url);
+                alert("¡Link copiado al portapapeles!");
+            } catch (err) {
+                console.error("Error al copiar:", err);
+            }
+        }
+    };
+
     return (
         <div style={vars} className="min-h-screen bg-[var(--p)] relative overflow-hidden text-[var(--tp)] font-sans transition-colors duration-700">
             <div className="absolute inset-0 z-0 pointer-events-none">
@@ -126,6 +146,25 @@ export default function TorneoPublico() {
                             <h1 className="text-5xl md:text-8xl font-black italic uppercase tracking-tighter text-[var(--tp)] drop-shadow-2xl leading-[0.85]">{torneo.nombre}</h1>
                             {torneo.division && <h2 className="text-xl md:text-3xl font-black uppercase tracking-[0.3em] mt-3 mb-5 drop-shadow-lg" style={{ color: "var(--ts)" }}>DIVISIÓN {torneo.division}</h2>}
                             <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
+                                {/* Badge Estado del Torneo */}
+                                <div className={`px-4 py-1.5 rounded-full border backdrop-blur-sm flex items-center gap-2 ${
+                                    torneo.estadoTorneo 
+                                        ? 'border-blue-500/50 bg-blue-500/20' 
+                                        : 'border-amber-500/50 bg-amber-500/20'
+                                }`}>
+                                    {torneo.estadoTorneo ? (
+                                        <>
+                                            <FaFutbol className="text-blue-400" size={12} />
+                                            <p className="text-blue-300 font-black uppercase tracking-[0.2em] text-[10px]">EN CURSO</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FaMedal className="text-amber-400" size={12} />
+                                            <p className="text-amber-300 font-black uppercase tracking-[0.2em] text-[10px]">FINALIZADO</p>
+                                        </>
+                                    )}
+                                </div>
+
                                 {torneo.genero && (
                                     <div className="px-4 py-1.5 rounded-full border border-dashed border-[var(--ts)]/30 bg-[var(--s)]/60 backdrop-blur-sm flex items-center gap-2">
                                         {torneo.genero === "MASCULINO" && <FaMars className="text-[var(--ts)]" />}
@@ -140,15 +179,44 @@ export default function TorneoPublico() {
                                         <p className="text-[var(--ts)] group-hover:text-[var(--p)] font-black uppercase tracking-[0.2em] text-[10px] transition-colors">SEGUINOS</p>
                                     </a>
                                 )}
-                                {torneo.encargadoTelefono && (
-                                    <a href={`https://wa.me/${torneo.encargadoTelefono.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="px-4 py-1.5 rounded-full border border-green-500/50 bg-green-500/10 hover:bg-green-500 hover:text-white transition-all flex items-center gap-2 cursor-pointer group">
+                                {torneo.telefono && (
+                                    <a href={`https://wa.me/${torneo.telefono.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="px-4 py-1.5 rounded-full border border-green-500/50 bg-green-500/10 hover:bg-green-500 hover:text-white transition-all flex items-center gap-2 cursor-pointer group">
                                         <FaPhone className="text-green-500 group-hover:text-white transition-colors" size={12} />
-                                        <p className="text-green-500 group-hover:text-white font-black uppercase tracking-[0.1em] text-[10px] transition-colors">{torneo.encargadoTelefono}</p>
+                                        <p className="text-green-500 group-hover:text-white font-black uppercase tracking-[0.1em] text-[10px] transition-colors">{torneo.telefono}</p>
                                     </a>
                                 )}
+                                <button onClick={compartirTorneo} className="px-4 py-1.5 rounded-full border border-blue-500/50 bg-blue-500/10 hover:bg-blue-500 hover:text-white transition-all flex items-center gap-2 cursor-pointer group">
+                                    <FaShareAlt className="text-blue-500 group-hover:text-white transition-colors" size={12} />
+                                    <p className="text-blue-500 group-hover:text-white font-black uppercase tracking-[0.2em] text-[10px] transition-colors">COMPARTIR</p>
+                                </button>
                             </div>
                         </div>
                     </header>
+
+                    {/* SECCIÓN CAMPEÓN - Solo si el torneo está finalizado */}
+                    {!torneo.estadoTorneo && torneo.campeon && (
+                        <div className="mb-8 animate-in slide-in-from-top-4 duration-700">
+                            <div className="relative bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 backdrop-blur-md rounded-[2rem] border-2 border-amber-500/40 p-6 md:p-8 shadow-[0_0_80px_rgba(251,191,36,0.3)] overflow-hidden">
+                                {/* Efecto de brillo animado */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-400/10 to-transparent animate-pulse"></div>
+
+                                <div className="relative z-10 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
+                                    <div className="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-amber-400 to-yellow-600 shadow-[0_0_30px_rgba(251,191,36,0.6)] animate-pulse">
+                                        <FaMedal className="text-2xl md:text-3xl text-white drop-shadow-lg" />
+                                    </div>
+
+                                    <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                                        <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] text-amber-400 mb-1">
+                                            🏆 Campeón del Torneo
+                                        </p>
+                                        <h3 className="text-2xl md:text-4xl font-black uppercase italic tracking-tighter text-amber-100 drop-shadow-[0_2px_10px_rgba(251,191,36,0.5)]">
+                                            {torneo.campeon}
+                                        </h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* SELECTOR DE SECCIÓN CONDICIONAL */}
                     {(torneo.faseGrupos && torneo.faseFinal) && (

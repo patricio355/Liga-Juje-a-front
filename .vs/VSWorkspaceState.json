@@ -1,0 +1,14 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\components",
+    "\\src\\components\\dashboard",
+    "\\src\\components\\modal",
+    "\\src\\components\\programacion",
+    "\\src\\components\\torneo",
+    "\\src\\pages"
+  ],
+  "SelectedNode": "\\src\\components\\torneo\\ProgramacionComoFixture.jsx",
+  "PreviewInSolutionExplorer": false
+}

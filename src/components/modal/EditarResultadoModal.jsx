@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { apiFetch } from "../../api/api";
-import { FaSave, FaFutbol, FaTimes } from "react-icons/fa";
+import { FaSave, FaFutbol, FaTimes, FaPlus, FaMinus } from "react-icons/fa";
 
 export default function EditarResultadoModal({ open, onClose, partido, onSuccess }) {
     const [golesLocal, setGolesLocal] = useState(0);
@@ -18,6 +18,25 @@ export default function EditarResultadoModal({ open, onClose, partido, onSuccess
     }, [partido, open]);
 
     if (!open || !partido) return null;
+
+    const handleGolesChange = (valor, setter) => {
+        if (valor === "" || valor === null || valor === undefined) {
+            setter(0);
+            return;
+        }
+        const num = parseInt(valor, 10);
+        if (!isNaN(num) && num >= 0) {
+            setter(num);
+        }
+    };
+
+    const incrementar = (setter) => {
+        setter(prev => prev + 1);
+    };
+
+    const decrementar = (setter) => {
+        setter(prev => prev > 0 ? prev - 1 : 0);
+    };
 
     const guardarCambios = async (e) => {
         if (e) e.preventDefault();
@@ -76,41 +95,75 @@ export default function EditarResultadoModal({ open, onClose, partido, onSuccess
 
                 <form onSubmit={guardarCambios} className="p-5 md:p-8 space-y-6 md:space-y-8">
                     {/* Marcador Responsivo */}
-                    <div className="flex items-center justify-between gap-2 bg-white/5 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border border-white/5 shadow-inner">
+                    <div className="flex items-center justify-center gap-4 md:gap-8 bg-white/5 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-white/5 shadow-inner">
 
                         {/* Equipo Local */}
-                        <div className="flex-1 flex flex-col items-center text-center min-w-0">
-                            <p className="text-[8px] md:text-[10px] font-black uppercase text-slate-500 mb-1 tracking-tighter">Local</p>
-                            <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-white break-words w-full leading-tight">
+                        <div className="flex-1 flex flex-col items-center gap-3 md:gap-4">
+                            <p className="text-[10px] md:text-xs font-black uppercase text-white tracking-widest text-center leading-tight">
                                 {partido.local || partido.equipoLocalNombre}
                             </p>
+                            <div className="flex items-center gap-1.5">
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    value={golesLocal}
+                                    onChange={e => handleGolesChange(e.target.value, setGolesLocal)}
+                                    className="w-14 h-14 md:w-16 md:h-16 bg-black border-2 border-white/10 rounded-xl md:rounded-2xl text-center text-2xl md:text-3xl font-black text-white focus:border-slate-400 outline-none transition-all shadow-2xl"
+                                />
+                                <div className="flex flex-col gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => incrementar(setGolesLocal)}
+                                        className="w-7 h-7 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-white transition-all active:scale-95"
+                                    >
+                                        <FaPlus size={10} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => decrementar(setGolesLocal)}
+                                        className="w-7 h-7 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-white transition-all active:scale-95"
+                                    >
+                                        <FaMinus size={10} />
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Inputs de Goles (Más chicos para móvil) */}
-                        <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
-                            <input
-                                type="number"
-                                min="0"
-                                value={golesLocal}
-                                onChange={e => setGolesLocal(Math.max(0, parseInt(e.target.value) || 0))}
-                                className="w-12 h-12 md:w-16 md:h-16 bg-black border-2 border-white/10 rounded-xl md:rounded-2xl text-center text-xl md:text-2xl font-black text-white focus:border-slate-400 outline-none transition-all shadow-2xl"
-                            />
-                            <span className="text-slate-700 font-black text-sm">-</span>
-                            <input
-                                type="number"
-                                min="0"
-                                value={golesVisitante}
-                                onChange={e => setGolesVisitante(Math.max(0, parseInt(e.target.value) || 0))}
-                                className="w-12 h-12 md:w-16 md:h-16 bg-black border-2 border-white/10 rounded-xl md:rounded-2xl text-center text-xl md:text-2xl font-black text-white focus:border-slate-400 outline-none transition-all shadow-2xl"
-                            />
-                        </div>
+                        {/* VS */}
+                        <div className="text-slate-700 font-black text-lg md:text-xl shrink-0">VS</div>
 
                         {/* Equipo Visitante */}
-                        <div className="flex-1 flex flex-col items-center text-center min-w-0">
-                            <p className="text-[8px] md:text-[10px] font-black uppercase text-slate-500 mb-1 tracking-tighter">Visitante</p>
-                            <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-white break-words w-full leading-tight">
-                                {partido.visitante  || partido.equipoVisitanteNombre}
+                        <div className="flex-1 flex flex-col items-center gap-3 md:gap-4">
+                            <p className="text-[10px] md:text-xs font-black uppercase text-white tracking-widest text-center leading-tight">
+                                {partido.visitante || partido.equipoVisitanteNombre}
                             </p>
+                            <div className="flex items-center gap-1.5">
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    value={golesVisitante}
+                                    onChange={e => handleGolesChange(e.target.value, setGolesVisitante)}
+                                    className="w-14 h-14 md:w-16 md:h-16 bg-black border-2 border-white/10 rounded-xl md:rounded-2xl text-center text-2xl md:text-3xl font-black text-white focus:border-slate-400 outline-none transition-all shadow-2xl"
+                                />
+                                <div className="flex flex-col gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => incrementar(setGolesVisitante)}
+                                        className="w-7 h-7 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-white transition-all active:scale-95"
+                                    >
+                                        <FaPlus size={10} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => decrementar(setGolesVisitante)}
+                                        className="w-7 h-7 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-white transition-all active:scale-95"
+                                    >
+                                        <FaMinus size={10} />
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
