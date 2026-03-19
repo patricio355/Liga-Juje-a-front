@@ -238,7 +238,7 @@ export default function PartidoCard({ partido }) {
                             </div>
                         )}
                     </div>
-    c
+
                     <div className="flex-1 flex items-center justify-center gap-3 py-3.5 px-2 hover:bg-white/5 transition-colors rounded-br-[1.5rem]">
                         <FaUserTie size={12} style={{ color: "var(--ts)" }} />
                         <span className="text-[11px] uppercase tracking-widest truncate" style={{ color: "var(--tp)" }}>{formatDato(partido.arbitro)}</span>
