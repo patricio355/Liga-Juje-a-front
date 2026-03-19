@@ -27,12 +27,11 @@ export default function PartidoCard({ partido }) {
         try {
             const [year, month, day] = fechaStr.split('-').map(Number);
             const fecha = new Date(year, month - 1, day);
-            const dias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
             const diasLargo = ["DOMINGO", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"];
             const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
 
             return {
-                corto: `${dias[fecha.getDay()].toUpperCase()} ${day}`,
+                corto: `${diasLargo[fecha.getDay()]} ${day}`,
                 largo: `${diasLargo[fecha.getDay()]} ${day} DE ${meses[fecha.getMonth()]} ${year}`
             };
         } catch (e) { return { corto: "ERROR", largo: "ERROR" }; }
@@ -43,8 +42,9 @@ export default function PartidoCard({ partido }) {
     const formatDato = (dato) => tieneDato(dato) ? dato : "---";
     const formatHora = (hora) => tieneDato(hora) ? `${hora} HS` : "";
 
-    const borderGray = "1px solid #33415588";
-    const dividerGray = "1px solid #33415544";
+    const borderUser = "1px solid var(--p)";
+    const dividerGray = "1px solid rgba(255, 255, 255, 0.04)";
+    const gradientBg = "linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 100%)";
 
     const irALaCancha = (e) => {
         e.stopPropagation();
@@ -62,10 +62,11 @@ export default function PartidoCard({ partido }) {
                ============================================== */}
             <div
                 onClick={() => setExpandido(!expandido)}
-                className="md:hidden rounded-xl overflow-hidden shadow-md transition-all active:scale-[0.98] cursor-pointer"
-                style={{ border: borderGray, backgroundColor: "var(--p)" }}
+                className="md:hidden rounded-[1rem] overflow-hidden shadow-lg transition-all active:scale-[0.98] cursor-pointer backdrop-blur-md relative group"
+                style={{ border: borderUser, backgroundColor: "var(--secondary)", backgroundImage: gradientBg }}
             >
-                <div className="px-2 py-2" style={{ backgroundColor: "var(--secondary)" }}>
+                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                <div className="px-2 py-3 bg-[var(--p)]/20 hover:bg-[var(--p)]/40 transition-colors relative z-10 border-b border-white/5">
                     <div className="grid grid-cols-[1fr_90px_1fr] items-center gap-1">
 
                         {/* LOCAL */}
@@ -146,7 +147,7 @@ export default function PartidoCard({ partido }) {
                 </div>
 
                 {expandido && (
-                    <div className="flex flex-col animate-in slide-in-from-top-1 duration-200 py-2 gap-2" style={{ borderTop: dividerGray, backgroundColor: "var(--ts)05" }}>
+                    <div className="flex flex-col animate-in slide-in-from-top-1 duration-200 py-3 gap-2 relative z-10" style={{ borderTop: dividerGray, backgroundColor: "rgba(0,0,0,0.1)" }}>
                         {finalizado && (
                             <div className="flex flex-col gap-1.5 pb-1 border-b border-white/5">
                                 {(tieneDato(partido.fecha) || tieneDato(partido.hora)) && (
@@ -163,7 +164,7 @@ export default function PartidoCard({ partido }) {
                                     <div onClick={irALaCancha} className="flex items-center justify-center gap-1 opacity-70 cursor-pointer hover:opacity-100">
                                         <FaMapMarkerAlt size={9} className="text-[var(--ts)]" />
                                         <span className="text-[8px] font-bold text-slate-300 uppercase truncate max-w-[200px]">
-                                            {partido.ubicacionUrl ? `VER UBICACIÓN EN ${partido.canchaNombre || partido.cancha}` : (partido.canchaNombre || partido.cancha)}
+                                            {partido.ubicacionUrl ? `VER UBICACIÓN ${partido.canchaNombre || partido.cancha}` : (partido.canchaNombre || partido.cancha)}
                                         </span>
                                     </div>
                                 )}
@@ -180,36 +181,37 @@ export default function PartidoCard({ partido }) {
             {/* ==============================================
                 VISTA PC (Texto cambia internamente)
                ============================================== */}
-            <div className="hidden md:flex flex-col w-full rounded-3xl transition-all duration-300" style={{ border: borderGray, backgroundColor: "var(--secondary)", boxShadow: finalizado ? "0 10px 40px -10px rgba(0,0,0,0.3)" : "none", overflow: "visible" }}>
-                <div className="flex items-center justify-between px-10 py-6">
+            <div className="hidden md:flex flex-col w-full rounded-[1.5rem] transition-all duration-500 backdrop-blur-xl group hover:-translate-y-1 hover:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.5)] relative" style={{ border: borderUser, backgroundColor: "var(--secondary)", backgroundImage: gradientBg, boxShadow: finalizado ? "0 10px 40px -10px rgba(0,0,0,0.4)" : "0 8px 30px -10px rgba(0,0,0,0.2)", overflow: "visible" }}>
+                <div className="absolute inset-0 rounded-[1.5rem] bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                <div className="flex items-center justify-between px-10 py-6 bg-[var(--p)]/20 group-hover:bg-[var(--p)]/30 transition-colors relative z-10 border-b border-white/5 rounded-t-[1.5rem]">
                     <div className="flex items-center gap-5 flex-1 justify-start">
-                        <div className="w-14 h-14 shrink-0 p-1 rounded-xl" style={{ backgroundColor: "var(--p)" }}>
-                            {partido.equipoLocalEscudo ? <img src={partido.equipoLocalEscudo} className="w-full h-full object-contain" /> : <FaShieldAlt style={{ color: "var(--ts)" }} className="w-full h-full opacity-40" />}
+                        <div className="w-14 h-14 shrink-0 p-1 rounded-[1rem] bg-[var(--p)]/80 shadow-inner border border-[var(--ts)]/10 ring-1 ring-white/5">
+                            {partido.equipoLocalEscudo ? <img src={partido.equipoLocalEscudo} className="w-full h-full object-contain filter drop-shadow-md" /> : <FaShieldAlt style={{ color: "var(--ts)" }} className="w-full h-full opacity-40" />}
                         </div>
-                        <span className="text-xl font-black uppercase tracking-tighter" style={{ color: "var(--tp)" }}>{formatDato(partido.equipoLocalNombre)}</span>
+                        <span className="text-xl font-black uppercase tracking-tighter drop-shadow-sm" style={{ color: "var(--tp)" }}>{formatDato(partido.equipoLocalNombre)}</span>
                     </div>
 
                     <div className="flex flex-col items-center px-10 w-[220px]">
-                        <span className="text-[9px] font-black uppercase tracking-[0.3em] mb-3 px-3 py-1 rounded-full border transition-all" style={{ color: finalizado ? "var(--p)" : "var(--ts)", backgroundColor: finalizado ? "var(--ts)" : "transparent", borderColor: finalizado ? "var(--ts)" : "#334155" }}>
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] mb-3 px-4 py-1.5 rounded-full border transition-all shadow-sm" style={{ color: finalizado ? "var(--secondary)" : "var(--ts)", backgroundColor: finalizado ? "var(--ts)" : "var(--ts)10", borderColor: finalizado ? "transparent" : "var(--ts)33" }}>
                             {finalizado ? "FINALIZADO" : "PENDIENTE"}
                         </span>
-                        <span className="text-4xl font-black tracking-tighter" style={{ color: "var(--tp)" }}>{finalizado ? `${partido.golesLocal} - ${partido.golesVisitante}` : "VS"}</span>
+                        <span className="text-4xl font-black tracking-tighter drop-shadow-md" style={{ color: "var(--tp)" }}>{finalizado ? `${partido.golesLocal} - ${partido.golesVisitante}` : "VS"}</span>
                     </div>
 
                     <div className="flex items-center gap-5 flex-1 justify-end">
-                        <span className="text-xl font-black uppercase tracking-tighter text-right" style={{ color: "var(--tp)" }}>{formatDato(partido.equipoVisitanteNombre)}</span>
-                        <div className="w-14 h-14 shrink-0 p-1 rounded-xl" style={{ backgroundColor: "var(--p)" }}>
-                            {partido.equipoVisitanteEscudo ? <img src={partido.equipoVisitanteEscudo} className="w-full h-full object-contain" /> : <FaShieldAlt style={{ color: "var(--ts)" }} className="w-full h-full opacity-40" />}
+                        <span className="text-xl font-black uppercase tracking-tighter text-right drop-shadow-sm" style={{ color: "var(--tp)" }}>{formatDato(partido.equipoVisitanteNombre)}</span>
+                        <div className="w-14 h-14 shrink-0 p-1 rounded-[1rem] bg-[var(--p)]/80 shadow-inner border border-[var(--ts)]/10 ring-1 ring-white/5">
+                            {partido.equipoVisitanteEscudo ? <img src={partido.equipoVisitanteEscudo} className="w-full h-full object-contain filter drop-shadow-md" /> : <FaShieldAlt style={{ color: "var(--ts)" }} className="w-full h-full opacity-40" />}
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center" style={{ backgroundColor: "var(--p)", borderTop: dividerGray }}>
-                    <div className="flex-1 flex items-center justify-center gap-3 py-3.5 cursor-pointer" onMouseEnter={() => setVerFechaLarga(true)} onMouseLeave={() => setVerFechaLarga(false)} style={{ borderRight: dividerGray }}>
+                <div className="flex items-center relative z-10 bg-black/10 rounded-b-[1.5rem]" style={{ borderTop: dividerGray }}>
+                    <div className="flex-1 flex items-center justify-center gap-3 py-3.5 cursor-pointer hover:bg-white/5 transition-colors rounded-bl-[1.5rem]" onMouseEnter={() => setVerFechaLarga(true)} onMouseLeave={() => setVerFechaLarga(false)} style={{ borderRight: dividerGray }}>
                         <FaCalendarAlt size={12} style={{ color: "var(--ts)" }} />
                         <span className="text-[11px] uppercase tracking-widest" style={{ color: "var(--tp)" }}>{verFechaLarga ? fechaInfo.largo : fechaInfo.corto}</span>
                     </div>
-                    <div className="flex-1 flex items-center justify-center gap-3 py-3.5" style={{ borderRight: dividerGray }}>
+                    <div className="flex-1 flex items-center justify-center gap-3 py-3.5 hover:bg-white/5 transition-colors" style={{ borderRight: dividerGray }}>
                         <FaClock size={12} style={{ color: "var(--ts)" }} />
                         <span className="text-[11px] uppercase tracking-widest" style={{ color: "var(--tp)" }}>{formatHora(partido.hora)}</span>
                     </div>
@@ -218,7 +220,7 @@ export default function PartidoCard({ partido }) {
                         onMouseEnter={() => setHoverCancha(true)}
                         onMouseLeave={() => setHoverCancha(false)}
                         onClick={irALaCancha}
-                        className={`flex-1 flex items-center justify-center gap-3 py-3.5 px-2 transition-all relative ${partido.ubicacionUrl ? 'cursor-pointer hover:bg-blue-500/10' : ''}`}
+                        className={`flex-1 flex items-center justify-center gap-3 py-3.5 px-2 transition-all relative hover:bg-white/5 ${partido.ubicacionUrl ? 'cursor-pointer hover:bg-white/10' : ''}`}
                         style={{ borderRight: dividerGray }}
                     >
                         <FaMapMarkerAlt size={12} style={{ color: (hoverCancha && partido.ubicacionUrl) ? "#60a5fa" : "var(--ts)" }} />
@@ -228,14 +230,16 @@ export default function PartidoCard({ partido }) {
 
                         {/* Tooltip PC */}
                         {hoverCancha && partido.ubicacionUrl && (
-                            <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-black px-4 py-2 rounded-lg shadow-2xl flex items-center gap-2 z-50 animate-in fade-in zoom-in duration-200 whitespace-nowrap">
-                                VER UBICACIÓN <FaExternalLinkAlt size={8} />
-                                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-blue-600 rotate-45"></div>
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 pb-2 z-50 flex flex-col items-center">
+                                <div className="bg-blue-600 hover:bg-blue-500 transition-colors text-white text-[10px] font-black px-4 py-2 rounded-lg shadow-2xl flex items-center gap-2 animate-in fade-in zoom-in duration-200 whitespace-nowrap relative shadow-[0_10px_25px_-5px_rgba(37,99,235,0.5)]">
+                                    VER UBICACIÓN <FaExternalLinkAlt size={8} />
+                                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-blue-600 rotate-45"></div>
+                                </div>
                             </div>
                         )}
                     </div>
-
-                    <div className="flex-1 flex items-center justify-center gap-3 py-3.5 px-2">
+    c
+                    <div className="flex-1 flex items-center justify-center gap-3 py-3.5 px-2 hover:bg-white/5 transition-colors rounded-br-[1.5rem]">
                         <FaUserTie size={12} style={{ color: "var(--ts)" }} />
                         <span className="text-[11px] uppercase tracking-widest truncate" style={{ color: "var(--tp)" }}>{formatDato(partido.arbitro)}</span>
                     </div>

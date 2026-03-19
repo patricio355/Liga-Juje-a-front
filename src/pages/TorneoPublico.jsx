@@ -135,7 +135,7 @@ export default function TorneoPublico() {
             <div className="relative z-10">
                 <Navbar />
 
-                <main className="max-w-[1600px] mx-auto p-4 md:px-8 animate-in fade-in duration-500">
+                <main className="max-w-[1200px] xl:max-w-[1400px] mx-auto p-4 md:px-8 animate-in fade-in duration-500">
                     <header className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 mt-8 mb-10">
                         {torneo.fotoUrl && (
                             <div className="w-32 h-32 md:w-48 md:h-48 shrink-0 rounded-[2.5rem] p-1 shadow-[0_0_60px_-10px_var(--ts)] overflow-hidden bg-[var(--p)] animate-in zoom-in-50 duration-700" style={{ border: "2px solid var(--ts)44" }}>
@@ -268,23 +268,23 @@ export default function TorneoPublico() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-8">
-                                <section className="bg-[var(--s)]/50 backdrop-blur-md rounded-[2rem] border border-[var(--ts)]/10 overflow-hidden shadow-2xl">
-                                    <div className="bg-[var(--p)]/60 px-6 py-4 border-b border-[var(--ts)]/10 flex items-center gap-3">
+                            <div className="flex flex-col gap-8 max-w-5xl mx-auto w-full">
+                                <section className="bg-[var(--secondary)] backdrop-blur-md rounded-[2rem] border border-[var(--ts)]/10 overflow-hidden shadow-2xl flex flex-col">
+                                    <div className="bg-[var(--p)]/60 px-6 py-4 border-b border-[var(--ts)]/10 flex items-center gap-3 shrink-0">
                                         <FaTrophy size={14} className="text-[var(--ts)]" />
                                         <h2 className="font-black uppercase italic tracking-widest text-[10px] md:text-[11px] text-[var(--tp)]">Posiciones</h2>
                                     </div>
-                                    <div className="p-3 md:p-8 overflow-x-auto">
+                                    <div className="p-3 md:p-6 overflow-x-auto flex-1">
                                         <TablaPosiciones posiciones={posiciones} />
                                     </div>
                                 </section>
 
-                                <section className="bg-[var(--s)]/50 backdrop-blur-md rounded-[2rem] border border-[var(--ts)]/10 overflow-hidden shadow-2xl">
-                                    <div className="bg-[var(--p)]/60 px-6 py-4 border-b border-[var(--ts)]/10 flex items-center gap-3">
+                                <section className="bg-[var(--secondary)] backdrop-blur-md rounded-[2rem] border border-[var(--ts)]/10 overflow-hidden shadow-2xl flex flex-col">
+                                    <div className="bg-[var(--p)]/60 px-6 py-4 border-b border-[var(--ts)]/10 flex items-center gap-3 shrink-0">
                                         <FaCalendarAlt size={14} className="text-[var(--ts)]" />
                                         <h2 className="font-black uppercase italic tracking-widest text-[10px] md:text-[11px] text-[var(--tp)]">Cronograma</h2>
                                     </div>
-                                    <div className="w-full">
+                                    <div className="w-full flex-1 flex flex-col">
                                         {zonaActiva && (torneo.tipo === "CERRADO" ? <FixtureTorneo zonaId={zonaActiva.id} /> : <ProgramacionComoFixture zonaId={zonaActiva.id} />)}
                                     </div>
                                 </section>

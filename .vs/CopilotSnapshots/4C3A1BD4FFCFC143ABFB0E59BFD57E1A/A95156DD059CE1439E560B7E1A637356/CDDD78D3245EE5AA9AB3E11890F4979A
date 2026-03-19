@@ -1,0 +1,174 @@
+﻿import { useEffect, useState } from "react";
+import PartidoCard from "./PartidoCard";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+
+export default function FixtureTorneo({ zonaId }) {
+    const [fixture, setFixture] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
+
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    // --- FUNCIÓN DE ORDENAMIENTO ---
+    const ordenarPartidos = (partidos) => {
+        return [...partidos].sort((a, b) => {
+            const canchaA = (a.canchaNombre || a.cancha || "ZZZ").toLowerCase();
+            const canchaB = (b.canchaNombre || b.cancha || "ZZZ").toLowerCase();
+
+            if (canchaA < canchaB) return -1;
+            if (canchaA > canchaB) return 1;
+
+            const horaA = a.hora || a.Hora || "99:99";
+            const horaB = b.hora || b.Hora || "99:99";
+
+            return horaA.localeCompare(horaB);
+        });
+    };
+
+    useEffect(() => {
+        const cargarFixture = async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/partidos/zona/${zonaId}/fixture`);
+                const data = await res.json();
+                setFixture(Array.isArray(data) ? data : []);
+                if (data.length > 0) setFechaSeleccionada(data[0].numeroFecha);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setLoading(false);
+            }
+        };
+        cargarFixture();
+    }, [zonaId, API_URL]);
+
+    if (loading) return (
+        <p className="text-center py-10 font-black animate-pulse uppercase tracking-widest text-[10px]" style={{ color: "var(--ts)" }}>
+            Cargando Fixture...
+        </p>
+    );
+
+    if (fixture.length === 0) return (
+        <p className="text-center py-10 italic text-sm" style={{ color: "var(--ts)", opacity: 0.5 }}>
+            No hay partidos programados
+        </p>
+    );
+
+    return (
+        /* CONTENEDOR PRINCIPAL: Borde sutil y fondo secundario */
+        <div
+            className="w-full backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden transition-all duration-700"
+            style={{
+                backgroundColor: "var(--secondary)",
+                border: "1px solid var(--ts)15" // Borde muy sutil del color elegido
+            }}
+        >
+            {/* HEADER DE FECHAS */}
+            <div
+                className="p-4 md:p-6 flex flex-col items-center gap-4"
+                style={{
+                    backgroundColor: "var(--p)",
+                    borderBottom: "1px solid var(--ts)25" // Línea divisoria oscura
+                }}
+            >
+                <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] italic" style={{ color: "var(--ts)" }}>
+                    FECHA
+                </span>
+
+                <div className="flex items-center justify-center gap-4 w-full">
+                    {/* Botón Anterior */}
+                    <button
+                        onClick={() => setFechaSeleccionada(f => Math.max(fixture[0].numeroFecha, f - 1))}
+                        disabled={fechaSeleccionada === fixture[0].numeroFecha}
+                        className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-all disabled:opacity-20 hover:scale-110"
+                        style={{
+                            border: "1px solid var(--ts)33",
+                            color: "var(--ts)",
+                            backgroundColor: "var(--secondary)"
+                        }}
+                    >
+                        <FaChevronLeft size={10} className="md:size-3" />
+                    </button>
+
+                    {/* Lista de Fechas */}
+                    <div className="flex flex-wrap gap-2 justify-center">
+                        {fixture.map(f => {
+                            const esSeleccionada = fechaSeleccionada === f.numeroFecha;
+                            return (
+                                <button
+                                    key={`fixture-fecha-${f.numeroFecha}`}
+                                    onClick={() => setFechaSeleccionada(f.numeroFecha)}
+                                    className="w-8 h-8 md:w-10 md:h-10 rounded-xl text-[10px] md:text-xs font-black transition-all flex items-center justify-center"
+                                    style={esSeleccionada ? {
+                                        backgroundColor: "var(--ts)", // Fondo del color de acento
+                                        color: "var(--p)",            // Texto oscuro para contraste
+                                        border: "1px solid var(--ts)",
+                                        boxShadow: "0 0 15px var(--ts)44",
+                                        transform: "scale(1.05)"
+                                    } : {
+                                        backgroundColor: "transparent",
+                                        color: "var(--ts)",
+                                        border: "1px solid var(--ts)22" // Borde inactivo sutil
+                                    }}
+                                >
+                                    {f.numeroFecha}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Botón Siguiente */}
+                    <button
+                        onClick={() => setFechaSeleccionada(f => Math.min(fixture[fixture.length - 1].numeroFecha, f + 1))}
+                        disabled={fechaSeleccionada === fixture[fixture.length - 1].numeroFecha}
+                        className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-all disabled:opacity-20 hover:scale-110"
+                        style={{
+                            border: "1px solid var(--ts)33",
+                            color: "var(--ts)",
+                            backgroundColor: "var(--secondary)"
+                        }}
+                    >
+                        <FaChevronRight size={10} className="md:size-3" />
+                    </button>
+                </div>
+            </div>
+
+            {/* LISTA DE PARTIDOS */}
+            <div className="p-2 md:p-10 space-y-4 md:space-y-8 bg-transparent">
+                {fixture.filter(f => f.numeroFecha === fechaSeleccionada).map(fecha => (
+                    ordenarPartidos(fecha.partidos).map(partido => (
+                        <PartidoCard
+                            key={`partido-${partido.partidoId || partido.id}`}
+                            partido={{
+                                ...partido,
+                                equipoLocalNombre: partido.equipoLocalNombre || partido.local,
+                                equipoVisitanteNombre: partido.equipoVisitanteNombre || partido.visitante,
+                                equipoLocalEscudo: partido.equipoLocalEscudo || partido.localEscudo,
+                                equipoVisitanteEscudo: partido.equipoVisitanteEscudo || partido.visitanteEscudo,
+                                canchaNombre: partido.canchaNombre || partido.cancha,
+                                ubicacionUrl: partido.ubicacionUrl || partido.canchaUbicacionUrl,
+                                hora: partido.hora || partido.Hora,
+                                arbitro: partido.arbitro || partido.arbitroNombre,
+                                golesLocal: partido.golesLocal ?? partido.golesL,
+                                golesVisitante: partido.golesVisitante ?? partido.golesV,
+                                partidoId: partido.partidoId || partido.id
+                            }}
+                        />
+                    ))
+                ))}
+            </div>
+
+            {/* FOOTER */}
+            <div
+                className="py-3 px-4 text-center"
+                style={{
+                    backgroundColor: "var(--p)",
+                    borderTop: "1px solid var(--ts)25" // Borde superior del footer oscuro
+                }}
+            >
+                <p className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: "var(--ts)", opacity: 0.5 }}>
+                    Programación Sujeta a Cambios
+                </p>
+            </div>
+        </div>
+    );
+}

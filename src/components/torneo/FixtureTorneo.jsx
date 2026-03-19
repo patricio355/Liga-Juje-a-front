@@ -133,7 +133,7 @@ export default function FixtureTorneo({ zonaId }) {
             </div>
 
             {/* LISTA DE PARTIDOS */}
-            <div className="p-2 md:p-10 space-y-4 md:space-y-8 bg-transparent">
+            <div className="p-2 md:p-6 lg:p-10 space-y-4 md:space-y-6 bg-transparent w-full max-w-4xl mx-auto">
                 {fixture.filter(f => f.numeroFecha === fechaSeleccionada).map(fecha => (
                     ordenarPartidos(fecha.partidos).map(partido => (
                         <PartidoCard

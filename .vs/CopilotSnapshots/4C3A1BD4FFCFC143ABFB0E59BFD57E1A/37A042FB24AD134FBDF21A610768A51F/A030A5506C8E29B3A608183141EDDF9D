@@ -1,0 +1,328 @@
+﻿import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { apiFetch } from "../api/api";
+import TablaPosiciones from "../components/torneo/TablaPosiciones";
+import FixtureTorneo from "../components/torneo/FixtureTorneo";
+import ProgramacionComoFixture from "../components/torneo/ProgramacionComoFixture";
+import CuadroFaseFinal from "./CuadroFaseFinal";
+import Navbar from "../components/Navbar";
+import {
+    FaTrophy, FaCalendarAlt, FaFutbol, FaChevronDown,
+    FaProjectDiagram, FaLayerGroup, FaGlobe, FaVenusMars,
+    FaMars, FaVenus, FaPhone, FaExclamationTriangle, FaHome, FaInfoCircle, FaShareAlt, FaMedal
+} from "react-icons/fa";
+
+export default function TorneoPublico() {
+    const { slug } = useParams();
+    const [torneo, setTorneo] = useState(null);
+    const [zonas, setZonas] = useState([]);
+    const [zonaActiva, setZonaActiva] = useState(null);
+    const [posiciones, setPosiciones] = useState([]);
+    const [menuAbierto, setMenuAbierto] = useState(false);
+    const [loadingTorneo, setLoadingTorneo] = useState(true);
+    const [seccionActiva, setSeccionActiva] = useState("ZONAS");
+
+    // 1. CARGAR DETALLE DEL TORNEO
+    useEffect(() => {
+        const cargarTorneo = async () => {
+            try {
+                setLoadingTorneo(true);
+                const data = await apiFetch(`/api/torneos/${slug}`);
+
+                if (data) {
+                    const zonasOrdenadas = (data.zonas || []).sort((a, b) =>
+                        a.nombre.localeCompare(b.nombre, undefined, { numeric: true, sensitivity: 'base' })
+                    );
+                    setTorneo(data);
+                    setZonas(zonasOrdenadas);
+                    setZonaActiva(zonasOrdenadas[0] ?? null);
+
+                    // LÓGICA DE VISUALIZACIÓN INICIAL:
+                    // Si no tiene fase de grupos pero sí fase final, activamos FINAL por defecto
+                    if (data.faseGrupos === false && data.faseFinal === true) {
+                        setSeccionActiva("FINAL");
+                    }
+                } else {
+                    setTorneo(null);
+                }
+            } catch (e) {
+                console.error("Error cargando detalle del torneo:", e);
+                setTorneo(null);
+            } finally {
+                setLoadingTorneo(false);
+            }
+        };
+        cargarTorneo();
+    }, [slug]);
+
+    // 2. CARGAR POSICIONES
+    useEffect(() => {
+        if (!zonaActiva || seccionActiva !== "ZONAS") return;
+        const cargarPosiciones = async () => {
+            try {
+                const data = await apiFetch(`/api/equipos/posiciones/zona/${zonaActiva.id}`);
+                setPosiciones(data);
+            } catch (e) {
+                console.error("Error cargando posiciones:", e);
+            }
+        };
+        cargarPosiciones();
+    }, [zonaActiva, seccionActiva]);
+
+    if (loadingTorneo) return (
+        <div className="min-h-screen bg-[#05070a] flex flex-col items-center justify-center gap-4">
+            <FaFutbol className="text-4xl text-slate-500 animate-spin" />
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Cargando competición</span>
+        </div>
+    );
+
+    if (!torneo) return (
+        <div className="min-h-screen bg-[#05070a] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_#1e293b_0%,_transparent_70%)] opacity-20"></div>
+            <div className="relative z-10 flex flex-col items-center">
+                <div className="bg-red-500/10 p-6 rounded-[2.5rem] border border-red-500/20 mb-8">
+                    <FaExclamationTriangle className="text-6xl text-red-500 animate-pulse" />
+                </div>
+                <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white mb-4 leading-none text-center">
+                    Torneo <br />
+                    <span className="bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">
+                        No Encontrado
+                    </span>
+                </h1>
+                <Link to="/torneos" className="group relative flex items-center gap-3 bg-white text-black px-10 py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] transition-all hover:scale-105 active:scale-95 shadow-[0_20px_40px_rgba(255,255,255,0.1)]">
+                    <FaHome className="text-lg group-hover:-translate-y-0.5 transition-transform" /> Ir al Inicio
+                </Link>
+            </div>
+        </div>
+    );
+
+    const vars = {
+        "--p": torneo.colorPrimario || "#05070a",
+        "--s": torneo.colorSecundario || "#0a0c10",
+        "--tp": torneo.colorTextoPrimario || "#ffffff",
+        "--ts": torneo.colorTextoSecundario || "#94a3b8",
+    };
+
+    const compartirTorneo = async () => {
+        const url = window.location.href;
+        const texto = `🏆 ${torneo.nombre} ${torneo.division ? `- División ${torneo.division}` : ''}`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: torneo.nombre, text: texto, url });
+            } catch (err) {
+                if (err.name !== 'AbortError') console.error("Error al compartir:", err);
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(url);
+                alert("¡Link copiado al portapapeles!");
+            } catch (err) {
+                console.error("Error al copiar:", err);
+            }
+        }
+    };
+
+    return (
+        <div style={vars} className="min-h-screen bg-[var(--p)] relative overflow-hidden text-[var(--tp)] font-sans transition-colors duration-700">
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <div
+                    className="absolute top-[-25%] left-1/2 -translate-x-1/2 w-full h-full opacity-40 blur-[120px]"
+                    style={{ background: `radial-gradient(circle, ${torneo.colorTextoSecundario}44 0%, transparent 70%)` }}
+                ></div>
+            </div>
+
+            <div className="relative z-10">
+                <Navbar />
+
+                <main className="max-w-[1600px] mx-auto p-4 md:px-8 animate-in fade-in duration-500">
+                    <header className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 mt-8 mb-10">
+                        {torneo.fotoUrl && (
+                            <div className="w-32 h-32 md:w-48 md:h-48 shrink-0 rounded-[2.5rem] p-1 shadow-[0_0_60px_-10px_var(--ts)] overflow-hidden bg-[var(--p)] animate-in zoom-in-50 duration-700" style={{ border: "2px solid var(--ts)44" }}>
+                                <img src={torneo.fotoUrl} alt="Logo Torneo" className="w-full h-full object-cover" />
+                            </div>
+                        )}
+                        <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                            <h1 className="text-5xl md:text-8xl font-black italic uppercase tracking-tighter text-[var(--tp)] drop-shadow-2xl leading-[0.85]">{torneo.nombre}</h1>
+                            {torneo.division && <h2 className="text-xl md:text-3xl font-black uppercase tracking-[0.3em] mt-3 mb-5 drop-shadow-lg" style={{ color: "var(--ts)" }}>DIVISIÓN {torneo.division}</h2>}
+                            <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
+                                {/* Badge Estado del Torneo */}
+                                <div className={`px-4 py-1.5 rounded-full border backdrop-blur-sm flex items-center gap-2 ${
+                                    torneo.estadoTorneo 
+                                        ? 'border-blue-500/50 bg-blue-500/20' 
+                                        : 'border-amber-500/50 bg-amber-500/20'
+                                }`}>
+                                    {torneo.estadoTorneo ? (
+                                        <>
+                                            <FaFutbol className="text-blue-400" size={12} />
+                                            <p className="text-blue-300 font-black uppercase tracking-[0.2em] text-[10px]">EN CURSO</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FaMedal className="text-amber-400" size={12} />
+                                            <p className="text-amber-300 font-black uppercase tracking-[0.2em] text-[10px]">FINALIZADO</p>
+                                        </>
+                                    )}
+                                </div>
+
+                                {torneo.genero && (
+                                    <div className="px-4 py-1.5 rounded-full border border-dashed border-[var(--ts)]/30 bg-[var(--s)]/60 backdrop-blur-sm flex items-center gap-2">
+                                        {torneo.genero === "MASCULINO" && <FaMars className="text-[var(--ts)]" />}
+                                        {torneo.genero === "FEMENINO" && <FaVenus className="text-[var(--ts)]" />}
+                                        {torneo.genero === "MIXTO" && <FaVenusMars className="text-[var(--ts)]" />}
+                                        <p className="text-[var(--ts)] font-black uppercase tracking-[0.2em] text-[10px]">{torneo.genero}</p>
+                                    </div>
+                                )}
+                                {torneo.redSocial && (
+                                    <a href={torneo.redSocial.startsWith('http') ? torneo.redSocial : `https://${torneo.redSocial}`} target="_blank" rel="noopener noreferrer" className="px-4 py-1.5 rounded-full border border-[var(--ts)] bg-[var(--ts)]/10 hover:bg-[var(--ts)] hover:text-[var(--p)] transition-all flex items-center gap-2 cursor-pointer group">
+                                        <FaGlobe className="text-[var(--ts)] group-hover:text-[var(--p)] transition-colors" />
+                                        <p className="text-[var(--ts)] group-hover:text-[var(--p)] font-black uppercase tracking-[0.2em] text-[10px] transition-colors">SEGUINOS</p>
+                                    </a>
+                                )}
+                                {torneo.telefono && (
+                                    <a href={`https://wa.me/${torneo.telefono.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="px-4 py-1.5 rounded-full border border-green-500/50 bg-green-500/10 hover:bg-green-500 hover:text-white transition-all flex items-center gap-2 cursor-pointer group">
+                                        <FaPhone className="text-green-500 group-hover:text-white transition-colors" size={12} />
+                                        <p className="text-green-500 group-hover:text-white font-black uppercase tracking-[0.1em] text-[10px] transition-colors">{torneo.telefono}</p>
+                                    </a>
+                                )}
+                                <button onClick={compartirTorneo} className="px-4 py-1.5 rounded-full border border-blue-500/50 bg-blue-500/10 hover:bg-blue-500 hover:text-white transition-all flex items-center gap-2 cursor-pointer group">
+                                    <FaShareAlt className="text-blue-500 group-hover:text-white transition-colors" size={12} />
+                                    <p className="text-blue-500 group-hover:text-white font-black uppercase tracking-[0.2em] text-[10px] transition-colors">COMPARTIR</p>
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* SECCIÓN CAMPEÓN - Solo si el torneo está finalizado */}
+                    {!torneo.estadoTorneo && torneo.campeon && (
+                        <div className="mb-8 animate-in slide-in-from-top-4 duration-700">
+                            <div className="relative bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 backdrop-blur-md rounded-[2rem] border-2 border-amber-500/40 p-6 md:p-8 shadow-[0_0_80px_rgba(251,191,36,0.3)] overflow-hidden">
+                                {/* Efecto de brillo animado */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-400/10 to-transparent animate-pulse"></div>
+
+                                <div className="relative z-10 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
+                                    <div className="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-amber-400 to-yellow-600 shadow-[0_0_30px_rgba(251,191,36,0.6)] animate-pulse">
+                                        <FaMedal className="text-2xl md:text-3xl text-white drop-shadow-lg" />
+                                    </div>
+
+                                    <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                                        <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] text-amber-400 mb-1">
+                                            🏆 Campeón del Torneo
+                                        </p>
+                                        <h3 className="text-2xl md:text-4xl font-black uppercase italic tracking-tighter text-amber-100 drop-shadow-[0_2px_10px_rgba(251,191,36,0.5)]">
+                                            {torneo.campeon}
+                                        </h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* SELECTOR DE SECCIÓN CONDICIONAL */}
+                    {(torneo.faseGrupos && torneo.faseFinal) && (
+                        <div className="flex justify-center gap-1 mb-8 bg-[var(--s)]/80 p-1 rounded-xl border border-[var(--ts)]/10 w-fit mx-auto backdrop-blur-xl shadow-2xl">
+                            <button
+                                onClick={() => setSeccionActiva("ZONAS")}
+                                className={`flex items-center gap-2 px-6 md:px-8 py-2 md:py-3 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${seccionActiva === "ZONAS" ? "bg-[var(--tp)] text-[var(--p)] shadow-lg" : "text-[var(--ts)] hover:text-[var(--tp)]"}`}
+                            >
+                                <FaLayerGroup /> FASE DE GRUPOS
+                            </button>
+                            <button
+                                onClick={() => setSeccionActiva("FINAL")}
+                                className={`flex items-center gap-2 px-6 md:px-8 py-2 md:py-3 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${seccionActiva === "FINAL" ? "bg-[var(--tp)] text-[var(--p)] shadow-lg" : "text-[var(--ts)] hover:text-[var(--tp)]"}`}
+                            >
+                                <FaProjectDiagram /> FASE FINAL
+                            </button>
+                        </div>
+                    )}
+
+                    {/* MOSTRAR CONTENIDO SEGÚN SECCIÓN ACTIVA Y PERMISOS DEL ATRIBUTO */}
+                    {seccionActiva === "ZONAS" && torneo.faseGrupos !== false ? (
+                        <div className="animate-in slide-in-from-bottom-4 duration-500">
+                            {/* SELECTOR DE ZONA */}
+                            <div className="relative mb-6 flex justify-center z-50">
+                                <div className="relative w-fit">
+                                    <div
+                                        onClick={() => setMenuAbierto(!menuAbierto)}
+                                        className="flex items-center justify-between gap-3 bg-[var(--s)] px-4 py-2.5 md:px-6 md:py-3.5 rounded-xl border border-[var(--ts)]/20 cursor-pointer hover:border-[var(--ts)]/50 transition-all shadow-xl"
+                                    >
+                                        <span className="text-[10px] md:text-[11px] font-black text-[var(--tp)] uppercase tracking-widest whitespace-nowrap">
+                                            {zonaActiva?.nombre || "ZONAS"}
+                                        </span>
+                                        <FaChevronDown size={10} className={`text-[var(--ts)] transition-transform duration-300 ${menuAbierto ? "rotate-180" : ""}`} />
+                                    </div>
+                                    {menuAbierto && (
+                                        <div className="absolute top-[calc(100%+6px)] left-0 min-w-full bg-[var(--s)] border border-[var(--ts)]/30 rounded-xl p-1 shadow-[0_15px_40px_rgba(0,0,0,0.5)] z-50 overflow-hidden animate-in zoom-in-95">
+                                            {zonas.map(z => (
+                                                <button
+                                                    key={z.id}
+                                                    onClick={() => { setZonaActiva(z); setMenuAbierto(false); }}
+                                                    className={`w-full px-4 py-2.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase text-center mb-1 transition-all whitespace-nowrap ${zonaActiva?.id === z.id ? "bg-[var(--tp)] text-[var(--p)]" : "text-[var(--ts)] hover:bg-[var(--p)] hover:text-[var(--tp)]"}`}
+                                                >
+                                                    {z.nombre}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {menuAbierto && <div className="fixed inset-0 z-[-1]" onClick={() => setMenuAbierto(false)}></div>}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-8">
+                                <section className="bg-[var(--s)]/50 backdrop-blur-md rounded-[2rem] border border-[var(--ts)]/10 overflow-hidden shadow-2xl">
+                                    <div className="bg-[var(--p)]/60 px-6 py-4 border-b border-[var(--ts)]/10 flex items-center gap-3">
+                                        <FaTrophy size={14} className="text-[var(--ts)]" />
+                                        <h2 className="font-black uppercase italic tracking-widest text-[10px] md:text-[11px] text-[var(--tp)]">Posiciones</h2>
+                                    </div>
+                                    <div className="p-3 md:p-8 overflow-x-auto">
+                                        <TablaPosiciones posiciones={posiciones} />
+                                    </div>
+                                </section>
+
+                                <section className="bg-[var(--s)]/50 backdrop-blur-md rounded-[2rem] border border-[var(--ts)]/10 overflow-hidden shadow-2xl">
+                                    <div className="bg-[var(--p)]/60 px-6 py-4 border-b border-[var(--ts)]/10 flex items-center gap-3">
+                                        <FaCalendarAlt size={14} className="text-[var(--ts)]" />
+                                        <h2 className="font-black uppercase italic tracking-widest text-[10px] md:text-[11px] text-[var(--tp)]">Cronograma</h2>
+                                    </div>
+                                    <div className="w-full">
+                                        {zonaActiva && (torneo.tipo === "CERRADO" ? <FixtureTorneo zonaId={zonaActiva.id} /> : <ProgramacionComoFixture zonaId={zonaActiva.id} />)}
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    ) : (
+                        /* ESTA PARTE SE MUESTRA SI SECCION === "FINAL" O SI FASE GRUPOS ES FALSE */
+                        torneo.faseFinal !== false && (
+                            <div className="animate-in slide-in-from-bottom-4 duration-500">
+                                <div className="bg-[var(--s)]/50 backdrop-blur-md rounded-[2rem] border border-[var(--ts)]/10 overflow-hidden shadow-2xl min-h-[300px] flex flex-col">
+                                    <div className="bg-[var(--p)]/60 px-6 py-4 border-b border-[var(--ts)]/10 flex items-center gap-3">
+                                        <FaProjectDiagram size={14} className="text-[var(--ts)]" />
+                                        <h2 className="font-black uppercase italic tracking-widest text-[10px] md:text-[11px] text-[var(--tp)]">Cuadro de Eliminación</h2>
+                                    </div>
+                                    <div className="flex-1 w-full p-2 md:p-6 text-center">
+                                        <CuadroFaseFinal
+                                            torneoId={torneo.id}
+                                            fallback={
+                                                <div className="flex flex-col items-center justify-center gap-4 py-12 h-full">
+                                                    <div className="bg-[var(--p)] p-5 rounded-full border border-[var(--ts)]/20 shadow-inner">
+                                                        <FaInfoCircle className="text-[var(--ts)] text-3xl opacity-40" />
+                                                    </div>
+                                                    <h3 className="text-sm md:text-base font-black uppercase tracking-widest text-[var(--tp)]">Sin partidos programados</h3>
+                                                    <p className="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--ts)] max-w-[250px]">La fase de eliminación aún no ha sido generada para esta competición.</p>
+                                                </div>
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    )}
+
+                    <footer className="mt-16 mb-12 text-center opacity-40">
+                        <p className="text-[8px] md:text-[9px] font-black text-[var(--ts)] uppercase tracking-[1em] italic">LIGAS JUJEÑAS • V1.0</p>
+                    </footer>
+                </main>
+            </div>
+        </div>
+    );
+}

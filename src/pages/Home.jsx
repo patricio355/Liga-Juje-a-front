@@ -10,6 +10,7 @@ export default function Home() {
     const [search, setSearch] = useState("");
     const [torneos, setTorneos] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [estadoFiltro, setEstadoFiltro] = useState(true); // true = en curso, false = finalizados
 
     useEffect(() => {
         let montado = true;
@@ -25,8 +26,11 @@ export default function Home() {
     }, []);
 
     const filtrados = useMemo(() => {
-        return torneos.filter(t => t.nombre?.toLowerCase().includes(search.toLowerCase()));
-    }, [torneos, search]);
+        return torneos.filter(t => 
+            (t.estadoTorneo === estadoFiltro) &&
+            t.nombre?.toLowerCase().includes(search.toLowerCase())
+        );
+    }, [torneos, search, estadoFiltro]);
 
     return (
         <div className="min-h-screen bg-[#05070a] relative overflow-hidden text-slate-300 font-sans">
@@ -49,22 +53,39 @@ export default function Home() {
                     </div>
                 </section>
 
-                <main className="px-4 py-12 max-w-4xl mx-auto w-full">
-                    <div className="flex flex-col items-center mb-12">
-                        <div className="relative mb-6">
-                            <div className="absolute -inset-4 bg-slate-500/10 blur-2xl rounded-full"></div>
-                            <div className="relative bg-white/5 backdrop-blur-sm p-5 rounded-[2rem] border border-slate-700/30">
-                                <FaTrophy className="text-4xl text-slate-200" />
-                            </div>
-                        </div>
-
-                        {/* --- TÍTULO CON PROXIMIDAD VERTICAL --- */}
-                        <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white text-center leading-[0.85] py-2">
-                            <span className="block">Torneos</span>
-                            <span className="inline-block bg-gradient-to-r from-slate-100 via-slate-400 to-slate-500 bg-clip-text text-transparent px-6 py-2">
-                                en curso
+                <main className="px-4 py-8 mb-6 max-w-4xl mx-auto w-full">
+                    <div className="flex flex-col items-center mb-8">
+                        {/* --- TÍTULO --- */}
+                        <h1 className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white text-center leading-normal flex justify-center gap-2">
+                            <span>Torneos</span>
+                            <span className={`bg-clip-text text-transparent px-1 ${estadoFiltro ? 'bg-gradient-to-r from-slate-100 via-slate-400 to-slate-500' : 'bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-600'}`} style={{ paddingRight: '0.1em' }}>
+                                {estadoFiltro ? "en curso" : "finalizados"}
                             </span>
                         </h1>
+                    </div>
+
+                    {/* --- FILTRO DE ESTADO --- */}
+                    <div className="flex justify-center gap-2 mb-8 bg-white/5 p-1.5 rounded-2xl w-fit mx-auto border border-white/10 backdrop-blur-md shadow-2xl">
+                        <button
+                            onClick={() => setEstadoFiltro(true)}
+                            className={`px-8 py-3 rounded-xl font-black uppercase text-[10px] md:text-xs tracking-widest transition-all duration-300 ${
+                                estadoFiltro 
+                                ? "bg-slate-200 text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]" 
+                                : "text-slate-400 hover:text-white hover:bg-white/10"
+                            }`}
+                        >
+                            EN CURSO
+                        </button>
+                        <button
+                            onClick={() => setEstadoFiltro(false)}
+                            className={`px-8 py-3 rounded-xl font-black uppercase text-[10px] md:text-xs tracking-widest transition-all duration-300 ${
+                                !estadoFiltro 
+                                ? "bg-amber-400 text-black shadow-[0_0_20px_rgba(251,191,36,0.3)]" 
+                                : "text-slate-400 hover:text-white hover:bg-white/10"
+                            }`}
+                        >
+                            FINALIZADOS
+                        </button>
                     </div>
 
                     {/* --- BUSCADOR --- */}
@@ -94,7 +115,7 @@ export default function Home() {
                         {!loading && filtrados.length === 0 && (
                             <div className="text-center py-20 bg-white/5 rounded-[3rem] border border-dashed border-slate-800">
                                 <p className="text-slate-500 font-bold uppercase tracking-widest italic">
-                                    No se encontraron torneos en curso
+                                    No se encontraron torneos {estadoFiltro ? "en curso" : "finalizados"}
                                 </p>
                             </div>
                         )}

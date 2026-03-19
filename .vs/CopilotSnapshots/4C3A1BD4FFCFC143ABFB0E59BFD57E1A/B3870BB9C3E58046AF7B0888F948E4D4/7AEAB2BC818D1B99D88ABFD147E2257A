@@ -1,0 +1,144 @@
+﻿import { FaShieldAlt } from "react-icons/fa";
+
+export default function TablaPosiciones({ posiciones }) {
+    const borderFrame = "1px solid var(--ts)22";
+    const borderRow = "1px solid #33415588";
+
+    // Definimos anchos fijos para asegurar alineación vertical perfecta entre header y body
+    const wStat = "w-[28px] md:w-[60px]"; // Ancho para J, G, E, P
+    const wPts = "w-[40px] md:w-[80px]";  // Ancho para PTS y +/-
+
+    return (
+        <div
+            className="w-full overflow-hidden rounded-[1.5rem] md:rounded-[2rem] backdrop-blur-md shadow-2xl transition-all duration-700"
+            style={{
+                border: borderFrame,
+                backgroundColor: "var(--s)"
+            }}
+        >
+            <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full border-collapse">
+                    <thead>
+                    <tr
+                        className="text-[9px] md:text-sm font-black uppercase tracking-wider h-10 md:h-14"
+                        style={{
+                            backgroundColor: "var(--p)",
+                            borderBottom: borderRow,
+                            color: "var(--ts)"
+                        }}
+                    >
+                        <th className="pl-3 pr-1 text-center w-[25px] md:w-[40px] align-middle">#</th>
+                        <th className="px-2 text-left min-w-[120px] md:min-w-[300px] align-middle">EQUIPOS</th>
+
+                        {/* PUNTOS */}
+                        <th className={`text-center align-middle ${wPts}`} style={{ backgroundColor: "var(--ts)11" }}>PTS</th>
+
+                        {/* ESTADÍSTICAS */}
+                        <th className={`text-center align-middle ${wStat}`}>J</th>
+                        <th className={`text-center align-middle ${wStat}`}>G</th>
+                        <th className={`text-center align-middle ${wStat}`}>E</th>
+                        <th className={`text-center align-middle ${wStat}`}>P</th>
+
+                        {/* DIFERENCIA */}
+                        <th className={`text-center align-middle ${wPts}`}>+/-</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {posiciones.map((p, index) => {
+                        const diferenciaGoles = (p.golesAFavor || 0) - (p.golesEnContra || 0);
+
+                        return (
+                            <tr
+                                key={p.id || index}
+                                className="transition-colors group hover:bg-white/5 h-10 md:h-16" // Altura fija de fila para centrado perfecto
+                                style={{
+                                    borderBottom: borderRow,
+                                    backgroundColor: "transparent"
+                                }}
+                            >
+                                {/* POSICIÓN */}
+                                <td className="pl-3 pr-1 text-center align-middle font-black text-[10px] md:text-base opacity-40">
+                                    {index + 1}
+                                </td>
+
+                                {/* EQUIPO */}
+                                <td className="px-2 align-middle">
+                                    <div className="flex items-center gap-2 md:gap-3">
+                                        <div className="shrink-0 w-6 h-6 md:w-11 md:h-11 flex items-center justify-center">
+                                            {p.escudo || p.urlEscudo ? (
+                                                <img
+                                                    src={p.escudo || p.urlEscudo}
+                                                    alt={p.nombreEquipo}
+                                                    className="max-w-full max-h-full object-contain filter drop-shadow-md"
+                                                />
+                                            ) : (
+                                                <FaShieldAlt style={{ color: "var(--ts)" }} className="text-xs md:text-3xl opacity-20" />
+                                            )}
+                                        </div>
+                                        <span
+                                            className="text-[10px] md:text-lg font-bold uppercase tracking-tight truncate max-w-[90px] md:max-w-none pt-0.5"
+                                            style={{ color: "var(--tp)" }}
+                                            title={p.nombreEquipo}
+                                        >
+                                                {p.nombreEquipo}
+                                            </span>
+                                    </div>
+                                </td>
+
+                                {/* PUNTOS */}
+                                <td className={`text-center align-middle ${wPts}`} style={{ backgroundColor: "var(--ts)08" }}>
+                                        <span className="font-black text-xs md:text-xl block" style={{ color: "var(--tp)" }}>
+                                            {p.puntos}
+                                        </span>
+                                </td>
+
+                                {/* ESTADÍSTICAS */}
+                                <td className={`text-center align-middle ${wStat}`}>
+                                    <span className="text-[9px] md:text-base font-bold opacity-60 text-slate-300 block">{p.partidosJugados}</span>
+                                </td>
+                                <td className={`text-center align-middle ${wStat}`}>
+                                    <span className="text-[9px] md:text-base font-bold opacity-60 text-slate-300 block">{p.ganados}</span>
+                                </td>
+                                <td className={`text-center align-middle ${wStat}`}>
+                                    <span className="text-[9px] md:text-base font-bold opacity-60 text-slate-300 block">{p.empatados}</span>
+                                </td>
+                                <td className={`text-center align-middle ${wStat}`}>
+                                    <span className="text-[9px] md:text-base font-bold opacity-60 text-slate-300 block">{p.perdidos}</span>
+                                </td>
+
+                                {/* DIFERENCIA */}
+                                <td className={`text-center align-middle ${wPts}`}>
+                                    <div className="flex justify-center items-center">
+                                            <span
+                                                className="text-[9px] md:text-base font-black px-1.5 py-0.5 rounded min-w-[20px]"
+                                                style={{
+                                                    color: diferenciaGoles > 0 ? "#10b981" : diferenciaGoles < 0 ? "#ef4444" : "var(--ts)44",
+                                                    backgroundColor: diferenciaGoles !== 0 ? "rgba(255,255,255,0.03)" : "transparent"
+                                                }}
+                                            >
+                                                {diferenciaGoles > 0 ? `+${diferenciaGoles}` : diferenciaGoles}
+                                            </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        );
+                    })}
+                    </tbody>
+                </table>
+            </div>
+
+            <div
+                className="py-2 px-4 text-center"
+                style={{
+                    backgroundColor: "var(--p)",
+                    borderTop: borderRow
+                }}
+            >
+                <p className="text-[7px] md:text-[10px] font-black uppercase tracking-[0.4em]" style={{ color: "var(--ts)", opacity: 0.4 }}>
+                    POSICIONES OFICIALES
+                </p>
+            </div>
+        </div>
+    );
+}

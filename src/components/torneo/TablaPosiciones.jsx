@@ -9,14 +9,15 @@ export default function TablaPosiciones({ posiciones }) {
     const wPts = "w-[40px] md:w-[80px]";  // Ancho para PTS y +/-
 
     return (
-        <div
-            className="w-full overflow-hidden rounded-[1.5rem] md:rounded-[2rem] backdrop-blur-md shadow-2xl transition-all duration-700"
-            style={{
-                border: borderFrame,
-                backgroundColor: "var(--s)"
-            }}
-        >
-            <div className="overflow-x-auto custom-scrollbar">
+        <div className="w-full flex justify-center">
+            <div
+                className="w-full max-w-5xl overflow-hidden rounded-[1.5rem] md:rounded-[2rem] font-sans"
+                style={{
+                    border: borderFrame,
+                    backgroundColor: "transparent"
+                }}
+            >
+                <div className="overflow-x-auto custom-scrollbar">
                 <table className="w-full border-collapse">
                     <thead>
                     <tr
@@ -138,6 +139,7 @@ export default function TablaPosiciones({ posiciones }) {
                 <p className="text-[7px] md:text-[10px] font-black uppercase tracking-[0.4em]" style={{ color: "var(--ts)", opacity: 0.4 }}>
                     POSICIONES OFICIALES
                 </p>
+            </div>
             </div>
         </div>
     );

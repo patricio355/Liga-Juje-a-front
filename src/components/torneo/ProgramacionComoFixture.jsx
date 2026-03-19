@@ -140,7 +140,7 @@ export default function ProgramacionComoFixture({ zonaId }) {
                 </div>
             </div>
 
-            <div className="p-2 md:p-10 space-y-4 md:space-y-8 bg-transparent">
+            <div className="p-2 md:p-6 lg:p-10 space-y-4 md:space-y-6 bg-transparent w-full max-w-4xl mx-auto">
                 {ordenarPartidos(partidos).map((p, index) => (
                     <PartidoCard
                         key={p.partidoId || p.id || `partido-${index}`}
