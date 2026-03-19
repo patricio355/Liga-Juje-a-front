@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import { apiFetch } from "../api/api";
 import {
     getOpcionesProgramacion,
@@ -25,6 +24,8 @@ export default function ProgramacionZona() {
     const [programados, setProgramados] = useState([]);
     const [nombreZona, setNombreZona] = useState("");
     const [nombreTorneo, setNombreTorneo] = useState("");
+    const [torneoId, setTorneoId] = useState(null);
+    const [torneoEscudo, setTorneoEscudo] = useState(null);
     const [openEquipoId, setOpenEquipoId] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -43,6 +44,18 @@ export default function ProgramacionZona() {
                 setNombreTorneo(zonaData.torneoNombre);
             } else if (zonaData?.torneo?.nombre) {
                 setNombreTorneo(zonaData.torneo.nombre);
+            }
+            if (zonaData?.torneoEscudo) {
+                 setTorneoEscudo(zonaData.torneoEscudo);
+            } else if (zonaData?.torneo?.fotoUrl) {
+                 setTorneoEscudo(zonaData.torneo.fotoUrl);
+            }
+            if (zonaData?.torneoId) {
+                setTorneoId(zonaData.torneoId);
+            } else if (zonaData?.torneo?.id) {
+                setTorneoId(zonaData.torneo.id);
+            } else if (zonaData?.torneo?.slug) {
+                setTorneoId(zonaData.torneo.slug);
             }
         } catch (error) {
             console.error("Error obteniendo nombres:", error);
@@ -277,18 +290,17 @@ export default function ProgramacionZona() {
     }, [programados]);
 
     return (
-        <div className="min-h-screen bg-black text-slate-200">
-            <Navbar />
-            <main className="p-4 md:p-8 max-w-[1500px] mx-auto w-full">
+        <div className="w-full text-slate-200">
+            <main className="w-full max-w-[1500px] mx-auto">
 
                 {/* Header Actions */}
                 <div className="flex justify-between items-center mb-10">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => torneoId ? navigate(`/dashboard/torneos/${torneoId}`) : navigate('/dashboard')}
                         className="flex items-center gap-3 bg-white text-black px-6 py-2.5 rounded-full hover:bg-slate-200 transition-all group shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-95"
                     >
                         <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-                        <span className="font-black uppercase text-[10px] tracking-widest">Volver al Panel</span>
+                        <span className="font-black uppercase text-[10px] tracking-widest">VOLVER AL TORNEO</span>
                     </button>
                     <div className="bg-[#111] px-5 py-2.5 rounded-2xl border border-white/10 flex items-center gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                         <FaUserCircle className="text-white text-sm" /> {userEmail || "ADMINISTRADOR"}
@@ -296,16 +308,28 @@ export default function ProgramacionZona() {
                 </div>
 
                 {/* Titulares */}
-                <div className="text-center lg:text-left mb-12 px-2">
-                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-2 leading-none">
-                        {nombreTorneo || "CARGANDO..."}
-                    </h1>
-                    <p className="text-slate-500 font-bold uppercase text-[11px] md:text-xs tracking-[0.4em] flex flex-col lg:flex-row lg:items-center">
-                        Gestión de Programación
-                        <span className="hidden lg:inline mx-3 text-white/20">/</span>
-                        <span className="text-white mt-2 lg:mt-0 font-black">ZONA: {nombreZona || '...'}</span>
-                    </p>
-                </div>
+                <header className="bg-[#0a0c10] p-8 rounded-[2.5rem] border border-white/5 mb-12 shadow-2xl flex flex-col xl:flex-row items-center gap-8 relative overflow-hidden text-center lg:text-left">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-slate-400/5 blur-[100px] rounded-full -mr-32 -mt-32"></div>
+                    <div className="flex items-center gap-6 relative z-10 flex-col md:flex-row">
+                        <div className="w-24 h-24 md:w-28 md:h-28 bg-black rounded-3xl border border-white/10 flex items-center justify-center shadow-2xl overflow-hidden shrink-0 group">
+                            {torneoEscudo ? (
+                                <img src={torneoEscudo} alt={nombreTorneo} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                            ) : (
+                                <FaFutbol size={32} className="text-slate-800" />
+                            )}
+                        </div>
+                        <div>
+                            <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-2 leading-none">
+                                {nombreTorneo || "CARGANDO..."}
+                            </h1>
+                            <p className="text-slate-500 font-bold uppercase text-[11px] md:text-xs tracking-[0.4em] flex flex-col lg:flex-row lg:items-center">
+                                Gestión de Programación
+                                <span className="hidden lg:inline mx-3 text-white/20">/</span>
+                                <span className="text-white mt-2 lg:mt-0 font-black">ZONA: {nombreZona || '...'}</span>
+                            </p>
+                        </div>
+                    </div>
+                </header>
 
                 {/* Selector de Fechas */}
                 <div className="flex items-center gap-4 mb-12 bg-[#0a0a0a] p-3 rounded-2xl border border-white/5 w-full lg:w-fit overflow-x-auto shadow-2xl">

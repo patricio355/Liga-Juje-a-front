@@ -7,6 +7,7 @@ export default function EditarResultadoModal({ open, onClose, partido, onSuccess
     const [golesLocal, setGolesLocal] = useState(0);
     const [golesVisitante, setGolesVisitante] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (partido) {
@@ -41,6 +42,7 @@ export default function EditarResultadoModal({ open, onClose, partido, onSuccess
     const guardarCambios = async (e) => {
         if (e) e.preventDefault();
         setLoading(true);
+        setError(null);
         try {
             const queryParams = new URLSearchParams({
                 golesLocal: golesLocal,
@@ -53,9 +55,9 @@ export default function EditarResultadoModal({ open, onClose, partido, onSuccess
 
             if (onSuccess) await onSuccess();
             onClose();
-        } catch (error) {
-            console.error("Error al editar resultado:", error);
-            alert("No se pudo actualizar el resultado.");
+        } catch (err) {
+            console.error("Error al editar resultado:", err);
+            setError(err.message || "No se pudo actualizar el resultado.");
         } finally {
             setLoading(false);
         }
@@ -168,21 +170,28 @@ export default function EditarResultadoModal({ open, onClose, partido, onSuccess
                     </div>
 
                     {/* Acciones */}
-                    <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-2">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="order-2 sm:order-1 flex-1 py-3 md:py-4 bg-white/5 hover:bg-white/10 text-slate-500 rounded-xl md:rounded-2xl font-black uppercase text-[9px] md:text-[10px] tracking-[0.2em] transition-all border border-white/5"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="order-1 sm:order-2 flex-1 py-3 md:py-4 bg-gradient-to-r from-slate-200 to-slate-400 hover:from-white hover:to-slate-100 text-black rounded-xl md:rounded-2xl font-black uppercase text-[9px] md:text-[10px] tracking-[0.2em] transition-all shadow-[0_10px_30px_rgba(0,0,0,0.3)] flex items-center justify-center gap-2 disabled:opacity-50"
-                        >
-                            {loading ? "..." : "CONFIRMAR"}
-                        </button>
+                    <div className="flex flex-col gap-4 pt-2">
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center">
+                                {error}
+                            </div>
+                        )}
+                        <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="order-2 sm:order-1 flex-1 py-3 md:py-4 bg-white/5 hover:bg-white/10 text-slate-500 rounded-xl md:rounded-2xl font-black uppercase text-[9px] md:text-[10px] tracking-[0.2em] transition-all border border-white/5"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="order-1 sm:order-2 flex-1 py-3 md:py-4 bg-gradient-to-r from-slate-200 to-slate-400 hover:from-white hover:to-slate-100 text-black rounded-xl md:rounded-2xl font-black uppercase text-[9px] md:text-[10px] tracking-[0.2em] transition-all shadow-[0_10px_30px_rgba(0,0,0,0.3)] flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {loading ? "..." : "CONFIRMAR"}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

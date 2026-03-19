@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { FaEdit, FaTrash, FaCircle, FaShieldAlt, FaExclamationTriangle, FaTimes } from "react-icons/fa";
+import { FaEdit, FaTrash, FaCircle, FaShieldAlt, FaExclamationTriangle, FaTimes, FaPalette, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 
 export default function EquipoCard({ equipo, onEdit, onDelete, onEliminarInscripcion }) {
     const [showConfirm, setShowConfirm] = useState(false);
@@ -41,7 +41,28 @@ export default function EquipoCard({ equipo, onEdit, onDelete, onEliminarInscrip
                             </div>
                         </div>
 
-
+                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            {(equipo.camisetaTitular || equipo.camisetaSuplente) && (
+                                <div className="flex items-center gap-2">
+                                    <FaPalette className="text-slate-600" />
+                                    <span>
+                                        {equipo.camisetaTitular ? equipo.camisetaTitular : "-"} / {equipo.camisetaSuplente ? equipo.camisetaSuplente : "-"}
+                                    </span>
+                                </div>
+                            )}
+                            {equipo.encargadoEmail && (
+                                <div className="flex items-center gap-2">
+                                    <FaEnvelope className="text-slate-600" />
+                                    <span className="lowercase normal-case tracking-normal">{equipo.encargadoEmail}</span>
+                                </div>
+                            )}
+                            {equipo.localidad && (
+                                <div className="flex items-center gap-2">
+                                    <FaMapMarkerAlt className="text-slate-600" />
+                                    <span>{equipo.localidad}</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 

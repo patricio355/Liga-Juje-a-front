@@ -4,7 +4,6 @@ import {
     FaArrowLeft, FaPlus, FaSync,
     FaEdit, FaCheckCircle, FaTrashAlt, FaTrophy, FaShieldAlt // <-- Agregado aquí
 } from "react-icons/fa";
-import Navbar from "../components/Navbar";
 import { apiFetch } from "../api/api";
 
 // Modales
@@ -17,6 +16,7 @@ export default function GestionFaseFinal() {
     const navigate = useNavigate();
 
     const [etapasDb, setEtapasDb] = useState([]);
+    const [torneo, setTorneo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [creandoEtapa, setCreandoEtapa] = useState(false);
     const [operando, setOperando] = useState(false);
@@ -34,8 +34,12 @@ export default function GestionFaseFinal() {
     const cargarEtapas = useCallback(async () => {
         try {
             setLoading(true);
-            const data = await apiFetch(`/api/torneos/${id}/cuadro-completo`);
+            const [data, torneoData] = await Promise.all([
+                  apiFetch(`/api/torneos/${id}/cuadro-completo`),
+                  apiFetch(`/api/torneos/${id}`)
+            ]);
             setEtapasDb(data.sort((a, b) => a.orden - b.orden));
+            setTorneo(torneoData);
         } catch (error) {
             console.error("Error al cargar etapas:", error);
         } finally {
@@ -151,36 +155,51 @@ export default function GestionFaseFinal() {
     };
 
     if (loading && !creandoEtapa) return (
-        <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
+        <div className="flex flex-col items-center justify-center gap-4 py-20">
             <FaSync className="text-white animate-spin text-4xl" />
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Sincronizando Cuadro</span>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-black text-slate-200 font-sans">
-            <Navbar />
-            <main className="p-4 md:p-8 max-w-[1800px] mx-auto">
+        <div className="w-full text-slate-200 font-sans">
+            <main className="max-w-[1800px] mx-auto">
+                <div className="mb-8">
+                    <button
+                        onClick={() => navigate(`/dashboard/torneos/${id}`)}
+                         className="flex items-center gap-3 bg-white text-black px-5 py-2 rounded-full hover:bg-slate-200 transition-all mb-4 uppercase text-[10px] font-black tracking-widest shadow-lg"
+                    >
+                        <FaArrowLeft /> VOLVER AL TORNEO
+                    </button>
+                </div>
 
                 {/* Header Acciones */}
-                <header className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
-                    <div className="text-center md:text-left">
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="flex items-center gap-3 bg-white text-black px-5 py-2 rounded-full hover:bg-slate-200 transition-all mb-4 uppercase text-[10px] font-black tracking-widest shadow-lg"
-                        >
-                            <FaArrowLeft /> Volver al Panel
-                        </button>
-                        <h1 className="text-4xl md:text-5xl font-black uppercase text-white tracking-tighter leading-none">
-                            GESTIÓN <span className="text-white/40">FASE FINAL</span>
-                        </h1>
+                <header className="bg-[#0a0c10] p-8 rounded-[2.5rem] border border-white/5 mb-10 shadow-2xl flex flex-col xl:flex-row justify-between items-center gap-8 relative overflow-hidden text-center md:text-left">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-slate-400/5 blur-[100px] rounded-full -mr-32 -mt-32"></div>
+                    <div className="flex items-center gap-6 relative z-10 flex-col md:flex-row">
+                        <div className="w-24 h-24 md:w-28 md:h-28 bg-black rounded-3xl border border-white/10 flex items-center justify-center shadow-2xl overflow-hidden shrink-0 group">
+                            {torneo?.fotoUrl ? (
+                                <img src={torneo.fotoUrl} alt={torneo.nombre} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                            ) : (
+                                <FaTrophy size={40} className="text-slate-800" />
+                            )}
+                        </div>
+
+                        <div className="flex flex-col items-center md:items-start">
+                             <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white leading-none">
+                                GESTIÓN <span className="text-white/40">FASE FINAL</span>
+                             </h1>
+                             <p className="text-slate-500 font-bold uppercase text-[11px] md:text-xs tracking-[0.4em] flex flex-col lg:flex-row lg:items-center mt-2">
+                                {torneo?.nombre || "Cargando..."}
+                             </p>
+                        </div>
                     </div>
 
                     {etapasDb.length < 6 && (
                         <button
                             onClick={gestionarNuevaEtapa}
                             disabled={creandoEtapa}
-                            className="bg-white hover:bg-slate-200 text-black px-10 py-5 rounded-2xl font-black uppercase text-xs flex items-center gap-4 shadow-[0_10px_30px_-10px_rgba(255,255,255,0.3)] transition-all active:scale-95 disabled:opacity-50"
+                            className="bg-white hover:bg-slate-200 text-black px-10 py-5 rounded-2xl font-black uppercase text-xs flex items-center gap-4 shadow-[0_10px_30px_-10px_rgba(255,255,255,0.3)] transition-all active:scale-95 disabled:opacity-50 relative z-10"
                         >
                             {creandoEtapa ? (
                                 <><FaSync className="animate-spin" /> Creando...</>

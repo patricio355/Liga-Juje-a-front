@@ -88,13 +88,6 @@ export default function ModalInscribirEquipo({ equipo, onClose, onInscripto }) {
                         </div>
                     )}
 
-                    {/* ERROR */}
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500 text-red-400 px-3 py-2 rounded text-sm">
-                            {error}
-                        </div>
-                    )}
-
                     {/* BUSCADOR TORNEO */}
                     <div className="relative">
                         <input
@@ -154,22 +147,30 @@ export default function ModalInscribirEquipo({ equipo, onClose, onInscripto }) {
                 </div>
 
                 {/* FOOTER */}
-                <div className="flex justify-end gap-3 mt-10 pt-4 border-t border-white/10">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 bg-gray-600 rounded"
-                        disabled={loading}
-                    >
-                        Cancelar
-                    </button>
+                <div className="flex flex-col gap-4 mt-10 pt-4 border-t border-white/10">
+                    {/* ERROR */}
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500 text-red-400 px-3 py-2 rounded text-sm text-center font-bold">
+                            {error}
+                        </div>
+                    )}
+                    <div className="flex justify-end gap-3">
+                        <button
+                            onClick={onClose}
+                            className="px-4 py-2 bg-gray-600 rounded"
+                            disabled={loading}
+                        >
+                            Cancelar
+                        </button>
 
-                    <button
-                        disabled={!zonaId || loading}
-                        onClick={inscribir}
-                        className="px-4 py-2 bg-blue-600 rounded disabled:opacity-50"
-                    >
-                        {loading ? "Inscribiendo..." : "Inscribir"}
-                    </button>
+                        <button
+                            disabled={!zonaId || loading}
+                            onClick={inscribir}
+                            className="px-4 py-2 bg-blue-600 rounded disabled:opacity-50"
+                        >
+                            {loading ? "Inscribiendo..." : "Inscribir"}
+                        </button>
+                    </div>
                 </div>
 
             </div>

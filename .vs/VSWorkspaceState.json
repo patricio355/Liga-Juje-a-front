@@ -4,11 +4,12 @@
     "\\src",
     "\\src\\components",
     "\\src\\components\\dashboard",
+    "\\src\\components\\equipos",
     "\\src\\components\\modal",
     "\\src\\components\\programacion",
     "\\src\\components\\torneo",
     "\\src\\pages"
   ],
-  "SelectedNode": "\\src\\components\\torneo\\PartidoCard.jsx",
+  "SelectedNode": "\\src\\pages\\TorneoDetalleAdmin.jsx",
   "PreviewInSolutionExplorer": false
 }

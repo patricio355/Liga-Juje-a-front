@@ -15,6 +15,7 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
     const [golesVisitantePenales, setGolesVisitantePenales] = useState(0);
 
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [modalEditarInfo, setModalEditarInfo] = useState(false);
 
     const API_URL = import.meta.env.VITE_API_URL;
@@ -63,6 +64,7 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
 
         try {
             setLoading(true);
+            setError(null);
             const res = await fetch(`${API_URL}${path}`, {
                 method: "POST",
                 headers: {
@@ -86,7 +88,7 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
             onClose();
         } catch (e) {
             console.error("Error al cerrar:", e);
-            alert(e.message || "Error al registrar el resultado.");
+            setError(e.message || "Error al registrar el resultado.");
         } finally {
             setLoading(false);
         }
@@ -294,17 +296,24 @@ export default function CerrarPartidoModal({ open, onClose, partido, onSuccess }
                 </div>
 
                 {/* Acciones Footer */}
-                <div className="flex p-6 gap-4 bg-[#0a0c10] border-t border-white/5">
-                    <button onClick={onClose} className="flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-500 border border-white/5 hover:bg-white/5 transition-all">
-                        Cancelar
-                    </button>
-                    <button
-                        onClick={cerrar}
-                        disabled={loading || penalesInvalidos}
-                        className="flex-[1.5] py-4 bg-gradient-to-r from-slate-200 to-slate-400 hover:from-white hover:to-slate-100 text-black rounded-2xl text-[10px] font-black uppercase shadow-xl disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center gap-3 transition-all"
-                    >
-                        {loading ? "Sincronizando..." : <><FaCheck size={14} /> Finalizar Acta</>}
-                    </button>
+                <div className="flex flex-col p-6 shrink-0 bg-[#0a0c10] border-t border-white/5">
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 mb-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center">
+                            {error}
+                        </div>
+                    )}
+                    <div className="flex gap-4">
+                        <button onClick={onClose} className="flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-500 border border-white/5 hover:bg-white/5 transition-all">
+                            Cancelar
+                        </button>
+                        <button
+                            onClick={cerrar}
+                            disabled={loading || penalesInvalidos}
+                            className="flex-[1.5] py-4 bg-gradient-to-r from-slate-200 to-slate-400 hover:from-white hover:to-slate-100 text-black rounded-2xl text-[10px] font-black uppercase shadow-xl disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center gap-3 transition-all"
+                        >
+                            {loading ? "Sincronizando..." : <><FaCheck size={14} /> Finalizar Acta</>}
+                        </button>
+                    </div>
                 </div>
             </div>
 

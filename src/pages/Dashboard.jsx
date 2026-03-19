@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import { useOutlet, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import TorneosList from "../components/dashboard/TorneosList";
@@ -78,6 +79,16 @@ export default function Dashboard() {
     const { user } = useContext(AuthContext);
     const [selected, setSelected] = useState("torneos");
     const [mobileSidebar, setMobileSidebar] = useState(false);
+    const outlet = useOutlet();
+    const navigate = useNavigate();
+
+    const handleMenuClick = (val) => {
+        setSelected(val);
+        setMobileSidebar(false);
+        if (outlet) {
+            navigate("/dashboard");
+        }
+    };
 
     const panelTitle = user?.role?.includes("ADMIN") ? "Administración" : "Gestión de Liga";
 
@@ -122,7 +133,7 @@ export default function Dashboard() {
 
                     <SidebarMenu
                         selected={selected}
-                        setSelected={(val) => { setSelected(val); setMobileSidebar(false); }}
+                        setSelected={handleMenuClick}
                         user={user}
                     />
 
@@ -144,30 +155,36 @@ export default function Dashboard() {
                     </div>
 
                     <nav className="flex-1">
-                        <SidebarMenu selected={selected} setSelected={setSelected} user={user} />
+                        <SidebarMenu selected={selected} setSelected={handleMenuClick} user={user} />
                     </nav>
 
                     <UserSection user={user} />
                 </aside>
 
-                <main className="flex-1 lg:ml-72 p-6 md:p-10 lg:p-12 transition-all mt-10 md:mt-14">
-                    <div className="w-full max-w-[1500px]">
-                        <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between border-b border-slate-800/60 pb-8 gap-4">
-                            <div>
-                                <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
-                                    {selected}
-                                </h1>
-                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mt-4 flex items-center gap-2">
-                                    <span className="w-8 h-[1px] bg-slate-800"></span>
-                                    Sistema de Gestión
-                                </p>
-                            </div>
-                        </header>
-
-                        <div className="min-h-[60vh]">
-                            <Content selected={selected} user={user} />
+                <main className="flex-1 lg:ml-72 p-2 sm:p-6 md:p-10 lg:p-12 transition-all mt-10 md:mt-14 w-full max-w-[100vw] lg:max-w-[calc(100vw-288px)] overflow-x-hidden">
+                    {outlet ? (
+                        <div className="w-full h-full fade-in pb-16">
+                            {outlet}
                         </div>
-                    </div>
+                    ) : (
+                        <div className="w-full max-w-[1500px] mx-auto pb-16">
+                            <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between border-b border-slate-800/60 pb-8 gap-4 px-2">
+                                <div>
+                                    <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
+                                        {selected}
+                                    </h1>
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mt-4 flex items-center gap-2">
+                                        <span className="w-8 h-[1px] bg-slate-800"></span>
+                                        Sistema de Gestión
+                                    </p>
+                                </div>
+                            </header>
+
+                            <div className="min-h-[60vh] px-2">
+                                <Content selected={selected} user={user} />
+                            </div>
+                        </div>
+                    )}
                 </main>
             </div>
         </div>

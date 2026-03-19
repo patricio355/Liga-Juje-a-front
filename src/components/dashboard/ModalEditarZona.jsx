@@ -64,11 +64,6 @@ export default function ModalEditarZona({ zona, onClose, onUpdated }) {
                 </div>
 
                 <div className="p-10 space-y-8">
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-center animate-pulse">
-                            {error}
-                        </div>
-                    )}
 
                     <div className="space-y-6">
                         <div className="space-y-2.5">
@@ -88,7 +83,15 @@ export default function ModalEditarZona({ zona, onClose, onUpdated }) {
                     </div>
 
                     {/* Footer con botones grandes estilo Ficha */}
-                    <div className="flex gap-4 pt-4">
+                    <div className="flex flex-col shrink-0 pt-4">
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 mb-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-center animate-pulse">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="flex gap-4">
+
                         <button
                             type="button"
                             className="flex-1 py-5 rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest text-slate-400 border border-white/5 hover:bg-white/5 hover:text-white transition-all active:scale-95"
@@ -111,6 +114,7 @@ export default function ModalEditarZona({ zona, onClose, onUpdated }) {
                             )}
                         </button>
                     </div>
+                </div>
                 </div>
             </form>
         </div>

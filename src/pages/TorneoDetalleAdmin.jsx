@@ -16,7 +16,6 @@ import ModalEditarTorneo from "../components/dashboard/ModalEditarTorneo";
 import ModalEquipoEditar from "../components/equipos/ModalEditarEquipo";
 import ModalCrearEquipo from "../components/equipos/ModalCrearEquipo";
 import ConfirmarEliminacionModal from "../components/modal/ConfirmarEliminacionModal";
-import Navbar from "../components/Navbar.jsx";
 
 // --- COMPONENTE INTERRUPTOR DESLIZABLE CORREGIDO ---
 const CustomSwitch = ({ label, isActive, onToggle, disabled }) => {
@@ -151,7 +150,7 @@ export default function TorneoDetalleAdmin() {
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-[#05070a] flex flex-col items-center justify-center gap-4">
+        <div className="flex flex-col items-center justify-center gap-4 py-20">
             <div className="w-12 h-12 border-4 border-white/5 border-t-slate-400 rounded-full animate-spin"></div>
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Sincronizando Panel...</span>
         </div>
@@ -161,21 +160,17 @@ export default function TorneoDetalleAdmin() {
     const esAbierto = torneo.tipo === 'ABIERTO';
 
     return (
-        <div className="min-h-screen w-full bg-[#05070a] text-slate-300 font-sans" onClick={() => setShowTooltipMobile(false)}>
-            <div className="sticky top-0 z-[100] w-full border-b border-white/5 bg-[#05070a]/80 backdrop-blur-md">
-                <Navbar />
-            </div>
-
-            <main className="p-4 md:p-8 max-w-[1600px] mx-auto w-full">
+        <div className="w-full text-slate-300 font-sans" onClick={() => setShowTooltipMobile(false)}>
+            <main className="w-full max-w-[1600px] mx-auto">
                 <div className="mb-8">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate('/dashboard')}
                         className="group flex items-center gap-4 bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded-2xl border border-white/10 transition-all shadow-xl active:scale-95"
                     >
                         <FaArrowLeft className="group-hover:-translate-x-1 transition-transform text-slate-400" />
                         <div className="flex flex-col items-start">
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 leading-none mb-1">Volver al</span>
-                            <span className="text-xs font-black uppercase tracking-widest italic">Panel de Gestión</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 leading-none mb-1">VOLVER A</span>
+                            <span className="text-xs font-black uppercase tracking-widest italic">MIS TORNEOS</span>
                         </div>
                     </button>
                 </div>

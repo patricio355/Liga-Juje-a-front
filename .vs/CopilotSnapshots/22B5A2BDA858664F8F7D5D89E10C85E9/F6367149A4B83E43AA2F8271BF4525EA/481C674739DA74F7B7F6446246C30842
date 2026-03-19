@@ -1,0 +1,57 @@
+﻿import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Home from "../pages/Home";
+import Login from "../pages/Login";
+import Dashboard from "../pages/Dashboard";
+import TorneoPublico from "../pages/TorneoPublico";
+import ProtectedRoute from "./ProtectedRoute";
+import ProgramacionFechaWrapper from "../pages/ProgramacionFechaWrapper";
+import TorneoDetalleAdmin from "../pages/TorneoDetalleAdmin.jsx";
+import GestionPartidosFixture from "../pages/GestionPartidosFixture.jsx";
+import GestionFaseFinal from "../pages/GestionFaseFinal.jsx";
+
+export default function AppRouter() {
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Navigate to="/torneos" replace />} />
+
+                {/* HOME público */}
+                <Route path="/torneos" element={<Home />} />
+
+                {/* TORNEO PÚBLICO */}
+                <Route path="/torneo/:slug" element={<TorneoPublico />} />
+
+                <Route path="/dashboard/torneos/:id" element={<TorneoDetalleAdmin />} />
+
+                {/* LOGIN */}
+                <Route path="/login" element={<Login />} />
+
+                {/* DASHBOARD Y SUB-RUTAS ANIDADAS */}
+                <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route path="torneos/:id" element={<TorneoDetalleAdmin />} />
+
+                    {/* PROGRAMACIÓN DE FECHA (ADMIN) */}
+                    <Route
+                        path="programacion/zona/:zonaId"
+                        element={<ProgramacionFechaWrapper />}
+                    />
+
+                    {/* PROGRAMACIÓN DE fixture (ADMIN) */}
+                    <Route path="gestion-partidos/:id" element={<GestionPartidosFixture />} />
+
+                    <Route path="torneos/:id/fase-final" element={<GestionFaseFinal />} />
+                </Route>
+
+                {/* fallback */}
+                <Route path="*" element={<Navigate to="/torneos" />} />
+            </Routes>
+        </BrowserRouter>
+    );
+}

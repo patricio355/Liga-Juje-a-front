@@ -105,11 +105,6 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
 
                 {/* Body con Scroll Interno */}
                 <div className="p-6 md:p-10 overflow-y-auto custom-scrollbar bg-[#05070a] flex-1">
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 mb-6 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center">
-                            {error}
-                        </div>
-                    )}
 
                     <div className="grid grid-cols-2 gap-6">
                         <div className="col-span-2 space-y-2">
@@ -210,7 +205,15 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                 </div>
 
                 {/* Footer Fijo */}
-                <div className="p-8 bg-[#0a0c10] border-t border-white/5 flex gap-4 shrink-0">
+                <div className="p-8 bg-[#0a0c10] border-t border-white/5 flex flex-col shrink-0 shrink-0">
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 mb-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="flex gap-4">
+
                     <button
                         type="button"
                         onClick={onClose}
@@ -226,6 +229,7 @@ export default function ModalCrearUsuario({ onClose, onCreated }) {
                     >
                         {loading ? "REGISTRANDO..." : "REGISTRAR ALTA"}
                     </button>
+                </div>
                 </div>
             </form>
         </div>,

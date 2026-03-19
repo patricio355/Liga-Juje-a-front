@@ -21,12 +21,10 @@ export default function AppRouter() {
                 {/* TORNEO PÚBLICO */}
                 <Route path="/torneo/:slug" element={<TorneoPublico />} />
 
-                <Route path="/dashboard/torneos/:id" element={<TorneoDetalleAdmin />} />
-
                 {/* LOGIN */}
                 <Route path="/login" element={<Login />} />
 
-                {/* DASHBOARD */}
+                {/* DASHBOARD Y SUB-RUTAS ANIDADAS */}
                 <Route
                     path="/dashboard"
                     element={
@@ -34,22 +32,20 @@ export default function AppRouter() {
                             <Dashboard />
                         </ProtectedRoute>
                     }
-                />
+                >
+                    <Route path="torneos/:id" element={<TorneoDetalleAdmin />} />
 
-                {/* PROGRAMACIÓN DE FECHA (ADMIN) */}
-                <Route
-                    path="/dashboard/programacion/zona/:zonaId"
-                    element={
-                        <ProtectedRoute>
-                            <ProgramacionFechaWrapper />
-                        </ProtectedRoute>
-                    }
-                />
+                    {/* PROGRAMACIÓN DE FECHA (ADMIN) */}
+                    <Route
+                        path="programacion/zona/:zonaId"
+                        element={<ProgramacionFechaWrapper />}
+                    />
 
-                {/* PROGRAMACIÓN DE fixture (ADMIN) */}
-                <Route path="/dashboard/gestion-partidos/:id" element={<GestionPartidosFixture />} />
+                    {/* PROGRAMACIÓN DE fixture (ADMIN) */}
+                    <Route path="gestion-partidos/:id" element={<GestionPartidosFixture />} />
 
-                <Route path="/dashboard/torneos/:id/fase-final" element={<GestionFaseFinal />} />
+                    <Route path="torneos/:id/fase-final" element={<GestionFaseFinal />} />
+                </Route>
 
                 {/* fallback */}
                 <Route path="*" element={<Navigate to="/torneos" />} />

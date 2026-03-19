@@ -69,7 +69,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
             setFotoUrl(torneo.fotoUrl || "");
             setGenero(torneo.genero || "MASCULINO");
             setRedSocial(torneo.redSocial || "");
-            setTelefono(torneo.telefono || "");
+            setTelefono(torneo.telefono ? torneo.telefono.replace(/^\+54/, '') : "");
             setEstadoTorneo(torneo.estadoTorneo ?? true);
             setCampeon(torneo.campeon || "");
             setPuntosGanador(torneo.puntosGanador ?? 3);
@@ -111,6 +111,11 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
         setError(null);
 
         try {
+            let telefonoFormateado = telefono?.trim() || null;
+            if (telefonoFormateado && !telefonoFormateado.startsWith("+54")) {
+                telefonoFormateado = `+54${telefonoFormateado}`;
+            }
+
             const payload = {
                 nombre: nombre.trim(),
                 division: division || null,
@@ -119,7 +124,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                 fotoUrl: fotoUrl || null,
                 genero,
                 redSocial: redSocial || null,
-                telefono: telefono || null,
+                telefono: telefonoFormateado,
                 estadoTorneo: estadoTorneo,
                 campeon: (!estadoTorneo && campeon.trim()) ? campeon.trim() : null,
                 puntosGanador: Number(puntosGanador),
@@ -178,11 +183,6 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
 
                 {/* Body con Scroll Interno */}
                 <div className="p-6 md:p-10 overflow-y-auto custom-scrollbar bg-[#05070a] flex-1">
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 mb-6 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center">
-                            {error}
-                        </div>
-                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Logo */}
@@ -247,6 +247,20 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                             </div>
 
                             <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    Modalidad de Gestión
+                                </label>
+                                <select
+                                    className="w-full px-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase italic shadow-inner"
+                                    value={tipo}
+                                    onChange={e => setTipo(e.target.value)}
+                                >
+                                    <option value="CERRADO">MODALIDAD CERRADA (AUTOMÁTICA)</option>
+                                    <option value="ABIERTO">MODALIDAD ABIERTA (MANUAL)</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">Género</label>
                                 <select
                                     className="w-full px-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase italic shadow-inner"
@@ -265,11 +279,13 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                                 </label>
                                 <div className="relative">
                                     <FaPhone className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700" />
+                                    <span className="absolute left-12 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs pointer-events-none">+54</span>
                                     <input
-                                        placeholder="+54 9 388..."
-                                        className="w-full pl-14 pr-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-bold text-white placeholder:text-slate-900 shadow-inner"
+                                        type="tel"
+                                        placeholder="3885..."
+                                        className="w-full pl-20 pr-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-bold text-white placeholder:text-slate-900 shadow-inner"
                                         value={telefono}
-                                        onChange={e => setTelefono(e.target.value)}
+                                        onChange={e => setTelefono(e.target.value.replace(/[^0-9]/g, ''))}
                                     />
                                 </div>
                             </div>
@@ -357,7 +373,15 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                 </div>
 
                 {/* Footer Fijo */}
-                <div className="p-8 bg-[#0a0c10] border-t border-white/5 flex gap-4 shrink-0">
+                <div className="p-8 bg-[#0a0c10] border-t border-white/5 flex flex-col shrink-0 shrink-0">
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 mb-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="flex gap-4">
+
                     <button
                         type="button"
                         onClick={onClose}
@@ -374,6 +398,7 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                     >
                         {loading ? "ACTUALIZANDO..." : "GUARDAR CAMBIOS"}
                     </button>
+                </div>
                 </div>
             </form>
         </div>,

@@ -83,6 +83,11 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
         setError(null);
 
         try {
+            let telefonoFormateado = telefono?.trim() || null;
+            if (telefonoFormateado && !telefonoFormateado.startsWith("+54")) {
+                telefonoFormateado = `+54${telefonoFormateado}`;
+            }
+
             const payload = {
                 nombre: nombre.trim(),
                 division: division || null,
@@ -98,7 +103,7 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                 fotoUrl: fotoUrl || null,
                 genero: genero,
                 redSocial: redSocial || null,
-                telefono: telefono || null,
+                telefono: telefonoFormateado,
                 estadoTorneo: true,
                 faseGrupos: mostrarGrupos,
                 faseFinal: mostrarFinal
@@ -149,11 +154,6 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
 
                 {/* Body con Scroll Interno */}
                 <div className="p-6 md:p-10 overflow-y-auto custom-scrollbar bg-[#05070a] flex-1">
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 mb-6 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center">
-                            {error}
-                        </div>
-                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* FOTO y NOMBRE */}
@@ -236,11 +236,13 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                                 </label>
                                 <div className="relative">
                                     <FaPhone className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700" />
+                                    <span className="absolute left-12 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs pointer-events-none">+54</span>
                                     <input
-                                        placeholder="+54 9 388..."
-                                        className="w-full pl-14 pr-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-bold text-white placeholder:text-slate-900 shadow-inner"
+                                        type="tel"
+                                        placeholder="3885..."
+                                        className="w-full pl-20 pr-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-bold text-white placeholder:text-slate-900 shadow-inner"
                                         value={telefono}
-                                        onChange={e => setTelefono(e.target.value)}
+                                        onChange={e => setTelefono(e.target.value.replace(/[^0-9]/g, ''))}
                                     />
                                 </div>
                             </div>
@@ -396,7 +398,15 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                 </div>
 
                 {/* Footer Fijo */}
-                <div className="p-8 bg-[#0a0c10] border-t border-white/5 flex gap-4 shrink-0">
+                <div className="p-8 bg-[#0a0c10] border-t border-white/5 flex flex-col shrink-0 shrink-0">
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 mb-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="flex gap-4">
+
                     <button
                         type="button"
                         onClick={onClose}
@@ -413,6 +423,7 @@ export default function ModalCrearTorneo({ onClose, onCreated }) {
                     >
                         {loading ? "PROCESANDO..." : "CREAR TORNEO"}
                     </button>
+                </div>
                 </div>
             </form>
         </div>,

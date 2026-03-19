@@ -138,11 +138,6 @@ export default function ModalCancha({ open, cancha, onClose, onSuccess }) {
                 </div>
 
                 <div className="p-8 space-y-6 overflow-y-auto max-h-[80vh]">
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-2xl text-[10px] font-black uppercase text-center">
-                            {error}
-                        </div>
-                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Columna Izquierda: Imagen e Info */}
@@ -215,17 +210,24 @@ export default function ModalCancha({ open, cancha, onClose, onSuccess }) {
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="flex gap-4 pt-4">
-                        <button type="button" onClick={onClose} className="flex-1 py-5 rounded-2xl text-[11px] font-black uppercase text-slate-500 border border-white/5 hover:bg-white/5 transition-all">
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="flex-[2] bg-white hover:bg-slate-200 text-black py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] transition-all flex items-center justify-center gap-2 disabled:opacity-20"
-                        >
-                            {loading ? <span className="animate-pulse">Procesando...</span> : <><FaCheckCircle size={16}/> {cancha ? "Guardar" : "Registrar"}</>}
-                        </button>
+                    <div className="flex flex-col shrink-0 pt-4">
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 mb-4 rounded-2xl text-[10px] font-black uppercase text-center">
+                                {error}
+                            </div>
+                        )}
+                        <div className="flex gap-4">
+                            <button type="button" onClick={onClose} className="flex-1 py-5 rounded-2xl text-[11px] font-black uppercase text-slate-500 border border-white/5 hover:bg-white/5 transition-all">
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="flex-[2] bg-white hover:bg-slate-200 text-black py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] transition-all flex items-center justify-center gap-2 disabled:opacity-20"
+                            >
+                                {loading ? <span className="animate-pulse">Procesando...</span> : <><FaCheckCircle size={16}/> {cancha ? "Guardar" : "Registrar"}</>}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </form>

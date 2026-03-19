@@ -6,7 +6,6 @@ import {
     FaChevronRight, FaCogs, FaRegCalendarAlt, FaShieldAlt
 } from "react-icons/fa";
 
-import Navbar from "../components/Navbar";
 import PartidoGestionCard from "../components/torneo/PartidoGestionCard";
 
 // Modales
@@ -73,17 +72,16 @@ export default function GestionPartidosFixture() {
     useEffect(() => { cargarFixture(); }, [zonaActiva]);
 
     return (
-        <div className="min-h-screen bg-black text-slate-200">
-            <Navbar />
-            <main className="max-w-[1200px] mx-auto p-4 md:px-8">
+        <div className="w-full text-slate-200">
+            <main className="max-w-[1200px] mx-auto">
 
                 {/* Botón Volver Resaltado */}
-                <div className="mt-8 mb-10">
+                <div className="mb-10">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate(`/dashboard/torneos/${id}`)}
                         className="flex items-center gap-3 bg-white text-black px-6 py-2.5 rounded-full hover:bg-slate-200 transition-all group shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-95 uppercase text-[10px] font-black tracking-widest"
                     >
-                        <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" /> REGRESAR AL PANEL
+                        <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" /> VOLVER AL TORNEO
                     </button>
                 </div>
 
