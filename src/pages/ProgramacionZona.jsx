@@ -344,7 +344,7 @@ export default function ProgramacionZona() {
                 <div className="grid grid-cols-1 xl:grid-cols-5 gap-10">
                     {/* Sección Principal: Enfrentamientos */}
                     <section className="xl:col-span-3 space-y-6">
-                        <div className="bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-6 md:p-10 shadow-2xl relative overflow-hidden">
+                        <div className="bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-6 md:p-10 shadow-2xl relative">
                             <div className="flex items-center gap-3 mb-10 border-b border-white/5 pb-6">
                                 <FaFutbol className="text-white" />
                                 <h2 className="text-white font-black text-[11px] uppercase tracking-[0.3em]">Enfrentamientos Disponibles</h2>

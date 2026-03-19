@@ -135,7 +135,7 @@ export default function TorneoPublico() {
             <div className="relative z-10">
                 <Navbar />
 
-                <main className="max-w-[1200px] mx-auto p-4 md:px-8 animate-in fade-in duration-500">
+                <main className="max-w-[1600px] mx-auto p-4 md:px-8 animate-in fade-in duration-500">
                     <header className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 mt-8 mb-10">
                         {torneo.fotoUrl && (
                             <div className="w-32 h-32 md:w-48 md:h-48 shrink-0 rounded-[2.5rem] p-1 shadow-[0_0_60px_-10px_var(--ts)] overflow-hidden bg-[var(--p)] animate-in zoom-in-50 duration-700" style={{ border: "2px solid var(--ts)44" }}>

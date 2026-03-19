@@ -1,0 +1,326 @@
+﻿import { useState, useEffect } from "react";
+import { apiFetch } from "../api/api";
+import {
+    FaSync, FaCalendarAlt,
+    FaMapMarkerAlt, FaChevronDown, FaClock, FaTrophy, FaUserTie
+} from "react-icons/fa";
+
+export default function CuadroFaseFinal({ torneoId, fallback }) {
+    const [etapasOriginales, setEtapasOriginales] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [detalleAbierto, setDetalleAbierto] = useState(null);
+
+    // Definición de bordes sutiles basados en variables de CSS del tema
+    const borderCard = "1px solid var(--ts)33";
+    const borderDivider = "1px solid var(--ts)10";
+
+    useEffect(() => {
+        const cargarCuadro = async () => {
+            try {
+                setLoading(true);
+                const data = await apiFetch(`/api/torneos/${torneoId}/cuadro-completo`);
+                if (!data || data.length === 0) {
+                    setEtapasOriginales([]);
+                } else {
+                    // Ordenamos para procesar las fases desde la más lejana a la final
+                    setEtapasOriginales(data.sort((a, b) => b.orden - a.orden));
+                }
+            } catch (error) {
+                console.error("Error al cargar cuadro final:", error);
+                setEtapasOriginales([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        cargarCuadro();
+    }, [torneoId]);
+
+    const organizarEtapasEspejo = () => {
+        if (etapasOriginales.length === 0) return [];
+        const final = etapasOriginales.find(e => e.orden === 1);
+        const otrasEtapas = etapasOriginales.filter(e => e.orden !== 1);
+
+        if (!otrasEtapas.length && final) return [final];
+
+        const etapasIzquierda = otrasEtapas.map(etapa => {
+            const mitad = Math.pow(2, etapa.orden - 1) / 2;
+            const partidos = [...Array(mitad)].map((_, i) => {
+                const numOrdenEsperado = i + 1;
+                const pReal = etapa.partidos.find(p => p.orden === numOrdenEsperado);
+                return pReal || { id: `left-${etapa.id}-${numOrdenEsperado}`, placeholder: true, orden: numOrdenEsperado };
+            });
+            return { ...etapa, partidosVisuales: partidos };
+        });
+
+        const etapasDerecha = [...otrasEtapas].reverse().map(etapa => {
+            const totalPartidosFase = Math.pow(2, etapa.orden - 1);
+            const mitad = totalPartidosFase / 2;
+            const partidos = [...Array(mitad)].map((_, i) => {
+                const numOrdenEsperado = i + 1 + mitad;
+                const pReal = etapa.partidos.find(p => p.orden === numOrdenEsperado);
+                return pReal || { id: `right-${etapa.id}-${numOrdenEsperado}`, placeholder: true, orden: numOrdenEsperado };
+            });
+            return { ...etapa, partidosVisuales: partidos };
+        });
+
+        return final ? [...etapasIzquierda, final, ...etapasDerecha] : [];
+    };
+
+    const etapasVisuales = organizarEtapasEspejo();
+
+    const toggleDetalle = (e, id) => {
+        e.stopPropagation();
+        setDetalleAbierto(detalleAbierto === id ? null : id);
+    };
+
+    const chunkPartidos = (partidosArray) => {
+        const pares = [];
+        for (let i = 0; i < partidosArray.length; i += 2) {
+            pares.push([partidosArray[i], partidosArray[i + 1]]);
+        }
+        return pares;
+    };
+
+    if (loading) return (
+        <div className="flex flex-col items-center justify-center py-10 gap-2">
+            <FaSync className="animate-spin text-xl" style={{ color: "var(--ts)" }} />
+            <span className="text-[10px] font-medium uppercase tracking-widest" style={{ color: "var(--ts)" }}>Cargando...</span>
+        </div>
+    );
+
+    if (etapasVisuales.length === 0) {
+        return fallback || null;
+    }
+
+    return (
+        <div
+            className="mt-2 mb-6 p-2 rounded-xl backdrop-blur-sm shadow-xl overflow-auto custom-scrollbar touch-pan-x touch-pan-y"
+            style={{
+                border: borderCard,
+                backgroundColor: "var(--secondary)",
+                maxHeight: "80vh"
+            }}
+        >
+            <div className="min-w-max pb-10">
+                <div className="flex flex-row justify-center gap-6 md:gap-10 px-2 pt-2">
+                    {etapasVisuales.map((etapa, idx) => {
+                        if (!etapa) return null;
+                        const idxFinal = etapasVisuales.findIndex(e => e.orden === 1);
+                        const isLeft = idx < idxFinal;
+                        const isRight = idx > idxFinal;
+                        const esFinal = etapa.orden === 1;
+
+                        const partidos = esFinal ? etapa.partidos : etapa.partidosVisuales;
+
+                        const renderPartido = (partido) => {
+                            if (!partido) return null;
+                            const localGano = !partido.placeholder && partido.estado === "FINALIZADO" && 
+                                (partido.golesLocal > partido.golesVisitante || 
+                                (partido.golesLocal === partido.golesVisitante && partido.golesLocalPenales > partido.golesVisitantePenales) || 
+                                (partido.ganadorId && Number(partido.ganadorId) === Number(partido.equipoLocalId)));
+
+                            const visitanteGano = !partido.placeholder && partido.estado === "FINALIZADO" && 
+                                (partido.golesVisitante > partido.golesLocal || 
+                                (partido.golesLocal === partido.golesVisitante && partido.golesVisitantePenales > partido.golesLocalPenales) || 
+                                (partido.ganadorId && Number(partido.ganadorId) === Number(partido.equipoVisitanteId)));
+
+                            const huboPenales = !partido.placeholder &&
+                                partido.estado === "FINALIZADO" &&
+                                partido.golesLocal !== null &&
+                                partido.golesLocal === partido.golesVisitante;
+
+                            return (
+                                <div key={partido.id} className="relative py-1.5 px-0.5 flex flex-col justify-center items-center h-full z-10 w-full">
+                                    <div
+                                        onClick={(e) => !partido.placeholder && toggleDetalle(e, partido.id)}
+                                        className={`w-full rounded-[4px] overflow-hidden transition-all relative shadow-sm ${!partido.placeholder ? 'cursor-pointer hover:scale-105 active:scale-95 shadow-md z-20' : ''}`}
+                                        style={{
+                                            backgroundColor: "var(--p)",
+                                            border: partido.placeholder ? "1px dashed var(--ts)44" : borderCard,
+                                            opacity: partido.placeholder ? 0.35 : 1,
+                                            borderColor: esFinal && !partido.placeholder ? "#eab308" : undefined,
+                                            boxShadow: esFinal && !partido.placeholder ? "0 0 15px rgba(234, 179, 8, 0.2)" : undefined
+                                        }}
+                                    >
+                                        {/* FILA LOCAL */}
+                                        <div
+                                            className="flex justify-between items-start py-1.5 px-2"
+                                            style={{
+                                                borderBottom: borderDivider,
+                                                backgroundColor: localGano ? "var(--ts)15" : "transparent"
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                                {partido.equipoLocalEscudo &&
+                                                    <img src={partido.equipoLocalEscudo} className="w-3.5 h-3.5 object-contain shrink-0" alt="" />
+                                                }
+                                                <span
+                                                    className="text-[9px] md:text-[10px] font-black uppercase break-words leading-tight"
+                                                    style={{ color: localGano ? "var(--ts)" : "var(--tp)", opacity: localGano ? 1 : 0.8 }}
+                                                >
+                                                    {partido.equipoLocal || "A DEFINIR"}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-0.5">
+                                                {huboPenales && (
+                                                    <span className="text-[7px] font-bold opacity-60" style={{ color: "var(--ts)" }}>
+                                                        ({partido.golesLocalPenales})
+                                                    </span>
+                                                )}
+                                                <span className="text-[10px] font-black" style={{ color: "var(--tp)" }}>
+                                                    {!partido.placeholder && partido.golesLocal !== null ? partido.golesLocal : ""}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* FILA VISITANTE */}
+                                        <div
+                                            className="flex justify-between items-start py-1.5 px-2"
+                                            style={{
+                                                backgroundColor: visitanteGano ? "var(--ts)15" : "transparent"
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                                {partido.equipoVisitanteEscudo &&
+                                                    <img src={partido.equipoVisitanteEscudo} className="w-3.5 h-3.5 object-contain shrink-0" alt="" />
+                                                }
+                                                <span
+                                                    className="text-[9px] md:text-[10px] font-black uppercase break-words leading-tight"
+                                                    style={{ color: visitanteGano ? "var(--ts)" : "var(--tp)", opacity: visitanteGano ? 1 : 0.8 }}
+                                                >
+                                                    {partido.equipoVisitante || "A DEFINIR"}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-0.5">
+                                                {huboPenales && (
+                                                    <span className="text-[7px] font-bold opacity-60" style={{ color: "var(--ts)" }}>
+                                                        ({partido.golesVisitantePenales})
+                                                    </span>
+                                                )}
+                                                <span className="text-[10px] font-black" style={{ color: "var(--tp)" }}>
+                                                    {!partido.placeholder && partido.golesVisitante !== null ? partido.golesVisitante : ""}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* DETALLES DESPLEGABLES */}
+                                        {detalleAbierto === partido.id && !partido.placeholder && (
+                                            <div
+                                                className="px-2 py-2 space-y-1.5 animate-in slide-in-from-top-1 duration-150"
+                                                style={{
+                                                    backgroundColor: "var(--secondary)",
+                                                    borderTop: borderDivider
+                                                }}
+                                            >
+                                                <div className="flex items-center gap-1.5 text-[8px] opacity-70" style={{ color: "var(--tp)" }}>
+                                                    <FaCalendarAlt size={8} /> <span>{partido.fecha || "A CONFIRMAR"}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-[8px] opacity-70" style={{ color: "var(--tp)" }}>
+                                                    <FaClock size={8} /> <span>{partido.hora ? `${partido.hora} HS` : "A CONFIRMAR"}</span>
+                                                </div>
+                                                {partido.cancha && (
+                                                    <div className="flex items-center gap-1.5 text-[8px] opacity-70" style={{ color: "var(--tp)" }}>
+                                                        <FaMapMarkerAlt size={8} /> <span className="truncate">{partido.cancha}</span>
+                                                    </div>
+                                                )}
+                                                {partido.arbitro && (
+                                                    <div className="flex items-center gap-1.5 text-[8px] opacity-70" style={{ color: "var(--tp)" }}>
+                                                        <FaUserTie size={8} /> <span className="truncate">{partido.arbitro}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {esFinal && (
+                                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 pointer-events-none z-0">
+                                            <FaTrophy className="text-yellow-500 text-xl drop-shadow-md opacity-80" />
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        };
+
+                        return (
+                            <div key={`${etapa.id}-${idx}`} className="flex flex-col w-[130px] md:w-[150px] relative z-20">
+                                {/* CABECERA DE ETAPA */}
+                                <div className="text-center mb-4 sticky top-0 z-30">
+                                    <span
+                                        className="px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest shadow-sm backdrop-blur-md"
+                                        style={esFinal ? {
+                                            backgroundColor: "#ca8a0422",
+                                            border: "1px solid #eab308",
+                                            color: "#eab308"
+                                        } : {
+                                            backgroundColor: "var(--secondary)",
+                                            border: borderCard,
+                                            color: "var(--ts)"
+                                        }}
+                                    >
+                                        {etapa.nombre}
+                                    </span>
+                                </div>
+
+                                <div className="flex flex-col flex-grow relative gap-0">
+                                    {esFinal ? (
+                                        <div className="flex flex-col justify-center flex-1 relative">
+                                            {renderPartido(partidos[0] || { id: 'final-ph', placeholder: true })}
+                                        </div>
+                                    ) : partidos.length === 1 ? (
+                                        <div className="flex flex-col flex-1 relative my-0.5 justify-center">
+                                            {/* LÍNEA RECTA PARA SEMIFINALES (1 solo partido en esta rama) */}
+                                            {isLeft && (
+                                                <div className="absolute top-1/2 -right-[24px] md:-right-[40px] w-[24px] md:w-[40px] border-t-[1.5px] pointer-events-none z-0" style={{ borderColor: 'var(--ts)', opacity: 0.25 }}></div>
+                                            )}
+                                            {isRight && (
+                                                <div className="absolute top-1/2 -left-[24px] md:-left-[40px] w-[24px] md:w-[40px] border-t-[1.5px] pointer-events-none z-0" style={{ borderColor: 'var(--ts)', opacity: 0.25 }}></div>
+                                            )}
+                                            <div className="flex-1 flex flex-col justify-center relative">
+                                                {renderPartido(partidos[0])}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        chunkPartidos(partidos).map((par, iPar) => (
+                                            <div key={iPar} className="flex flex-col flex-1 relative my-0.5">
+                                                {/* LÍNEAS VISUALES / GANCHOS (BRACKETS) */}
+                                                {isLeft && (
+                                                    par[1] ? (
+                                                        <>
+                                                            <div className="absolute top-[25%] bottom-[25%] -right-[12px] md:-right-[20px] w-[12px] md:w-[20px] border-y-[1.5px] border-r-[1.5px] rounded-r-lg pointer-events-none z-0" style={{ borderColor: 'var(--ts)', opacity: 0.25 }}></div>
+                                                            <div className="absolute top-1/2 -right-[24px] md:-right-[40px] w-[12px] md:w-[20px] border-t-[1.5px] pointer-events-none z-0" style={{ borderColor: 'var(--ts)', opacity: 0.25 }}></div>
+                                                        </>
+                                                    ) : (
+                                                        <div className="absolute top-1/2 -right-[24px] md:-right-[40px] w-[24px] md:w-[40px] border-t-[1.5px] pointer-events-none z-0" style={{ borderColor: 'var(--ts)', opacity: 0.25 }}></div>
+                                                    )
+                                                )}
+                                                {isRight && (
+                                                    par[1] ? (
+                                                        <>
+                                                            <div className="absolute top-[25%] bottom-[25%] -left-[12px] md:-left-[20px] w-[12px] md:w-[20px] border-y-[1.5px] border-l-[1.5px] rounded-l-lg pointer-events-none z-0" style={{ borderColor: 'var(--ts)', opacity: 0.25 }}></div>
+                                                            <div className="absolute top-1/2 -left-[24px] md:-left-[40px] w-[12px] md:w-[20px] border-t-[1.5px] pointer-events-none z-0" style={{ borderColor: 'var(--ts)', opacity: 0.25 }}></div>
+                                                        </>
+                                                    ) : (
+                                                        <div className="absolute top-1/2 -left-[24px] md:-left-[40px] w-[24px] md:w-[40px] border-t-[1.5px] pointer-events-none z-0" style={{ borderColor: 'var(--ts)', opacity: 0.25 }}></div>
+                                                    )
+                                                )}
+
+                                                <div className={`flex-1 flex flex-col justify-center relative ${par[1] ? 'h-1/2' : 'h-full'}`}>
+                                                    {renderPartido(par[0])}
+                                                </div>
+                                                {par[1] && (
+                                                    <div className="flex-1 flex flex-col justify-center relative h-1/2">
+                                                        {renderPartido(par[1])}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+}

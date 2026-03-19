@@ -142,6 +142,14 @@ export default function GestionFaseFinal() {
         return etapasDb.length > 0 ? Math.max(...etapasDb.map(e => e.orden)) : 0;
     }, [etapasDb]);
 
+    const chunkCeldas = (celdasArray) => {
+        const pares = [];
+        for (let i = 0; i < celdasArray.length; i += 2) {
+            pares.push([celdasArray[i], celdasArray[i + 1]]);
+        }
+        return pares;
+    };
+
     if (loading && !creandoEtapa) return (
         <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
             <FaSync className="text-white animate-spin text-4xl" />
@@ -192,7 +200,7 @@ export default function GestionFaseFinal() {
 
                             return (
                                 <div key={`${col.id}-${idxCol}`} className="flex flex-col w-[180px] md:w-[220px] relative">
-                                    <div className="text-center mb-8 flex flex-col items-center gap-3">
+                                    <div className="text-center mb-8 flex flex-col items-center gap-3 z-30">
                                         <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border shadow-sm ${col.esFinal ? 'border-white bg-white text-black' : 'border-white/10 text-slate-400 bg-black'}`}>
                                             {col.nombre}
                                         </span>
@@ -207,87 +215,151 @@ export default function GestionFaseFinal() {
                                         )}
                                     </div>
 
-                                    <div className="flex flex-col justify-around flex-grow relative min-h-[500px]">
-                                        {col.celdas.map((celda, idxCelda) => (
-                                            <div key={idxCelda} className="relative py-4 px-1 flex items-center">
-                                                <div className={`w-full bg-black border rounded-2xl overflow-hidden shadow-2xl relative z-10 transition-all ${celda.partido ? 'border-white/20' : 'border-white/5 opacity-40 hover:opacity-100'}`}>
-                                                    <div className="p-4">
-                                                        <div className="space-y-3">
-                                                            {/* Local */}
-                                                            <div className="flex justify-between items-start text-[10px] font-black uppercase tracking-tighter">
-                                                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                                    <div className="w-6 h-6 bg-[#111] rounded-md flex items-center justify-center shrink-0 border border-white/5">
-                                                                        {celda.partido?.equipoLocalEscudo ? <img src={celda.partido.equipoLocalEscudo} className="w-4 h-4 object-contain" alt="" /> : <FaShieldAlt className="text-white/10" />}
+                                    <div className="flex flex-col flex-grow relative gap-0 min-h-[500px]">
+                                        {(() => {
+                                            const renderCelda = (celda) => {
+                                                if (!celda) return null;
+
+                                                const p = celda.partido;
+                                                const tieneUnEquipo = p && (p.equipoLocal || p.equipoVisitante);
+
+                                                const localGano = p && p.estado === "FINALIZADO" && 
+                                                    (p.golesLocal > p.golesVisitante || 
+                                                    (p.golesLocal === p.golesVisitante && p.golesLocalPenales > p.golesVisitantePenales) || 
+                                                    (p.ganadorId && Number(p.ganadorId) === Number(p.equipoLocalId)));
+
+                                                const visitanteGano = p && p.estado === "FINALIZADO" && 
+                                                    (p.golesVisitante > p.golesLocal || 
+                                                    (p.golesLocal === p.golesVisitante && p.golesVisitantePenales > p.golesLocalPenales) || 
+                                                    (p.ganadorId && Number(p.ganadorId) === Number(p.equipoVisitanteId)));
+
+                                                return (
+                                                    <div key={celda.ordenReal} className="relative py-1.5 px-0.5 flex flex-col justify-center items-center h-full z-10 w-full">
+                                                        <div className={`w-full bg-black border rounded-2xl overflow-hidden shadow-2xl relative transition-all ${p ? 'border-white/20 z-20 hover:scale-105' : 'border-white/5 opacity-40 hover:opacity-100 z-10'}`}>
+                                                            <div className="flex flex-col">
+                                                                {/* Local */}
+                                                                <div className={`flex justify-between items-start py-2 px-3 text-[10px] font-black uppercase tracking-tighter border-b border-white/10 ${localGano ? 'bg-white/15' : ''}`}>
+                                                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                                        <div className="w-5 h-5 bg-[#111] rounded-md flex items-center justify-center shrink-0 border border-white/5">
+                                                                            {p?.equipoLocalEscudo ? <img src={p.equipoLocalEscudo} className="w-3.5 h-3.5 object-contain" alt="" /> : <FaShieldAlt className="text-white/10" />}
+                                                                        </div>
+                                                                        <span className={`break-words leading-tight ${p ? (localGano ? "text-white" : "text-white/80") : "text-slate-800"}`}>
+                                                                            {p?.equipoLocal || "ESPERANDO"}
+                                                                        </span>
                                                                     </div>
-                                                                    <span className={`break-words leading-tight ${celda.partido ? "text-white" : "text-slate-800"}`}>
-                                                                        {celda.partido?.equipoLocal || "ESPERANDO"}
-                                                                    </span>
+                                                                    <div className="flex items-center gap-1">
+                                                                        {p?.estado === "FINALIZADO" && p.golesLocal === p.golesVisitante && (
+                                                                            <span className="text-emerald-400 text-[8px]">({p.golesLocalPenales})</span>
+                                                                        )}
+                                                                        <span className={`text-xs ${p ? (localGano ? "text-white" : "text-slate-400") : "text-slate-800"}`}>{p ? (p.golesLocal ?? "-") : "-"}</span>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="flex items-center gap-1">
-                                                                    {celda.partido?.estado === "FINALIZADO" && celda.partido.golesLocal === celda.partido.golesVisitante && (
-                                                                        <span className="text-slate-600 text-[8px]">({celda.partido.golesLocalPenales})</span>
-                                                                    )}
-                                                                    <span className="text-white text-xs">{celda.partido?.golesLocal ?? "-"}</span>
+
+                                                                {/* Visitante */}
+                                                                <div className={`flex justify-between items-start py-2 px-3 text-[10px] font-black uppercase tracking-tighter ${visitanteGano ? 'bg-white/15' : ''}`}>
+                                                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                                        <div className="w-5 h-5 bg-[#111] rounded-md flex items-center justify-center shrink-0 border border-white/5">
+                                                                            {p?.equipoVisitanteEscudo ? <img src={p.equipoVisitanteEscudo} className="w-3.5 h-3.5 object-contain" alt="" /> : <FaShieldAlt className="text-white/10" />}
+                                                                        </div>
+                                                                        <span className={`break-words leading-tight ${p ? (visitanteGano ? "text-white" : "text-white/80") : "text-slate-800"}`}>
+                                                                            {p?.equipoVisitante || "ESPERANDO"}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-1">
+                                                                        {p?.estado === "FINALIZADO" && p.golesLocal === p.golesVisitante && (
+                                                                            <span className="text-emerald-400 text-[8px]">({p.golesVisitantePenales})</span>
+                                                                        )}
+                                                                         <span className={`text-xs ${p ? (visitanteGano ? "text-white" : "text-slate-400") : "text-slate-800"}`}>{p ? (p.golesVisitante ?? "-") : "-"}</span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
 
-                                                            {/* Visitante */}
-                                                            <div className="flex justify-between items-start text-[10px] font-black uppercase tracking-tighter">
-                                                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                                    <div className="w-6 h-6 bg-[#111] rounded-md flex items-center justify-center shrink-0 border border-white/5">
-                                                                        {celda.partido?.equipoVisitanteEscudo ? <img src={celda.partido.equipoVisitanteEscudo} className="w-4 h-4 object-contain" alt="" /> : <FaShieldAlt className="text-white/10" />}
-                                                                    </div>
-                                                                    <span className={`break-words leading-tight ${celda.partido ? "text-white" : "text-slate-800"}`}>
-                                                                        {celda.partido?.equipoVisitante || "ESPERANDO"}
-                                                                    </span>
-                                                                </div>
-                                                                <div className="flex items-center gap-1">
-                                                                    {celda.partido?.estado === "FINALIZADO" && celda.partido.golesLocal === celda.partido.golesVisitante && (
-                                                                        <span className="text-slate-600 text-[8px]">({celda.partido.golesVisitantePenales})</span>
-                                                                    )}
-                                                                    <span className="text-white text-xs">{celda.partido?.golesVisitante ?? "-"}</span>
-                                                                </div>
+                                                            <div className="bg-[#0a0a0a] px-2 py-1 border-t border-white/5 flex justify-around items-center">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setEtapaSeleccionada({ ...col, etapaId: col.id });
+                                                                        setIdxPartSeleccionado(celda.ordenReal - 1);
+                                                                        setModalCrearOpen(true);
+                                                                    }}
+                                                                    disabled={operando}
+                                                                    className="text-slate-600 hover:text-white transition-all p-1.5 bg-white/5 rounded-lg border border-white/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                >
+                                                                    <FaEdit size={12}/>
+                                                                </button>
+                                                                {p && (
+                                                                    <>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setPartidoSeleccionado(prepararPartidoParaModal(p));
+                                                                                setModalCerrarOpen(true);
+                                                                            }}
+                                                                            disabled={operando}
+                                                                            className="text-slate-600 hover:text-emerald-500 transition-all p-1.5 bg-white/5 rounded-lg border border-white/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                        >
+                                                                            <FaCheckCircle size={12}/>
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => eliminarPartido(p.id)}
+                                                                            disabled={operando}
+                                                                            className="text-slate-600 hover:text-red-500 transition-all p-1.5 bg-white/5 rounded-lg border border-white/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                        >
+                                                                            <FaTrashAlt size={12}/>
+                                                                        </button>
+                                                                    </>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
+                                                );
+                                            };
 
-                                                    <div className="bg-[#0a0a0a] px-2 py-2 border-t border-white/5 flex justify-around items-center">
-                                                        <button
-                                                            onClick={() => {
-                                                                setEtapaSeleccionada({ ...col, etapaId: col.id });
-                                                                setIdxPartSeleccionado(celda.ordenReal - 1);
-                                                                setModalCrearOpen(true);
-                                                            }}
-                                                            disabled={operando}
-                                                            className="text-slate-600 hover:text-white transition-all p-2 bg-white/5 rounded-lg border border-white/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        >
-                                                            <FaEdit size={14}/>
-                                                        </button>
-                                                        {celda.partido && (
-                                                            <>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setPartidoSeleccionado(prepararPartidoParaModal(celda.partido));
-                                                                        setModalCerrarOpen(true);
-                                                                    }}
-                                                                    disabled={operando}
-                                                                    className="text-slate-600 hover:text-white transition-all p-2 bg-white/5 rounded-lg border border-white/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                >
-                                                                    <FaCheckCircle size={14}/>
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => eliminarPartido(celda.partido.id)}
-                                                                    disabled={operando}
-                                                                    className="text-slate-600 hover:text-red-500 transition-all p-2 bg-white/5 rounded-lg border border-white/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                >
-                                                                    <FaTrashAlt size={14}/>
-                                                                </button>
-                                                            </>
+                                            const idxFinal = columnas.findIndex(e => e.esFinal);
+                                            const isLeft = idxCol < idxFinal;
+                                            const isRight = idxCol > idxFinal;
+
+                                            if (col.esFinal) {
+                                                return (
+                                                    <div className="flex flex-col justify-center flex-1 relative">
+                                                        {renderCelda(col.celdas[0])}
+                                                    </div>
+                                                );
+                                            } else {
+                                                return chunkCeldas(col.celdas).map((par, iPar) => (
+                                                    <div key={iPar} className="flex flex-col flex-1 relative my-0.5">
+                                                        {/* LÍNEAS VISUALES / GANCHOS (BRACKETS) */}
+                                                        {isLeft && (
+                                                            par[1] ? (
+                                                                <>
+                                                                    <div className="absolute top-[25%] bottom-[25%] -right-[12px] md:-right-[20px] w-[12px] md:w-[20px] border-y-[1.5px] border-r-[1.5px] rounded-r-lg pointer-events-none z-0" style={{ borderColor: 'rgba(255,255,255,0.2)' }}></div>
+                                                                    <div className="absolute top-1/2 -right-[24px] md:-right-[40px] w-[12px] md:w-[20px] border-t-[1.5px] pointer-events-none z-0" style={{ borderColor: 'rgba(255,255,255,0.2)' }}></div>
+                                                                </>
+                                                            ) : (
+                                                                <div className="absolute top-1/2 -right-[24px] md:-right-[40px] w-[24px] md:w-[40px] border-t-[1.5px] pointer-events-none z-0" style={{ borderColor: 'rgba(255,255,255,0.2)' }}></div>
+                                                            )
+                                                        )}
+                                                        {isRight && (
+                                                            par[1] ? (
+                                                                <>
+                                                                    <div className="absolute top-[25%] bottom-[25%] -left-[12px] md:-left-[20px] w-[12px] md:w-[20px] border-y-[1.5px] border-l-[1.5px] rounded-l-lg pointer-events-none z-0" style={{ borderColor: 'rgba(255,255,255,0.2)' }}></div>
+                                                                    <div className="absolute top-1/2 -left-[24px] md:-left-[40px] w-[12px] md:w-[20px] border-t-[1.5px] pointer-events-none z-0" style={{ borderColor: 'rgba(255,255,255,0.2)' }}></div>
+                                                                </>
+                                                            ) : (
+                                                                <div className="absolute top-1/2 -left-[24px] md:-left-[40px] w-[24px] md:w-[40px] border-t-[1.5px] pointer-events-none z-0" style={{ borderColor: 'rgba(255,255,255,0.2)' }}></div>
+                                                            )
+                                                        )}
+
+                                                        <div className={`flex-1 flex flex-col justify-center relative ${par[1] ? 'h-1/2' : 'h-full'}`}>
+                                                            {renderCelda(par[0])}
+                                                        </div>
+                                                        {par[1] && (
+                                                            <div className="flex-1 flex flex-col justify-center relative h-1/2">
+                                                                {renderCelda(par[1])}
+                                                            </div>
                                                         )}
                                                     </div>
-                                                </div>
-                                            </div>
-                                        ))}
+                                                ));
+                                            }
+                                        })()}
                                     </div>
                                 </div>
                             );
