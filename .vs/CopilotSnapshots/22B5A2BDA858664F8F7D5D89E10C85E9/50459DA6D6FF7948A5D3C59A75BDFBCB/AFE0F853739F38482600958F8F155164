@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+﻿import { useContext, useState, useEffect } from "react";
 import { createPortal } from "react-dom"; //
 import { apiFetch } from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
@@ -243,6 +243,20 @@ export default function ModalEditarTorneo({ torneo, onClose, onUpdated }) {
                                     {["A", "B", "C", "D", "E"].map(d => (
                                         <option key={d} value={d} className="bg-black">DIVISIÓN {d}</option>
                                     ))}
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                    Modalidad de Gestión
+                                </label>
+                                <select
+                                    className="w-full px-6 py-5 bg-black border border-white/10 rounded-2xl outline-none focus:border-slate-400 text-xs font-black text-white appearance-none cursor-pointer uppercase italic shadow-inner"
+                                    value={tipo}
+                                    onChange={e => setTipo(e.target.value)}
+                                >
+                                    <option value="CERRADO">MODALIDAD CERRADA (AUTOMÁTICA)</option>
+                                    <option value="ABIERTO">MODALIDAD ABIERTA (MANUAL)</option>
                                 </select>
                             </div>
 
