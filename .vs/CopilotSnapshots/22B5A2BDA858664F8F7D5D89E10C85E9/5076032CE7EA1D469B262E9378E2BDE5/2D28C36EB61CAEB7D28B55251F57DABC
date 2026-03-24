@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { FaChevronDown, FaExclamationCircle, FaFutbol } from "react-icons/fa";
 
 export default function FilaProgramacion({
@@ -45,15 +45,15 @@ export default function FilaProgramacion({
             ref={ref}
             style={{ zIndex: open ? 100 : 10 }}
             className={`
-                flex flex-wrap items-center justify-between gap-4 md:gap-6 
+                flex flex-col sm:flex-row items-center gap-5 sm:gap-8 
                 bg-[#0a0f2c] border rounded-[2rem] 
-                p-5 sm:px-6 sm:py-4 transition-all duration-300 
-                w-full mb-4 shadow-xl relative
+                p-6 sm:px-8 sm:py-4 transition-all duration-300 
+                w-full sm:w-fit mb-4 shadow-xl relative
                 ${open ? "border-cyan-500 shadow-cyan-900/20" : "border-slate-800"}
             `}
         >
             {/* EQUIPO BASE CON ESCUDO */}
-            <div className="flex items-center gap-4 flex-1 min-w-[200px]">
+            <div className="flex items-center gap-4 w-full sm:w-[280px]">
                 {/* CONTENEDOR DEL ESCUDO */}
                 <div className="w-10 h-10 rounded-full bg-[#040714] border border-slate-800 flex items-center justify-center shrink-0 overflow-hidden shadow-inner">
                     {tarjeta.escudo ? (
@@ -84,15 +84,15 @@ export default function FilaProgramacion({
             </div>
 
             {/* DIVISOR VS */}
-            <span className="text-slate-800 font-bold text-sm hidden md:block shrink-0 px-2">VS</span>
+            <span className="text-slate-800 font-bold text-sm hidden sm:block">VS</span>
 
             {/* SELECTOR DE RIVAL */}
-            <div className="relative w-full sm:w-56 shrink-0 mt-2 md:mt-0">
+            <div className="relative w-full sm:w-64">
                 <button
                     type="button"
                     onClick={handleToggle}
                     className={`
-                        w-full h-12 flex justify-between items-center px-6 rounded-xl border transition-all font-bold text-[10px] md:text-xs uppercase tracking-widest
+                        w-full h-12 flex justify-between items-center px-6 rounded-xl border transition-all font-bold text-xs uppercase tracking-widest
                         ${open
                         ? "bg-cyan-600 border-cyan-500 text-white shadow-lg shadow-cyan-900/40"
                         : "bg-[#040714] border-slate-800 text-slate-400 hover:border-slate-600 hover:text-white"}
@@ -104,8 +104,8 @@ export default function FilaProgramacion({
 
                 {open && (
                     <div className={`
-                        absolute z-[110] w-[calc(100vw-32px)] sm:w-72 bg-[#0a0f2c] border border-slate-800 
-                        rounded-2xl shadow-2xl max-h-72 overflow-y-auto right-0 sm:left-auto
+                        absolute z-[110] w-full sm:w-80 bg-[#0a0f2c] border border-slate-800 
+                        rounded-2xl shadow-2xl max-h-72 overflow-y-auto left-0
                         ${abreHaciaArriba ? "bottom-full mb-3" : "top-full mt-3"}
                     `}>
                         {opciones.length === 0 ? (

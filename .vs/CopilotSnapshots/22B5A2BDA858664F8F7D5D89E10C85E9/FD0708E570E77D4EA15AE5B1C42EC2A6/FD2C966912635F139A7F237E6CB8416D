@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { FaChevronDown, FaExclamationCircle, FaFutbol } from "react-icons/fa";
 
 export default function FilaProgramacion({
@@ -104,8 +104,8 @@ export default function FilaProgramacion({
 
                 {open && (
                     <div className={`
-                        absolute z-[110] w-[calc(100vw-32px)] sm:w-72 bg-[#0a0f2c] border border-slate-800 
-                        rounded-2xl shadow-2xl max-h-72 overflow-y-auto right-0 sm:left-auto
+                        absolute z-[110] w-full sm:w-80 bg-[#0a0f2c] border border-slate-800 
+                        rounded-2xl shadow-2xl max-h-72 overflow-y-auto left-0
                         ${abreHaciaArriba ? "bottom-full mb-3" : "top-full mt-3"}
                     `}>
                         {opciones.length === 0 ? (
